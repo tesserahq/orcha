@@ -11,7 +11,7 @@ def test_list_workflows(client):
 
 
 def test_create_workflow(client):
-    """Test POST /workflows endpoint."""
+    """Test POST /workflows endpoint creates workflow with initial version."""
     response = client.post(
         "/workflows",
         json={
