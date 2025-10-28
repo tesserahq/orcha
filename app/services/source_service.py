@@ -1,6 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from app.models.source import Source
 from app.schemas.source import SourceCreate, SourceUpdate
 from app.services.soft_delete_service import SoftDeleteService
@@ -68,9 +69,9 @@ class SourceService(SoftDeleteService[Source]):
         This is useful for pagination with fastapi-pagination.
 
         Returns:
-            Query: SQLAlchemy query object for sources
+            Select: SQLAlchemy select statement for sources
         """
-        return self.db.query(Source).order_by(Source.created_at.desc())
+        return select(Source).order_by(Source.created_at.desc())
 
     def create_source(self, source: SourceCreate) -> Source:
         """

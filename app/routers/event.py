@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
+from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi_pagination import Page
 
 from app.db import get_db
 from app.schemas.event import Event, EventCreate, EventUpdate
 from app.services.event_service import EventService
 from app.services.source_service import SourceService
-from app.schemas.common import ListResponse
 
 router = APIRouter(
     prefix="/events",
@@ -32,17 +33,14 @@ def create_event(event: EventCreate, db: Session = Depends(get_db)):
     return event_service.create_event(event)
 
 
-@router.get("", response_model=ListResponse[Event])
-def list_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+@router.get("", response_model=Page[Event])
+def list_events(db: Session = Depends(get_db)):
     """List all events."""
-    events = EventService(db).get_events(skip=skip, limit=limit)
-    return ListResponse(data=events)
+    return paginate(db, EventService(db).get_events_query())
 
 
-@router.get("/source/{source_id}", response_model=ListResponse[Event])
-def list_events_by_source(
-    source_id: UUID, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+@router.get("/source/{source_id}", response_model=Page[Event])
+def list_events_by_source(source_id: UUID, db: Session = Depends(get_db)):
     """List all events for a specific source."""
     event_service = EventService(db)
     source_service = SourceService(db)
@@ -55,17 +53,27 @@ def list_events_by_source(
             detail="Source not found",
         )
 
-    events = event_service.get_events_by_source(source_id, skip=skip, limit=limit)
-    return ListResponse(data=events)
+    from app.models.event import Event
+    from sqlalchemy import select
+
+    return paginate(
+        db,
+        select(Event).filter(Event.source_id == source_id).order_by(Event.time.desc()),
+    )
 
 
-@router.get("/type/{event_type}", response_model=ListResponse[Event])
-def list_events_by_type(
-    event_type: str, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+@router.get("/type/{event_type}", response_model=Page[Event])
+def list_events_by_type(event_type: str, db: Session = Depends(get_db)):
     """List all events of a specific type."""
-    events = EventService(db).get_events_by_type(event_type, skip=skip, limit=limit)
-    return ListResponse(data=events)
+    from app.models.event import Event
+    from sqlalchemy import select
+
+    return paginate(
+        db,
+        select(Event)
+        .filter(Event.event_type == event_type)
+        .order_by(Event.time.desc()),
+    )
 
 
 @router.get("/{event_id}", response_model=Event)

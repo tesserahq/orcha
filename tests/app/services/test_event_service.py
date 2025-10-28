@@ -237,8 +237,8 @@ def test_create_event_with_default_spec_version(db: Session, test_source):
 
 def test_get_events_query(db: Session, test_event):
     """Test getting events query object."""
-    query = EventService(db).get_events_query()
-    events = query.all()
+    select_stmt = EventService(db).get_events_query()
+    events = db.execute(select_stmt).scalars().all()
 
     # Assertions
     assert len(events) >= 1

@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
+from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi_pagination import Page
 
 from app.db import get_db
 from app.schemas.source import Source, SourceCreate, SourceUpdate
 from app.services.source_service import SourceService
-from app.schemas.common import ListResponse
 
 router = APIRouter(
     prefix="/sources",
@@ -29,11 +30,10 @@ def create_source(source: SourceCreate, db: Session = Depends(get_db)):
     return source_service.create_source(source)
 
 
-@router.get("", response_model=ListResponse[Source])
-def list_sources(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+@router.get("", response_model=Page[Source])
+def list_sources(db: Session = Depends(get_db)):
     """List all sources."""
-    sources = SourceService(db).get_sources(skip=skip, limit=limit)
-    return ListResponse(data=sources)
+    return paginate(db, SourceService(db).get_sources_query())
 
 
 @router.get("/{source_id}", response_model=Source)

@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
+from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi_pagination import Page
 
 from app.db import get_db
 from app.schemas.workflow import Workflow, WorkflowCreate, WorkflowUpdate
 from app.services.workflow_service import WorkflowService
-from app.schemas.common import ListResponse
 
 router = APIRouter(
     prefix="/workflows",
@@ -21,11 +22,10 @@ def create_workflow(workflow: WorkflowCreate, db: Session = Depends(get_db)):
     return workflow_service.create_workflow(workflow)
 
 
-@router.get("", response_model=ListResponse[Workflow])
-def list_workflows(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+@router.get("", response_model=Page[Workflow])
+def list_workflows(db: Session = Depends(get_db)):
     """List all workflows."""
-    workflows = WorkflowService(db).get_workflows(skip=skip, limit=limit)
-    return ListResponse(data=workflows)
+    return paginate(db, WorkflowService(db).get_workflows_query())
 
 
 @router.get("/{workflow_id}", response_model=Workflow)

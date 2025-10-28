@@ -202,8 +202,10 @@ def test_toggle_workflow_active_status(db: Session, test_workflow):
 
 def test_get_workflows_query(db: Session, test_workflow):
     """Test getting workflows query object."""
-    query = WorkflowService(db).get_workflows_query()
-    workflows = query.all()
+    from sqlalchemy import select
+
+    select_stmt = WorkflowService(db).get_workflows_query()
+    workflows = db.execute(select_stmt).scalars().all()
 
     assert len(workflows) >= 1
     assert any(w.id == test_workflow.id for w in workflows)

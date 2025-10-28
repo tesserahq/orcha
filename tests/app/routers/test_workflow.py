@@ -7,8 +7,8 @@ def test_list_workflows(client):
     response = client.get("/workflows")
     assert response.status_code == 200
     data = response.json()
-    assert "data" in data
-    assert isinstance(data["data"], list)
+    assert "items" in data
+    assert isinstance(data["items"], list)
 
 
 def test_create_workflow(client):
@@ -103,12 +103,12 @@ def test_delete_workflow_not_found(client):
 
 def test_list_workflows_pagination(client, test_workflow):
     """Test pagination in GET /workflows endpoint."""
-    response = client.get("/workflows?skip=0&limit=1")
+    response = client.get("/workflows?page=1&size=1")
     assert response.status_code == 200
     data = response.json()
-    assert len(data["data"]) <= 1
+    assert len(data["items"]) <= 1
 
-    response = client.get("/workflows?skip=1&limit=1")
+    response = client.get("/workflows?page=2&size=1")
     assert response.status_code == 200
     data = response.json()
-    assert len(data["data"]) <= 1
+    assert len(data["items"]) <= 1

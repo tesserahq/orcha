@@ -1,6 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from app.models.event import Event
 from app.schemas.event import EventCreate, EventUpdate
 from app.services.soft_delete_service import SoftDeleteService
@@ -56,9 +57,9 @@ class EventService(SoftDeleteService[Event]):
         This is useful for pagination with fastapi-pagination.
 
         Returns:
-            Query: SQLAlchemy query object for events
+            Select: SQLAlchemy select statement for events
         """
-        return self.db.query(Event).order_by(Event.time.desc())
+        return select(Event).order_by(Event.time.desc())
 
     def get_events_by_source(
         self, source_id: UUID, skip: int = 0, limit: int = 100

@@ -6,8 +6,8 @@ def test_list_sources(client):
     response = client.get("/sources")
     assert response.status_code == 200
     data = response.json()
-    assert "data" in data
-    assert isinstance(data["data"], list)
+    assert "items" in data
+    assert isinstance(data["items"], list)
 
 
 def test_create_source(client):
@@ -184,12 +184,12 @@ def test_list_sources_pagination(client, test_source):
     )
 
     # Test with pagination
-    response = client.get("/sources?skip=0&limit=1")
+    response = client.get("/sources?page=1&size=1")
     assert response.status_code == 200
     data = response.json()
-    assert len(data["data"]) <= 1
+    assert len(data["items"]) <= 1
 
-    response = client.get("/sources?skip=1&limit=1")
+    response = client.get("/sources?page=2&size=1")
     assert response.status_code == 200
     data = response.json()
-    assert len(data["data"]) <= 1
+    assert len(data["items"]) <= 1

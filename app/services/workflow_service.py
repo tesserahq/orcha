@@ -1,6 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from app.models.workflow import Workflow
 from app.schemas.workflow import WorkflowCreate, WorkflowUpdate
 from app.services.soft_delete_service import SoftDeleteService
@@ -56,9 +57,9 @@ class WorkflowService(SoftDeleteService[Workflow]):
         This is useful for pagination with fastapi-pagination.
 
         Returns:
-            Query: SQLAlchemy query object for workflows
+            Select: SQLAlchemy select statement for workflows
         """
-        return self.db.query(Workflow).order_by(Workflow.created_at.desc())
+        return select(Workflow).order_by(Workflow.created_at.desc())
 
     def get_active_workflows(self, skip: int = 0, limit: int = 100) -> List[Workflow]:
         """

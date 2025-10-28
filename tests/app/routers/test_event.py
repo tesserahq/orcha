@@ -8,8 +8,8 @@ def test_list_events(client):
     response = client.get("/events")
     assert response.status_code == 200
     data = response.json()
-    assert "data" in data
-    assert isinstance(data["data"], list)
+    assert "items" in data
+    assert isinstance(data["items"], list)
 
 
 def test_create_event(client, test_source):
@@ -105,10 +105,10 @@ def test_list_events_by_source(client, test_event, test_source):
     response = client.get(f"/events/source/{test_source.id}")
     assert response.status_code == 200
     data = response.json()
-    assert "data" in data
-    assert isinstance(data["data"], list)
+    assert "items" in data
+    assert isinstance(data["items"], list)
     # Should include our test event
-    assert any(e["id"] == str(test_event.id) for e in data["data"])
+    assert any(e["id"] == str(test_event.id) for e in data["items"])
 
 
 def test_list_events_by_source_not_found(client):
@@ -124,10 +124,10 @@ def test_list_events_by_type(client, test_event):
     response = client.get(f"/events/type/{test_event.event_type}")
     assert response.status_code == 200
     data = response.json()
-    assert "data" in data
-    assert isinstance(data["data"], list)
+    assert "items" in data
+    assert isinstance(data["items"], list)
     # Should include our test event
-    assert any(e["id"] == str(test_event.id) for e in data["data"])
+    assert any(e["id"] == str(test_event.id) for e in data["items"])
 
 
 def test_create_event_with_invalid_source(client):
@@ -178,12 +178,12 @@ def test_create_event_minimal_data(client, test_source):
 def test_list_events_pagination(client, test_event):
     """Test pagination in GET /events endpoint."""
     # Test with pagination
-    response = client.get("/events?skip=0&limit=1")
+    response = client.get("/events?page=1&size=1")
     assert response.status_code == 200
     data = response.json()
-    assert len(data["data"]) <= 1
+    assert len(data["items"]) <= 1
 
-    response = client.get("/events?skip=1&limit=1")
+    response = client.get("/events?page=2&size=1")
     assert response.status_code == 200
     data = response.json()
-    assert len(data["data"]) <= 1
+    assert len(data["items"]) <= 1
