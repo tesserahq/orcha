@@ -202,7 +202,6 @@ def test_toggle_workflow_active_status(db: Session, test_workflow):
 
 def test_get_workflows_query(db: Session, test_workflow):
     """Test getting workflows query object."""
-    from sqlalchemy import select
 
     select_stmt = WorkflowService(db).get_workflows_query()
     workflows = db.execute(select_stmt).scalars().all()

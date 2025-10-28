@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
-from fastapi_pagination.ext.sqlalchemy import paginate
-from fastapi_pagination import Page
 
 from app.db import get_db
-from app.schemas.user import User, UserCreate, UserUpdate
+from app.schemas.user import User
 from app.services.user_service import UserService
 
 router = APIRouter(

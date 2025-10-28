@@ -20,3 +20,5 @@ class Workflow(Base, TimestampMixin, SoftDeleteMixin):
     trigger_event_type: Mapped[str] = mapped_column(String, nullable=False)
     trigger_event_filters: Mapped[dict] = mapped_column(JSONB, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    versions = relationship("WorkflowVersion", back_populates="workflow")

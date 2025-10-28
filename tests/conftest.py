@@ -18,6 +18,7 @@ pytest_plugins = [
     "tests.fixtures.source_fixtures",
     "tests.fixtures.event_fixtures",
     "tests.fixtures.workflow_fixtures",
+    "tests.fixtures.workflow_version_fixtures",
 ]
 
 logger = logging.getLogger(__name__)

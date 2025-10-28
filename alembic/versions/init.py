@@ -153,6 +153,29 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
+    op.create_table(
+        "workflow_versions",
+        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("workflow_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("version", sa.Integer(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False, default=True),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), nullable=True),
+        sa.PrimaryKeyConstraint("id"),
+    )
+
+    op.create_unique_constraint(
+        "uq_workflow_versions_workflow_id_version",
+        "workflow_versions",
+        ["workflow_id", "version"],
+    )
+    op.create_unique_constraint(
+        "uq_workflow_versions_workflow_id_is_active",
+        "workflow_versions",
+        ["workflow_id", "is_active"],
+    )
+
 
 def downgrade() -> None:
     # Drop tables in reverse order
