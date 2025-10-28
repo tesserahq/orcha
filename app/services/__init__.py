@@ -3,6 +3,7 @@ from app.services.source_service import SourceService
 from app.services.event_service import EventService
 from app.services.workflow_service import WorkflowService
 from app.services.workflow_version_service import WorkflowVersionService
+from app.services.node_service import NodeService
 
 __all__ = [
     "UserService",
@@ -10,4 +11,5 @@ __all__ = [
     "EventService",
     "WorkflowService",
     "WorkflowVersionService",
+    "NodeService",
 ]

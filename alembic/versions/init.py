@@ -176,9 +176,31 @@ def upgrade() -> None:
         ["workflow_id", "is_active"],
     )
 
+    op.create_table(
+        "nodes",
+        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("description", sa.String(), nullable=True),
+        sa.Column("kind", sa.String(), nullable=False),
+        sa.Column("settings", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column(
+            "ui_settings", postgresql.JSONB(astext_type=sa.Text()), nullable=False
+        ),
+        sa.Column("workflow_version_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.ForeignKeyConstraint(["workflow_version_id"], ["workflow_versions.id"]),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), nullable=True),
+        sa.PrimaryKeyConstraint("id"),
+    )
+
 
 def downgrade() -> None:
     # Drop tables in reverse order
+    op.drop_table("nodes")
+    op.drop_table("workflow_versions")
+    op.drop_table("workflows")
+    op.drop_table("events")
     op.drop_table("sources")
 
     # Drop the partial unique index

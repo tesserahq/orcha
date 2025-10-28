@@ -22,3 +22,4 @@ class WorkflowVersion(Base, TimestampMixin, SoftDeleteMixin):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     workflow = relationship("Workflow", back_populates="versions")
+    nodes = relationship("Node", back_populates="workflow_version")
