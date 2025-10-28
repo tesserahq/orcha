@@ -7,6 +7,7 @@ from fastapi_pagination import Page
 from app.db import get_db
 from app.schemas.workflow import Workflow, WorkflowCreate, WorkflowUpdate
 from app.services.workflow_service import WorkflowService
+from app.commands.create_workflow_command import create_workflow_with_version
 
 router = APIRouter(
     prefix="/workflows",
@@ -17,9 +18,12 @@ router = APIRouter(
 
 @router.post("", response_model=Workflow, status_code=status.HTTP_201_CREATED)
 def create_workflow(workflow: WorkflowCreate, db: Session = Depends(get_db)):
-    """Create a new workflow."""
-    workflow_service = WorkflowService(db)
-    return workflow_service.create_workflow(workflow)
+    """Create a new workflow with its initial version."""
+    created_workflow = create_workflow_with_version(
+        workflow_data=workflow,
+        db=db,
+    )
+    return created_workflow
 
 
 @router.get("", response_model=Page[Workflow])
