@@ -135,6 +135,24 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
+    op.create_table(
+        "workflows",
+        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("description", sa.String(), nullable=True),
+        sa.Column("trigger_event_type", sa.String(), nullable=False),
+        sa.Column(
+            "trigger_event_filters",
+            postgresql.JSONB(astext_type=sa.Text()),
+            nullable=False,
+        ),
+        sa.Column("is_active", sa.Boolean(), nullable=False, default=True),
+        sa.Column("created_at", sa.DateTime(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), nullable=True),
+        sa.PrimaryKeyConstraint("id"),
+    )
+
 
 def downgrade() -> None:
     # Drop tables in reverse order

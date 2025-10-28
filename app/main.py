@@ -10,6 +10,9 @@ from fastapi_pagination import add_pagination
 
 from .routers import (
     user,
+    source,
+    event,
+    workflow,
 )
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from app.telemetry import setup_tracing
@@ -78,6 +81,9 @@ def create_app(testing: bool = False, auth_middleware=None) -> FastAPI:
     )
 
     app.include_router(user.router)
+    app.include_router(source.router)
+    app.include_router(event.router)
+    app.include_router(workflow.router)
 
     register_exception_handlers(app)
 

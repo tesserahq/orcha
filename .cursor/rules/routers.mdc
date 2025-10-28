@@ -12,7 +12,7 @@ In the routers directory:
 
 Endpoints:
 
-* GET / – list all items, returns { "data": [...] }
+* GET / – list all items, returns { "data": [...] }, use fastapi-pagination for handling the responses
 * GET /{id} – retrieve a specific item by ID
 * POST / – create a new item
 * PUT /{id} – update an existing item

@@ -16,6 +16,8 @@ from faker import Faker
 pytest_plugins = [
     "tests.fixtures.user_fixtures",
     "tests.fixtures.source_fixtures",
+    "tests.fixtures.event_fixtures",
+    "tests.fixtures.workflow_fixtures",
 ]
 
 logger = logging.getLogger(__name__)
