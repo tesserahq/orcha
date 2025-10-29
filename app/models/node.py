@@ -24,6 +24,12 @@ class Node(Base, TimestampMixin, SoftDeleteMixin):
         UUID(as_uuid=True), ForeignKey("workflow_versions.id"), nullable=False
     )
     workflow_version = relationship("WorkflowVersion", back_populates="nodes")
+    source_edges = relationship(
+        "Edge", foreign_keys="Edge.source_id", back_populates="source"
+    )
+    target_edges = relationship(
+        "Edge", foreign_keys="Edge.target_id", back_populates="target"
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

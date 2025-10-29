@@ -23,3 +23,4 @@ class WorkflowVersion(Base, TimestampMixin, SoftDeleteMixin):
 
     workflow = relationship("Workflow", back_populates="versions")
     nodes = relationship("Node", back_populates="workflow_version")
+    edges = relationship("Edge", back_populates="workflow_version")
