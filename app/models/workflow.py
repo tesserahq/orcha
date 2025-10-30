@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixins import TimestampMixin, SoftDeleteMixin
-from sqlalchemy import Boolean, Column, String
+from sqlalchemy import Boolean, Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 import uuid
 
@@ -20,5 +20,13 @@ class Workflow(Base, TimestampMixin, SoftDeleteMixin):
     trigger_event_type: Mapped[str] = mapped_column(String, nullable=False)
     trigger_event_filters: Mapped[dict] = mapped_column(JSONB, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    active_version_id: Mapped[UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("workflow_versions.id"), nullable=True
+    )
 
-    versions = relationship("WorkflowVersion", back_populates="workflow")
+    active_version = relationship("WorkflowVersion", foreign_keys=[active_version_id])
+    versions = relationship(
+        "WorkflowVersion",
+        back_populates="workflow",
+        foreign_keys="WorkflowVersion.workflow_id",
+    )

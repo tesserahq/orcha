@@ -4,10 +4,15 @@ from uuid import UUID
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
+
 from app.db import get_db
-from app.schemas.workflow import Workflow, WorkflowCreate, WorkflowUpdate
+from app.schemas.workflow import (
+    Workflow,
+    WorkflowCreate,
+    WorkflowUpdateRequest,
+)
 from app.services.workflow_service import WorkflowService
-from app.commands.create_workflow_command import create_workflow_with_version
+from app.commands.create_workflow_command import CreateWorkflowCommand
 
 router = APIRouter(
     prefix="/workflows",
@@ -17,12 +22,10 @@ router = APIRouter(
 
 
 @router.post("", response_model=Workflow, status_code=status.HTTP_201_CREATED)
-def create_workflow(workflow: WorkflowCreate, db: Session = Depends(get_db)):
+def create_workflow(workflow_data: WorkflowCreate, db: Session = Depends(get_db)):
     """Create a new workflow with its initial version."""
-    created_workflow = create_workflow_with_version(
-        workflow_data=workflow,
-        db=db,
-    )
+    command = CreateWorkflowCommand(db)
+    created_workflow = command.execute(workflow_data)
     return created_workflow
 
 
@@ -45,7 +48,7 @@ def get_workflow(workflow_id: UUID, db: Session = Depends(get_db)):
 
 @router.put("/{workflow_id}", response_model=Workflow)
 def update_workflow(
-    workflow_id: UUID, workflow: WorkflowUpdate, db: Session = Depends(get_db)
+    workflow_id: UUID, workflow: WorkflowUpdateRequest, db: Session = Depends(get_db)
 ):
     """Update a workflow."""
     workflow_service = WorkflowService(db)

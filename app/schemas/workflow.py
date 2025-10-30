@@ -25,6 +25,9 @@ class WorkflowBase(BaseModel):
     is_active: bool = True
     """Whether the workflow is active. Defaults to True."""
 
+    active_version_id: Optional[UUID] = None
+    """ID of the active version of the workflow. Optional field."""
+
 
 class WorkflowCreate(WorkflowBase):
     """Schema for creating a new workflow. Inherits all fields from WorkflowBase."""
@@ -33,6 +36,28 @@ class WorkflowCreate(WorkflowBase):
 
 
 class WorkflowUpdate(BaseModel):
+    """Schema for updating an existing workflow. All fields are optional."""
+
+    name: Optional[str] = None
+    """Updated workflow name."""
+
+    description: Optional[str] = None
+    """Updated workflow description."""
+
+    trigger_event_type: Optional[str] = None
+    """Updated trigger event type."""
+
+    trigger_event_filters: Optional[dict] = None
+    """Updated trigger event filters."""
+
+    is_active: Optional[bool] = None
+    """Updated active status."""
+
+    active_version_id: Optional[UUID] = None
+    """Updated active version ID."""
+
+
+class WorkflowUpdateRequest(BaseModel):
     """Schema for updating an existing workflow. All fields are optional."""
 
     name: Optional[str] = None

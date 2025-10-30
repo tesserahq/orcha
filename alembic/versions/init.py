@@ -150,6 +150,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.Column("deleted_at", sa.DateTime(), nullable=True),
+        sa.Column("active_version_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
 
@@ -163,6 +164,14 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.Column("deleted_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
+    )
+
+    op.create_foreign_key(
+        "fk_workflows_active_version_id",
+        "workflows",
+        "workflow_versions",
+        ["active_version_id"],
+        ["id"],
     )
 
     op.create_unique_constraint(

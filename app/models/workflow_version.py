@@ -21,6 +21,8 @@ class WorkflowVersion(Base, TimestampMixin, SoftDeleteMixin):
     version: Mapped[int] = mapped_column(Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
-    workflow = relationship("Workflow", back_populates="versions")
+    workflow = relationship(
+        "Workflow", back_populates="versions", foreign_keys=[workflow_id]
+    )
     nodes = relationship("Node", back_populates="workflow_version")
     edges = relationship("Edge", back_populates="workflow_version")
