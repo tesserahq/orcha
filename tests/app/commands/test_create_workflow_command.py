@@ -12,8 +12,6 @@ def test_create_workflow_creates_both_workflow_and_version(db: Session):
     workflow_data = WorkflowCreate(
         name="Test Workflow",
         description="Test description",
-        trigger_event_type="test.event",
-        trigger_event_filters={"field": "test", "value": "value"},
         is_active=True,
     )
 
@@ -45,8 +43,6 @@ def test_create_workflow_inactive(db: Session):
     workflow_data = WorkflowCreate(
         name="Inactive Workflow",
         description="Inactive description",
-        trigger_event_type="test.event",
-        trigger_event_filters={"field": "test", "value": "value"},
         is_active=False,
     )
 
@@ -73,16 +69,12 @@ def test_create_workflow_multiple_workflows(db: Session):
     workflow1_data = WorkflowCreate(
         name="Workflow 1",
         description="Description 1",
-        trigger_event_type="event1",
-        trigger_event_filters={"field": "test"},
         is_active=True,
     )
 
     workflow2_data = WorkflowCreate(
         name="Workflow 2",
         description="Description 2",
-        trigger_event_type="event2",
-        trigger_event_filters={"field": "test2"},
         is_active=True,
     )
 

@@ -27,11 +27,25 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=Workflow, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=WorkflowWithNodes, status_code=status.HTTP_201_CREATED)
 def create_workflow(workflow_data: WorkflowCreate, db: Session = Depends(get_db)):
     """Create a new workflow with its initial version."""
     command = CreateWorkflowCommand(db)
     created_workflow = command.execute(workflow_data)
+
+    nodes: list = []
+    if created_workflow.active_version_id:
+        node_service = NodeService(db)
+        # get_nodes_by_workflow_version returns descending by created_at; reverse for ascending order
+        nodes_desc = node_service.get_nodes_by_workflow_version(
+            created_workflow.active_version_id
+        )
+        nodes = list(reversed(nodes_desc))
+
+    wf_schema = Workflow.model_validate(created_workflow, from_attributes=True)
+    node_schemas = [NodeSchema.model_validate(n, from_attributes=True) for n in nodes]
+    return WorkflowWithNodes(**wf_schema.model_dump(), nodes=node_schemas)
+
     return created_workflow
 
 

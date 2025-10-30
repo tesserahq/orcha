@@ -81,29 +81,6 @@ class WorkflowService(SoftDeleteService[Workflow]):
             .all()
         )
 
-    def get_workflows_by_trigger_event_type(
-        self, event_type: str, skip: int = 0, limit: int = 100
-    ) -> List[Workflow]:
-        """
-        Get all workflows that trigger on a specific event type.
-
-        Args:
-            event_type: The event type to filter by
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List[Workflow]: List of workflows for the event type
-        """
-        return (
-            self.db.query(Workflow)
-            .filter(Workflow.trigger_event_type == event_type)
-            .order_by(Workflow.created_at.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-
     def create_workflow(self, workflow: WorkflowCreate) -> Workflow:
         """
         Create a new workflow.

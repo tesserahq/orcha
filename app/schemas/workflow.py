@@ -20,12 +20,6 @@ class WorkflowBase(BaseModel):
     description: Optional[str] = None
     """Description of the workflow. Optional field."""
 
-    trigger_event_type: str
-    """Type of event that triggers this workflow. Required field."""
-
-    trigger_event_filters: dict
-    """Filters to apply when matching trigger events. Required field."""
-
     is_active: bool = True
     """Whether the workflow is active. Defaults to True."""
 
@@ -48,12 +42,6 @@ class WorkflowUpdate(BaseModel):
     description: Optional[str] = None
     """Updated workflow description."""
 
-    trigger_event_type: Optional[str] = None
-    """Updated trigger event type."""
-
-    trigger_event_filters: Optional[dict] = None
-    """Updated trigger event filters."""
-
     is_active: Optional[bool] = None
     """Updated active status."""
 
@@ -69,12 +57,6 @@ class WorkflowUpdateRequest(BaseModel):
 
     description: Optional[str] = None
     """Updated workflow description."""
-
-    trigger_event_type: Optional[str] = None
-    """Updated trigger event type."""
-
-    trigger_event_filters: Optional[dict] = None
-    """Updated trigger event filters."""
 
     is_active: Optional[bool] = None
     """Updated active status."""
@@ -121,12 +103,6 @@ class WorkflowDetails(BaseModel):
 
     description: Optional[str] = None
     """Description of the workflow."""
-
-    trigger_event_type: str
-    """Type of event that triggers this workflow."""
-
-    trigger_event_filters: dict
-    """Filters to apply when matching trigger events."""
 
     is_active: bool
     """Whether the workflow is active."""

@@ -10,8 +10,6 @@ def sample_workflow_data():
     return {
         "name": "Test Workflow",
         "description": "This is a test workflow",
-        "trigger_event_type": "test.event",
-        "trigger_event_filters": {"field": "test", "value": "value"},
         "is_active": True,
     }
 
@@ -24,10 +22,6 @@ def test_create_workflow(db: Session, sample_workflow_data):
     assert workflow.id is not None
     assert workflow.name == sample_workflow_data["name"]
     assert workflow.description == sample_workflow_data["description"]
-    assert workflow.trigger_event_type == sample_workflow_data["trigger_event_type"]
-    assert (
-        workflow.trigger_event_filters == sample_workflow_data["trigger_event_filters"]
-    )
     assert workflow.is_active == sample_workflow_data["is_active"]
     assert workflow.created_at is not None
     assert workflow.updated_at is not None
@@ -57,19 +51,6 @@ def test_get_active_workflows(db: Session, test_workflow):
     assert len(workflows) >= 1
     assert any(w.id == test_workflow.id for w in workflows)
     assert all(w.is_active == True for w in workflows)
-
-
-def test_get_workflows_by_trigger_event_type(db: Session, test_workflow):
-    """Test retrieving workflows by trigger event type."""
-    workflows = WorkflowService(db).get_workflows_by_trigger_event_type(
-        test_workflow.trigger_event_type
-    )
-
-    assert len(workflows) >= 1
-    assert any(w.id == test_workflow.id for w in workflows)
-    assert all(
-        w.trigger_event_type == test_workflow.trigger_event_type for w in workflows
-    )
 
 
 def test_update_workflow(db: Session, test_workflow):
@@ -159,12 +140,6 @@ def test_search_workflows_with_filters(db: Session, test_workflow):
 
     assert isinstance(results, list)
     assert any(workflow.id == test_workflow.id for workflow in results)
-
-    filters = {"trigger_event_type": test_workflow.trigger_event_type}
-    results = WorkflowService(db).search(filters)
-
-    assert len(results) >= 1
-    assert results[0].id == test_workflow.id
 
 
 def test_workflow_not_found_cases(db: Session):

@@ -8,11 +8,6 @@ def test_workflow(db, faker):
     workflow_data = {
         "name": faker.sentence(nb_words=3),
         "description": faker.text(max_nb_chars=200),
-        "trigger_event_type": faker.word(),
-        "trigger_event_filters": {
-            "field": faker.word(),
-            "value": faker.word(),
-        },
         "is_active": True,
     }
 
@@ -30,11 +25,6 @@ def setup_workflow(db, faker):
     workflow_data = {
         "name": faker.sentence(nb_words=3),
         "description": faker.text(max_nb_chars=200),
-        "trigger_event_type": faker.word(),
-        "trigger_event_filters": {
-            "field": faker.word(),
-            "value": faker.word(),
-        },
         "is_active": True,
     }
 
@@ -52,11 +42,6 @@ def setup_another_workflow(db, faker):
     workflow_data = {
         "name": faker.sentence(nb_words=3),
         "description": faker.text(max_nb_chars=200),
-        "trigger_event_type": faker.word(),
-        "trigger_event_filters": {
-            "field": faker.word(),
-            "value": faker.word(),
-        },
         "is_active": True,
     }
 

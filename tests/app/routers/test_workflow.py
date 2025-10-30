@@ -20,8 +20,6 @@ def test_create_workflow(client):
         json={
             "name": "Test Workflow",
             "description": "Test description",
-            "trigger_event_type": "test.event",
-            "trigger_event_filters": {"field": "test", "value": "value"},
             "is_active": True,
         },
     )
@@ -29,8 +27,6 @@ def test_create_workflow(client):
     workflow = response.json()
     assert workflow["name"] == "Test Workflow"
     assert workflow["description"] == "Test description"
-    assert workflow["trigger_event_type"] == "test.event"
-    assert workflow["trigger_event_filters"] == {"field": "test", "value": "value"}
     assert workflow["is_active"] is True
     assert "id" in workflow
     assert "created_at" in workflow
@@ -44,7 +40,6 @@ def test_get_workflow(client, test_workflow):
     workflow = response.json()
     assert workflow["id"] == str(test_workflow.id)
     assert workflow["name"] == test_workflow.name
-    assert workflow["trigger_event_type"] == test_workflow.trigger_event_type
 
 
 def test_get_workflow_not_found(client):
