@@ -1,4 +1,9 @@
-from app.constants.node_kinds import NODE_KINDS, CATEGORY_FLOW
+from app.constants.node_kinds import (
+    NODE_KINDS,
+    CATEGORY_FLOW,
+    CATEGORY_ACTION_APP,
+    NODE_CATEGORIES,
+)
 
 
 def test_list_node_kinds(client):
@@ -21,3 +26,6 @@ def test_list_node_kinds(client):
     # Validate category normalization via constants
     flow_items = [k for k in data if k["category"] == CATEGORY_FLOW]
     assert len(flow_items) >= 1
+
+    # Ensure the new category exists in the categories registry
+    assert CATEGORY_ACTION_APP in NODE_CATEGORIES

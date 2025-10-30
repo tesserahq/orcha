@@ -15,8 +15,9 @@ CATEGORY_TRIGGER = "trigger"
 CATEGORY_CORE = "core"
 CATEGORY_FLOW = "flow"
 CATEGORY_DATA_TRANSFORMATION = "data_transformation"
+CATEGORY_ACTION_APP = "action_app"
 
-CategoryKey = Literal["trigger", "core", "flow", "data_transformation"]
+CategoryKey = Literal["trigger", "core", "flow", "data_transformation", "action_app"]
 
 
 class NodeCategory(TypedDict):
@@ -55,6 +56,13 @@ NODE_CATEGORIES: Dict[CategoryKey, NodeCategory] = {
         "key": CATEGORY_DATA_TRANSFORMATION,
         "name": "Data Transformation",
         "description": "Manipulate, filter or convert data.",
+    },
+    CATEGORY_ACTION_APP: {
+        "key": CATEGORY_ACTION_APP,
+        "name": "Action in an app",
+        "description": (
+            "Do something in an app or service like Looply, Identies, Slack"
+        ),
     },
 }
 
@@ -120,6 +128,7 @@ __all__ = [
     "CATEGORY_CORE",
     "CATEGORY_FLOW",
     "CATEGORY_DATA_TRANSFORMATION",
+    "CATEGORY_ACTION_APP",
     "NODE_CATEGORIES",
     "NODE_KINDS",
     "NODE_KIND_BY_ID",
