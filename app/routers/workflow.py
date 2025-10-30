@@ -13,6 +13,7 @@ from app.schemas.workflow import (
 )
 from app.services.workflow_service import WorkflowService
 from app.commands.create_workflow_command import CreateWorkflowCommand
+from app.commands.update_workflow_command import UpdateWorkflowCommand
 
 router = APIRouter(
     prefix="/workflows",
@@ -51,8 +52,8 @@ def update_workflow(
     workflow_id: UUID, workflow: WorkflowUpdateRequest, db: Session = Depends(get_db)
 ):
     """Update a workflow."""
-    workflow_service = WorkflowService(db)
-    updated_workflow = workflow_service.update_workflow(workflow_id, workflow)
+    command = UpdateWorkflowCommand(db)
+    updated_workflow = command.execute(workflow_id, workflow)
     if not updated_workflow:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found"
