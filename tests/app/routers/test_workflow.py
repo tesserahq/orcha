@@ -159,3 +159,43 @@ def test_list_workflows_pagination(client, test_workflow):
     assert response.status_code == 200
     data = response.json()
     assert len(data["items"]) <= 1
+
+
+def test_get_workflow_returns_nodes_in_order(client, db, test_workflow):
+    # First update with nodes to ensure nodes exist for active version
+    update_data = {
+        "name": "WF order check",
+        "nodes": [
+            {
+                "name": "OrderNode 1",
+                "description": "First",
+                "kind": "action",
+                "settings": {"a": 1},
+                "ui_settings": {"x": 1},
+            },
+            {
+                "name": "OrderNode 2",
+                "description": "Second",
+                "kind": "condition",
+                "settings": {"b": 2},
+                "ui_settings": {"x": 2},
+            },
+            {
+                "name": "OrderNode 3",
+                "description": "Third",
+                "kind": "action",
+                "settings": {"c": 3},
+                "ui_settings": {"x": 3},
+            },
+        ],
+    }
+    put_resp = client.put(f"/workflows/{test_workflow.id}", json=update_data)
+    assert put_resp.status_code == 200
+
+    # Fetch workflow and assert nodes are present in correct order
+    get_resp = client.get(f"/workflows/{test_workflow.id}")
+    assert get_resp.status_code == 200
+    wf = get_resp.json()
+    assert "nodes" in wf
+    names_in_order = [n["name"] for n in wf["nodes"]]
+    assert names_in_order == ["OrderNode 1", "OrderNode 2", "OrderNode 3"]

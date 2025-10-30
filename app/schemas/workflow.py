@@ -5,6 +5,7 @@ from datetime import datetime
 from app.schemas.node import NodeCreate
 from app.schemas.edge import EdgeCreate
 from app.schemas.node import NodeCreatePayload
+from app.schemas.node import Node
 
 
 class WorkflowBase(BaseModel):
@@ -101,6 +102,12 @@ class Workflow(WorkflowInDB):
     """Schema for workflow data returned in API responses. Inherits all fields from WorkflowInDB."""
 
     pass
+
+
+class WorkflowWithNodes(Workflow):
+    """Workflow response including ordered nodes for the active version."""
+
+    nodes: List[Node]
 
 
 class WorkflowDetails(BaseModel):
