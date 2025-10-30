@@ -9,8 +9,8 @@ from app.services.edge_service import EdgeService
 def sample_edge_data(test_node, setup_node):
     return {
         "name": "Test Edge",
-        "source_id": test_node.id,
-        "target_id": setup_node.id,
+        "source_node_id": test_node.id,
+        "target_node_id": setup_node.id,
         "workflow_version_id": test_node.workflow_version_id,
         "settings": {"key": "value"},
         "ui_settings": {"type": "bezier"},
@@ -24,8 +24,8 @@ def test_create_edge(db: Session, sample_edge_data):
 
     assert edge.id is not None
     assert edge.name == sample_edge_data["name"]
-    assert edge.source_id == sample_edge_data["source_id"]
-    assert edge.target_id == sample_edge_data["target_id"]
+    assert edge.source_node_id == sample_edge_data["source_node_id"]
+    assert edge.target_node_id == sample_edge_data["target_node_id"]
     assert edge.workflow_version_id == sample_edge_data["workflow_version_id"]
     assert edge.settings == sample_edge_data["settings"]
     assert edge.ui_settings == sample_edge_data["ui_settings"]
@@ -61,26 +61,26 @@ def test_get_edges_by_workflow_version(db: Session, test_edge):
 
 def test_get_edges_by_source_node(db: Session, test_edge):
     """Test retrieving edges by source node."""
-    edges = EdgeService(db).get_edges_by_source_node(test_edge.source_id)
+    edges = EdgeService(db).get_edges_by_source_node(test_edge.source_node_id)
 
     assert len(edges) >= 1
     assert any(e.id == test_edge.id for e in edges)
-    assert all(e.source_id == test_edge.source_id for e in edges)
+    assert all(e.source_node_id == test_edge.source_node_id for e in edges)
 
 
 def test_get_edges_by_target_node(db: Session, test_edge):
     """Test retrieving edges by target node."""
-    edges = EdgeService(db).get_edges_by_target_node(test_edge.target_id)
+    edges = EdgeService(db).get_edges_by_target_node(test_edge.target_node_id)
 
     assert len(edges) >= 1
     assert any(e.id == test_edge.id for e in edges)
-    assert all(e.target_id == test_edge.target_id for e in edges)
+    assert all(e.target_node_id == test_edge.target_node_id for e in edges)
 
 
 def test_get_edges_by_node(db: Session, test_edge):
     """Test retrieving edges connected to a node (source or target)."""
-    edges_as_source = EdgeService(db).get_edges_by_node(test_edge.source_id)
-    edges_as_target = EdgeService(db).get_edges_by_node(test_edge.target_id)
+    edges_as_source = EdgeService(db).get_edges_by_node(test_edge.source_node_id)
+    edges_as_target = EdgeService(db).get_edges_by_node(test_edge.target_node_id)
 
     assert len(edges_as_source) >= 1
     assert any(e.id == test_edge.id for e in edges_as_source)
@@ -173,7 +173,7 @@ def test_search_edges_with_filters(db: Session, test_edge):
     assert isinstance(results, list)
     assert any(edge.id == test_edge.id for edge in results)
 
-    filters = {"source_id": test_edge.source_id}
+    filters = {"source_node_id": test_edge.source_node_id}
     results = EdgeService(db).search(filters)
 
     assert len(results) >= 1

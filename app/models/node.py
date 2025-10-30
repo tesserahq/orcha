@@ -25,10 +25,10 @@ class Node(Base, TimestampMixin, SoftDeleteMixin):
     )
     workflow_version = relationship("WorkflowVersion", back_populates="nodes")
     source_edges = relationship(
-        "Edge", foreign_keys="Edge.source_id", back_populates="source"
+        "Edge", foreign_keys="Edge.source_node_id", back_populates="source_node"
     )
     target_edges = relationship(
-        "Edge", foreign_keys="Edge.target_id", back_populates="target"
+        "Edge", foreign_keys="Edge.target_node_id", back_populates="target_node"
     )
 
     def __init__(self, **kwargs):

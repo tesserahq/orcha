@@ -13,10 +13,10 @@ class EdgeBase(BaseModel):
     name: Optional[str] = None
     """Name of the edge. Optional field."""
 
-    source_id: UUID
+    source_node_id: UUID
     """ID of the source node. Required field."""
 
-    target_id: UUID
+    target_node_id: UUID
     """ID of the target node. Required field."""
 
     workflow_version_id: UUID
@@ -41,10 +41,10 @@ class EdgeUpdate(BaseModel):
     name: Optional[str] = None
     """Updated edge name."""
 
-    source_id: Optional[UUID] = None
+    source_node_id: Optional[UUID] = None
     """Updated source node ID."""
 
-    target_id: Optional[UUID] = None
+    target_node_id: Optional[UUID] = None
     """Updated target node ID."""
 
     settings: Optional[dict] = None
@@ -87,10 +87,10 @@ class EdgeDetails(BaseModel):
     name: Optional[str] = None
     """Name of the edge."""
 
-    source_id: UUID
+    source_node_id: UUID
     """ID of the source node."""
 
-    target_id: UUID
+    target_node_id: UUID
     """ID of the target node."""
 
     workflow_version_id: UUID

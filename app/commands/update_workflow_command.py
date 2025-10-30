@@ -6,6 +6,10 @@ from app.schemas.workflow import Workflow, WorkflowUpdate, WorkflowUpdateRequest
 from app.schemas.workflow_version import WorkflowVersionCreate
 from app.services.workflow_service import WorkflowService
 from app.services.workflow_version_service import WorkflowVersionService
+from app.schemas.node import NodeCreate, NodeCreatePayload
+from app.services.node_service import NodeService
+from app.services.edge_service import EdgeService
+from app.schemas.edge import EdgeCreate
 
 
 class UpdateWorkflowCommand:
@@ -26,6 +30,38 @@ class UpdateWorkflowCommand:
         )
 
         workflow_version = self.create_new_version(updated_workflow)
+
+        # Insert nodes for the new workflow version if provided and auto-create edges between them
+        created_nodes = []
+        if workflow_data.nodes:
+            node_service = NodeService(self.db)
+            for node_payload in workflow_data.nodes:
+                node_data = NodeCreate(
+                    name=node_payload.name,
+                    description=node_payload.description,
+                    kind=node_payload.kind,
+                    settings=node_payload.settings,
+                    ui_settings=node_payload.ui_settings,
+                    workflow_version_id=workflow_version.id,
+                )
+                created_node = node_service.create_node(node_data)
+                created_nodes.append(created_node)
+
+        # Auto-create edges based on node order (consecutive pairs)
+        if len(created_nodes) >= 2:
+            edge_service = EdgeService(self.db)
+            for i in range(len(created_nodes) - 1):
+                src = created_nodes[i]
+                tgt = created_nodes[i + 1]
+                edge_data = EdgeCreate(
+                    name=None,
+                    source_node_id=src.id,
+                    target_node_id=tgt.id,
+                    workflow_version_id=workflow_version.id,
+                    settings={},
+                    ui_settings={},
+                )
+                edge_service.create_edge(edge_data)
 
         # Set the new version as the active version
         updated_workflow = self.workflow_service.update_workflow(

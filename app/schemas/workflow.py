@@ -1,7 +1,10 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
+from app.schemas.node import NodeCreate
+from app.schemas.edge import EdgeCreate
+from app.schemas.node import NodeCreatePayload
 
 
 class WorkflowBase(BaseModel):
@@ -74,6 +77,9 @@ class WorkflowUpdateRequest(BaseModel):
 
     is_active: Optional[bool] = None
     """Updated active status."""
+
+    nodes: Optional[List[NodeCreatePayload]] = None
+    """Ordered nodes to associate with the new workflow version. Optional."""
 
 
 class WorkflowInDB(WorkflowBase):

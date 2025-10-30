@@ -85,13 +85,13 @@ class EdgeService(SoftDeleteService[Edge]):
         )
 
     def get_edges_by_source_node(
-        self, source_id: UUID, skip: int = 0, limit: int = 100
+        self, source_node_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[Edge]:
         """
         Get all edges originating from a specific source node.
 
         Args:
-            source_id: The ID of the source node
+            source_node_id: The ID of the source node
             skip: Number of records to skip
             limit: Maximum number of records to return
 
@@ -100,7 +100,7 @@ class EdgeService(SoftDeleteService[Edge]):
         """
         return (
             self.db.query(Edge)
-            .filter(Edge.source_id == source_id)
+            .filter(Edge.source_node_id == source_node_id)
             .order_by(Edge.created_at.desc())
             .offset(skip)
             .limit(limit)
@@ -108,13 +108,13 @@ class EdgeService(SoftDeleteService[Edge]):
         )
 
     def get_edges_by_target_node(
-        self, target_id: UUID, skip: int = 0, limit: int = 100
+        self, target_node_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[Edge]:
         """
         Get all edges terminating at a specific target node.
 
         Args:
-            target_id: The ID of the target node
+            target_node_id: The ID of the target node
             skip: Number of records to skip
             limit: Maximum number of records to return
 
@@ -123,7 +123,7 @@ class EdgeService(SoftDeleteService[Edge]):
         """
         return (
             self.db.query(Edge)
-            .filter(Edge.target_id == target_id)
+            .filter(Edge.target_node_id == target_node_id)
             .order_by(Edge.created_at.desc())
             .offset(skip)
             .limit(limit)
@@ -146,7 +146,7 @@ class EdgeService(SoftDeleteService[Edge]):
         """
         return (
             self.db.query(Edge)
-            .filter((Edge.source_id == node_id) | (Edge.target_id == node_id))
+            .filter((Edge.source_node_id == node_id) | (Edge.target_node_id == node_id))
             .order_by(Edge.created_at.desc())
             .offset(skip)
             .limit(limit)

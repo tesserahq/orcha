@@ -25,7 +25,7 @@ class NodeBase(BaseModel):
     ui_settings: dict
     """UI settings for the node. Required field."""
 
-    workflow_version_id: UUID
+    workflow_version_id: Optional[UUID] = None
     """ID of the workflow version this node belongs to. Required field."""
 
 
@@ -109,3 +109,13 @@ class NodeDetails(BaseModel):
     """Timestamp when the node record was last updated."""
 
     model_config = {"from_attributes": True}
+
+
+class NodeCreatePayload(BaseModel):
+    """Node creation payload used in workflow update requests (no version id)."""
+
+    name: str
+    description: Optional[str] = None
+    kind: str
+    settings: dict
+    ui_settings: dict

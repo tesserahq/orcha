@@ -207,8 +207,8 @@ def upgrade() -> None:
         "edges",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("name", sa.String(), nullable=True),
-        sa.Column("source_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("target_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("source_node_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("target_node_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("workflow_version_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("settings", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column(
@@ -218,14 +218,14 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.Column("deleted_at", sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(["workflow_version_id"], ["workflow_versions.id"]),
-        sa.ForeignKeyConstraint(["source_id"], ["nodes.id"]),
-        sa.ForeignKeyConstraint(["target_id"], ["nodes.id"]),
+        sa.ForeignKeyConstraint(["source_node_id"], ["nodes.id"]),
+        sa.ForeignKeyConstraint(["target_node_id"], ["nodes.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_unique_constraint(
-        "uq_edges_source_id_target_id_workflow_version_id",
+        "uq_edges_source_node_id_target_node_id_workflow_version_id",
         "edges",
-        ["source_id", "target_id", "workflow_version_id"],
+        ["source_node_id", "target_node_id", "workflow_version_id"],
     )
 
 

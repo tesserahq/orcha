@@ -1,4 +1,7 @@
 from uuid import uuid4
+from app.services.workflow_version_service import WorkflowVersionService
+from app.services.node_service import NodeService
+from app.services.edge_service import EdgeService
 
 
 def test_list_workflows(client):
@@ -79,6 +82,51 @@ def test_update_workflow_not_found(client):
     )
     assert response.status_code == 404
     assert response.json()["detail"] == "Workflow not found"
+
+
+def test_update_workflow_with_nodes_auto_edges_router(client, db, test_workflow):
+    update_data = {
+        "name": "WF with graph via router",
+        "nodes": [
+            {
+                "name": "RNode 1",
+                "description": "Router node 1",
+                "kind": "action",
+                "settings": {"a": 1},
+                "ui_settings": {"x": 10},
+            },
+            {
+                "name": "RNode 2",
+                "description": "Router node 2",
+                "kind": "condition",
+                "settings": {"b": 2},
+                "ui_settings": {"x": 20},
+            },
+        ],
+    }
+
+    resp = client.put(f"/workflows/{test_workflow.id}", json=update_data)
+    assert resp.status_code == 200
+    workflow = resp.json()
+    assert workflow["name"] == update_data["name"]
+
+    # Verify nodes and auto edge exist for the new active version
+    wv_service = WorkflowVersionService(db)
+    node_service = NodeService(db)
+    edge_service = EdgeService(db)
+
+    version_obj = wv_service.get_workflow_version(workflow["active_version_id"])
+    nodes = node_service.get_nodes_by_workflow_version(version_obj.id)
+    edges = edge_service.get_edges_by_workflow_version(version_obj.id)
+
+    node_names = {n.name for n in nodes}
+    assert node_names == {"RNode 1", "RNode 2"}
+    assert len(edges) == 1
+
+    nodes_by_name = {n.name: n for n in nodes}
+    created_edge = edges[0]
+    assert created_edge.source_node_id == nodes_by_name["RNode 1"].id
+    assert created_edge.target_node_id == nodes_by_name["RNode 2"].id
 
 
 def test_delete_workflow(client, test_workflow):
