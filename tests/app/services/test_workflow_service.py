@@ -176,6 +176,7 @@ def test_workflow_not_found_cases(db: Session):
 
     update_data = {"name": "Updated Name"}
     workflow_update = WorkflowUpdate(**update_data)
+
     assert workflow_service.update_workflow(non_existent_id, workflow_update) is None
 
     assert workflow_service.delete_workflow(non_existent_id) is False

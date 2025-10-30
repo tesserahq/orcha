@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from uuid import UUID
+from app.routers.utils.dependencies import get_workflow_by_id
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
@@ -37,34 +38,24 @@ def list_workflows(db: Session = Depends(get_db)):
 
 
 @router.get("/{workflow_id}", response_model=Workflow)
-def get_workflow(workflow_id: UUID, db: Session = Depends(get_db)):
+def get_workflow(workflow: Workflow = Depends(get_workflow_by_id)):
     """Get a workflow by ID."""
-    workflow = WorkflowService(db).get_workflow(workflow_id)
-    if not workflow:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found"
-        )
     return workflow
 
 
 @router.put("/{workflow_id}", response_model=Workflow)
 def update_workflow(
-    workflow_id: UUID, workflow: WorkflowUpdateRequest, db: Session = Depends(get_db)
+    workflow_data: WorkflowUpdateRequest,
+    db: Session = Depends(get_db),
+    workflow: Workflow = Depends(get_workflow_by_id),
 ):
     """Update a workflow."""
     command = UpdateWorkflowCommand(db)
-    updated_workflow = command.execute(workflow_id, workflow)
-    if not updated_workflow:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found"
-        )
-    return updated_workflow
+    return command.execute(workflow.id, workflow_data)
 
 
 @router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_workflow(workflow_id: UUID, db: Session = Depends(get_db)):
+def delete_workflow(workflow: Workflow = Depends(get_workflow_by_id), db: Session = Depends(get_db)):
     """Delete a workflow (soft delete)."""
-    if not WorkflowService(db).delete_workflow(workflow_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Workflow not found"
-        )
+    WorkflowService(db).delete_workflow(workflow.id)
+    return None

@@ -140,6 +140,7 @@ class WorkflowService(SoftDeleteService[Workflow]):
                 setattr(db_workflow, key, value)
             self.db.commit()
             self.db.refresh(db_workflow)
+
         return db_workflow
 
     def delete_workflow(self, workflow_id: UUID) -> bool:
