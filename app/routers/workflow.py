@@ -55,7 +55,9 @@ def update_workflow(
 
 
 @router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_workflow(workflow: Workflow = Depends(get_workflow_by_id), db: Session = Depends(get_db)):
+def delete_workflow(
+    workflow: Workflow = Depends(get_workflow_by_id), db: Session = Depends(get_db)
+):
     """Delete a workflow (soft delete)."""
     WorkflowService(db).delete_workflow(workflow.id)
     return None
