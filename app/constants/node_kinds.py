@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Literal, Optional, TypedDict
+from abc import ABC, abstractmethod
 
 
 # Category keys are stable identifiers suitable for storage and lookups
@@ -28,6 +29,12 @@ class RequestConfig:
     headers: Optional[Dict[str, Any]] = None
     qs: Optional[Dict[str, Any]] = None  # query string parameters.
     body: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class ExecutionData:
+    json: Dict[str, Any]
+    error: Optional[str] = None
 
 
 @dataclass
@@ -65,7 +72,7 @@ class NodeCategory(TypedDict):
 
 
 @dataclass
-class NodeDescription:
+class NodeDescription(ABC):
     displayName: str
     name: str
     icon: str
@@ -79,6 +86,10 @@ class NodeDescription:
     credentials: Optional[List[Dict[str, Any]]] = None
     requestDefaults: Optional[RequestConfig] = None
     properties: List[PropertyField] = field(default_factory=list)
+
+    @abstractmethod
+    def execute(self, input: ExecutionData) -> ExecutionData:
+        pass
 
 
 @dataclass

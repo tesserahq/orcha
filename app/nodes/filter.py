@@ -5,6 +5,7 @@ from typing import Dict, Any
 
 from app.constants.node_kinds import (
     CATEGORY_FLOW,
+    ExecutionData,
     NodeDescription,
     Node,
     PropertyField,
@@ -28,6 +29,9 @@ class FilterDescription(NodeDescription):
     credentials: list = field(default_factory=list)
     requestDefaults: Any = None
     properties: list = field(default_factory=list)
+
+    def execute(self, input: ExecutionData) -> ExecutionData:
+        return input
 
 
 NODE = Node(
