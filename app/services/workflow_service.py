@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.workflow import Workflow
-from app.schemas.workflow import WorkflowCreate, WorkflowUpdate
+from app.schemas.workflow import WorkflowCreate, WorkflowUpdate, WorkflowUpdateRequest
 from app.services.soft_delete_service import SoftDeleteService
 from app.utils.db.filtering import apply_filters
 
@@ -91,28 +91,31 @@ class WorkflowService(SoftDeleteService[Workflow]):
         Returns:
             Workflow: The created workflow
         """
-        db_workflow = Workflow(**workflow.model_dump())
+        # Exclude 'nodes' from model_dump as it's not a direct model attribute
+        workflow_data = workflow.model_dump(exclude={"nodes"})
+        db_workflow = Workflow(**workflow_data)
         self.db.add(db_workflow)
         self.db.commit()
         self.db.refresh(db_workflow)
         return db_workflow
 
     def update_workflow(
-        self, workflow_id: UUID, workflow: WorkflowUpdate
+        self, workflow_id: UUID, workflow: WorkflowUpdate | WorkflowUpdateRequest
     ) -> Optional[Workflow]:
         """
         Update an existing workflow.
 
         Args:
             workflow_id: The ID of the workflow to update
-            workflow: The updated workflow data
+            workflow: The updated workflow data (WorkflowUpdate or WorkflowUpdateRequest)
 
         Returns:
             Optional[Workflow]: The updated workflow or None if not found
         """
         db_workflow = self.db.query(Workflow).filter(Workflow.id == workflow_id).first()
         if db_workflow:
-            update_data = workflow.model_dump(exclude_unset=True)
+            # Exclude 'nodes' from model_dump as it's not a direct model attribute
+            update_data = workflow.model_dump(exclude_unset=True, exclude={"nodes"})
             for key, value in update_data.items():
                 setattr(db_workflow, key, value)
             self.db.commit()

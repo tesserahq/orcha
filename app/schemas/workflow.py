@@ -30,7 +30,8 @@ class WorkflowBase(BaseModel):
 class WorkflowCreate(WorkflowBase):
     """Schema for creating a new workflow. Inherits all fields from WorkflowBase."""
 
-    pass
+    nodes: Optional[List[NodeCreatePayload]] = None
+    """Ordered nodes to associate with the initial workflow version. Optional."""
 
 
 class WorkflowUpdate(BaseModel):

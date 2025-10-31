@@ -173,10 +173,14 @@ def upgrade() -> None:
         "workflow_versions",
         ["workflow_id", "version"],
     )
-    op.create_unique_constraint(
+    # Partial unique index: only one active version per workflow
+    # Allows multiple inactive versions but enforces uniqueness for active ones
+    op.create_index(
         "uq_workflow_versions_workflow_id_is_active",
         "workflow_versions",
         ["workflow_id", "is_active"],
+        unique=True,
+        postgresql_where=sa.text("is_active = true"),
     )
 
     op.create_table(

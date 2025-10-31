@@ -46,8 +46,6 @@ def create_workflow(workflow_data: WorkflowCreate, db: Session = Depends(get_db)
     node_schemas = [NodeSchema.model_validate(n, from_attributes=True) for n in nodes]
     return WorkflowWithNodes(**wf_schema.model_dump(), nodes=node_schemas)
 
-    return created_workflow
-
 
 @router.get("", response_model=Page[Workflow])
 def list_workflows(db: Session = Depends(get_db)):

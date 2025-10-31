@@ -4,7 +4,10 @@ import pytest
 from sqlalchemy.orm import Session
 from app.commands.create_workflow_command import CreateWorkflowCommand
 from app.schemas.workflow import WorkflowCreate
+from app.schemas.node import NodeCreatePayload
 from app.services.workflow_version_service import WorkflowVersionService
+from app.services.node_service import NodeService
+from app.services.edge_service import EdgeService
 
 
 def test_create_workflow_creates_both_workflow_and_version(db: Session):
@@ -103,3 +106,53 @@ def test_create_workflow_multiple_workflows(db: Session):
     assert workflow1.active_version_id == versions1[0].id
     assert workflow2.active_version_id == versions2[0].id
     assert workflow1.active_version_id != workflow2.active_version_id
+
+
+def test_create_workflow_with_nodes_auto_edges(db: Session):
+    """Test that creating a workflow with nodes also creates edges between them."""
+    node1 = NodeCreatePayload(
+        name="Node 1",
+        description="Test node 1",
+        kind="action",
+        settings={"a": 1},
+        ui_settings={"x": 1},
+    )
+    node2 = NodeCreatePayload(
+        name="Node 2",
+        description="Test node 2",
+        kind="condition",
+        settings={"b": 2},
+        ui_settings={"x": 2},
+    )
+    workflow_data = WorkflowCreate(
+        name="Workflow with nodes",
+        description="Test description",
+        is_active=True,
+        nodes=[node1, node2],
+    )
+
+    workflow = CreateWorkflowCommand(db).execute(workflow_data)
+
+    # Verify workflow was created
+    assert workflow is not None
+    assert workflow.name == "Workflow with nodes"
+    assert workflow.active_version_id is not None
+
+    # Check that nodes and edges were created
+    workflow_version_service = WorkflowVersionService(db)
+    node_service = NodeService(db)
+    edge_service = EdgeService(db)
+    version_obj = workflow_version_service.get_workflow_version(
+        workflow.active_version_id
+    )
+    all_nodes = node_service.get_nodes_by_workflow_version(version_obj.id)
+    all_edges = edge_service.get_edges_by_workflow_version(version_obj.id)
+
+    assert len(all_nodes) == 2
+    assert len(all_edges) == 1
+
+    # Ensure the edge connects Node 1 -> Node 2
+    nodes_by_name = {n.name: n for n in all_nodes}
+    created_edge = all_edges[0]
+    assert created_edge.source_node_id == nodes_by_name["Node 1"].id
+    assert created_edge.target_node_id == nodes_by_name["Node 2"].id

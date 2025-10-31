@@ -1,24 +1,16 @@
 """Command for creating a workflow with an initial workflow version."""
 
-from sqlalchemy.orm import Session
-from app.schemas.workflow import (
-    Workflow,
-    WorkflowCreate,
-    WorkflowUpdate,
-)
+from app.schemas.workflow import Workflow, WorkflowCreate
 from app.schemas.workflow_version import WorkflowVersionCreate
-from app.services.workflow_service import WorkflowService
 from app.services.workflow_version_service import WorkflowVersionService
+from app.commands.update_workflow_command import WorkflowCommandBase
 
 
-class CreateWorkflowCommand:
-    def __init__(self, db: Session):
-        self.db = db
-
+class CreateWorkflowCommand(WorkflowCommandBase):
     def execute(self, workflow_data: WorkflowCreate) -> Workflow:
+        """Create a new workflow with its initial version and optional nodes."""
         # Create the workflow using the service
-        workflow_service = WorkflowService(self.db)
-        workflow = workflow_service.create_workflow(workflow_data)
+        workflow = self.workflow_service.create_workflow(workflow_data)
 
         # Create the initial workflow version with the same active status as the workflow
         workflow_version_service = WorkflowVersionService(self.db)
@@ -31,8 +23,10 @@ class CreateWorkflowCommand:
             version_data
         )
 
-        workflow = workflow_service.update_workflow(
-            workflow.id, WorkflowUpdate(active_version_id=workflow_version.id)
-        )
+        # Create nodes and edges if provided
+        self.create_nodes_and_edges(workflow_version.id, workflow_data.nodes)
+
+        # Set the initial version as the active version
+        workflow = self.set_active_version(workflow.id, workflow_version.id)
 
         return workflow
