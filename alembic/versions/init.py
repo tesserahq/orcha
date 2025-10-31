@@ -146,6 +146,9 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(), nullable=True),
         sa.Column("active_version_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
+        sa.Column("last_execution_time", sa.DateTime(), nullable=True),
+        sa.Column("execution_status", sa.String(), nullable=True),
+        sa.Column("execution_status_message", sa.String(), nullable=True),
     )
 
     op.create_table(

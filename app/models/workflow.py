@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixins import TimestampMixin, SoftDeleteMixin
-from sqlalchemy import Boolean, Column, ForeignKey, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
+from datetime import datetime
 import uuid
 
 from app.db import Base
@@ -21,6 +22,11 @@ class Workflow(Base, TimestampMixin, SoftDeleteMixin):
     active_version_id: Mapped[UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("workflow_versions.id"), nullable=True
     )
+    last_execution_time: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True
+    )
+    execution_status: Mapped[str | None] = mapped_column(String, nullable=True)
+    execution_status_message: Mapped[str | None] = mapped_column(String, nullable=True)
 
     active_version = relationship("WorkflowVersion", foreign_keys=[active_version_id])
     versions = relationship(

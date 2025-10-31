@@ -26,6 +26,15 @@ class WorkflowBase(BaseModel):
     active_version_id: Optional[UUID] = None
     """ID of the active version of the workflow. Optional field."""
 
+    last_execution_time: Optional[datetime] = None
+    """Timestamp of the last execution of the workflow. Optional field."""
+
+    execution_status: Optional[str] = None
+    """Status of the last execution of the workflow. Optional field."""
+
+    execution_status_message: Optional[str] = None
+    """Message of the last execution of the workflow. Optional field."""
+
 
 class WorkflowCreate(WorkflowBase):
     """Schema for creating a new workflow. Inherits all fields from WorkflowBase."""
@@ -48,6 +57,15 @@ class WorkflowUpdate(BaseModel):
 
     active_version_id: Optional[UUID] = None
     """Updated active version ID."""
+
+    last_execution_time: Optional[datetime] = None
+    """Updated timestamp of the last execution of the workflow. Optional field."""
+
+    execution_status: Optional[str] = None
+    """Updated status of the last execution of the workflow. Optional field."""
+
+    execution_status_message: Optional[str] = None
+    """Updated message of the last execution of the workflow. Optional field."""
 
 
 class WorkflowUpdateRequest(BaseModel):
@@ -91,27 +109,3 @@ class WorkflowWithNodes(Workflow):
     """Workflow response including ordered nodes for the active version."""
 
     nodes: List[Node]
-
-
-class WorkflowDetails(BaseModel):
-    """Schema for detailed workflow information, typically used in workflow views."""
-
-    id: UUID
-    """Unique identifier for the workflow."""
-
-    name: str
-    """Name of the workflow."""
-
-    description: Optional[str] = None
-    """Description of the workflow."""
-
-    is_active: bool
-    """Whether the workflow is active."""
-
-    created_at: datetime
-    """Timestamp when the workflow record was created."""
-
-    updated_at: datetime
-    """Timestamp when the workflow record was last updated."""
-
-    model_config = {"from_attributes": True}
