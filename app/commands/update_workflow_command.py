@@ -60,12 +60,6 @@ class WorkflowCommandBase:
 
         return created_nodes
 
-    def set_active_version(self, workflow_id: UUID, version_id: UUID) -> Workflow:
-        """Set the active version for a workflow."""
-        return self.workflow_service.update_workflow(
-            workflow_id, WorkflowUpdate(active_version_id=version_id)
-        )
-
 
 class UpdateWorkflowCommand(WorkflowCommandBase):
     def execute(
@@ -85,8 +79,10 @@ class UpdateWorkflowCommand(WorkflowCommandBase):
         # Create nodes and edges if provided
         self.create_nodes_and_edges(workflow_version.id, workflow_data.nodes)
 
-        # Set the new version as the active version
-        updated_workflow = self.set_active_version(workflow.id, workflow_version.id)
+        # Set the new version as the active version (deactivates previous active versions)
+        updated_workflow = self.workflow_service.set_active_version(
+            workflow.id, workflow_version.id
+        )
 
         return updated_workflow
 

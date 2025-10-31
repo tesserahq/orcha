@@ -26,7 +26,9 @@ class CreateWorkflowCommand(WorkflowCommandBase):
         # Create nodes and edges if provided
         self.create_nodes_and_edges(workflow_version.id, workflow_data.nodes)
 
-        # Set the initial version as the active version
-        workflow = self.set_active_version(workflow.id, workflow_version.id)
+        # Set the initial version as the active version (deactivates previous active versions)
+        workflow = self.workflow_service.set_active_version(
+            workflow.id, workflow_version.id
+        )
 
         return workflow

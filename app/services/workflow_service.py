@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.workflow import Workflow
+from app.models.workflow_version import WorkflowVersion
 from app.schemas.workflow import WorkflowCreate, WorkflowUpdate, WorkflowUpdateRequest
 from app.services.soft_delete_service import SoftDeleteService
 from app.utils.db.filtering import apply_filters
@@ -186,4 +187,55 @@ class WorkflowService(SoftDeleteService[Workflow]):
             db_workflow.is_active = not db_workflow.is_active
             self.db.commit()
             self.db.refresh(db_workflow)
+        return db_workflow
+
+    def set_active_version(
+        self, workflow_id: UUID, version_id: UUID
+    ) -> Optional[Workflow]:
+        """
+        Set the active version for a workflow.
+        This method ensures only one active version per workflow by:
+        1. Deactivating all previous active versions for the workflow
+        2. Activating the specified version
+        3. Updating the workflow's active_version_id
+
+        Args:
+            workflow_id: The ID of the workflow
+            version_id: The ID of the version to set as active
+
+        Returns:
+            Optional[Workflow]: The updated workflow or None if not found
+        """
+        db_workflow = self.db.query(Workflow).filter(Workflow.id == workflow_id).first()
+        if not db_workflow:
+            return None
+
+        # Verify the version belongs to this workflow
+        db_version = (
+            self.db.query(WorkflowVersion)
+            .filter(
+                WorkflowVersion.id == version_id,
+                WorkflowVersion.workflow_id == workflow_id,
+            )
+            .first()
+        )
+        if not db_version:
+            raise ValueError(
+                f"Workflow version {version_id} not found or does not belong to workflow {workflow_id}"
+            )
+
+        # Deactivate all active versions for this workflow
+        self.db.query(WorkflowVersion).filter(
+            WorkflowVersion.workflow_id == workflow_id,
+            WorkflowVersion.is_active == True,
+        ).update({"is_active": False})
+
+        # Activate the specified version
+        db_version.is_active = db_workflow.is_active
+
+        # Update the workflow's active_version_id
+        db_workflow.active_version_id = version_id
+
+        self.db.commit()
+        self.db.refresh(db_workflow)
         return db_workflow
