@@ -143,23 +143,116 @@ _ALL_NODES: List[Node] = [
 ]
 
 
-class NodeKindDict(TypedDict):
-    """Node kind dictionary format for API responses."""
+class NodeKindDictRequired(TypedDict):
+    """Required fields for NodeKindDict."""
 
     id: str
+    displayName: str
     name: str
+    icon: str
+    group: List[str]
+    version: Any  # int or list
     description: str
+    defaults: Dict[str, Any]
+    inputs: List[str]
+    outputs: List[str]
+    properties: List[Dict[str, Any]]
     category: str
+
+
+class NodeKindDict(NodeKindDictRequired, total=False):
+    """Node kind dictionary format for API responses."""
+
+    subtitle: Optional[str]
+    credentials: Optional[List[Dict[str, Any]]]
+    requestDefaults: Optional[Dict[str, Any]]
+
+
+def _serialize_property_field(prop: PropertyField) -> Dict[str, Any]:
+    """Serialize a PropertyField to a dictionary."""
+    result: Dict[str, Any] = {
+        "displayName": prop.displayName,
+        "name": prop.name,
+        "type": prop.type,
+        "required": prop.required,
+    }
+    if prop.default is not None:
+        result["default"] = prop.default
+    if prop.description:
+        result["description"] = prop.description
+    if prop.options:
+        result["options"] = [
+            {
+                "name": opt.name,
+                "value": opt.value,
+                **({"description": opt.description} if opt.description else {}),
+                **({"action": opt.action} if opt.action else {}),
+                **(
+                    {
+                        "routing": (
+                            _serialize_routing(opt.routing) if opt.routing else None
+                        )
+                    }
+                    if opt.routing
+                    else {}
+                ),
+                **(
+                    {"displayOptions": opt.displayOptions} if opt.displayOptions else {}
+                ),
+            }
+            for opt in prop.options
+        ]
+    if prop.displayOptions:
+        result["displayOptions"] = prop.displayOptions
+    return result
+
+
+def _serialize_routing(routing: Routing) -> Dict[str, Any]:
+    """Serialize a Routing to a dictionary."""
+    return {"request": _serialize_request_config(routing.request)}
+
+
+def _serialize_request_config(request: RequestConfig) -> Dict[str, Any]:
+    """Serialize a RequestConfig to a dictionary."""
+    result: Dict[str, Any] = {
+        "method": request.method,
+        "url": request.url,
+    }
+    if request.headers:
+        result["headers"] = request.headers
+    if request.qs:
+        result["qs"] = request.qs
+    if request.body:
+        result["body"] = request.body
+    return result
 
 
 def _node_to_kind_dict(node: Node) -> NodeKindDict:
     """Convert a Node instance to the API format."""
-    return {
+    desc = node.description
+    result: NodeKindDict = {
         "id": node.id,
-        "name": node.description.displayName,
-        "description": node.description.description,
+        "displayName": desc.displayName,
+        "name": desc.name,
+        "icon": desc.icon,
+        "group": desc.group,
+        "version": desc.version,
+        "description": desc.description,
+        "defaults": desc.defaults,
+        "inputs": desc.inputs,
+        "outputs": desc.outputs,
+        "properties": [_serialize_property_field(prop) for prop in desc.properties],
         "category": node.category,
     }
+
+    if desc.subtitle is not None:
+        result["subtitle"] = desc.subtitle
+    if desc.credentials is not None:
+        result["credentials"] = desc.credentials
+    if desc.requestDefaults is not None:
+        result["requestDefaults"] = _serialize_request_config(desc.requestDefaults)
+
+    return result
 
 
 # Kind registry - converted to dict format for API compatibility

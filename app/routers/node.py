@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from app.schemas.common import ListResponse
-from app.schemas.node_kind import NodeKind as NodeKindSchema
-from app.constants.node_kinds import NODE_KINDS
+from app.schemas.node_kind import CategoryWithNodes
+from app.constants.node_kinds import NODE_CATEGORIES, NODE_KINDS_BY_CATEGORY
 
 
 router = APIRouter(
@@ -12,7 +12,17 @@ router = APIRouter(
 )
 
 
-@router.get("/kinds", response_model=ListResponse[NodeKindSchema])
-def list_node_kinds() -> ListResponse[NodeKindSchema]:
-    """Return all available node kinds."""
-    return ListResponse(data=NODE_KINDS)  # type: ignore[arg-type]
+@router.get("/categories", response_model=ListResponse[CategoryWithNodes])
+def list_categories() -> ListResponse[CategoryWithNodes]:
+    """Return all node categories with their associated node kinds."""
+    categories = []
+    for category_key, category_info in NODE_CATEGORIES.items():
+        categories.append(
+            CategoryWithNodes(
+                key=category_info["key"],
+                name=category_info["name"],
+                description=category_info["description"],
+                nodes=NODE_KINDS_BY_CATEGORY.get(category_key, []),
+            )
+        )
+    return ListResponse(items=categories)
