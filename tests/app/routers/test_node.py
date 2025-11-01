@@ -1,4 +1,4 @@
-from app.constants.node_kinds import (
+from app.constants.node_categories import (
     NODE_KINDS,
     CATEGORY_FLOW,
     CATEGORY_ACTION_APP,

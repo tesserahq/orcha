@@ -13,4 +13,3 @@ class WorkflowExecutionStatus:
     SUCCESS = "success"
     FAILED = "failed"
     CANCELLED = "cancelled"
-

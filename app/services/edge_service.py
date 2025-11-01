@@ -3,9 +3,11 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.edge import Edge
+from app.models.workflow import Workflow
 from app.schemas.edge import EdgeCreate, EdgeUpdate
 from app.services.soft_delete_service import SoftDeleteService
 from app.utils.db.filtering import apply_filters
+from app.exceptions.resource_not_found_error import ResourceNotFoundError
 
 
 class EdgeService(SoftDeleteService[Edge]):
@@ -82,6 +84,36 @@ class EdgeService(SoftDeleteService[Edge]):
             .offset(skip)
             .limit(limit)
             .all()
+        )
+
+    def get_edges_by_workflow(
+        self, workflow_id: UUID, skip: int = 0, limit: int = 100
+    ) -> List[Edge]:
+        """
+        Get all edges for the active version of a workflow.
+
+        Args:
+            workflow_id: The ID of the workflow
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List[Edge]: List of edges for the workflow's active version
+
+        Raises:
+            ResourceNotFoundError: If workflow not found or has no active version
+        """
+        workflow = self.db.query(Workflow).filter(Workflow.id == workflow_id).first()
+        if not workflow:
+            raise ResourceNotFoundError(f"Workflow with id {workflow_id} not found")
+
+        if not workflow.active_version_id:
+            raise ResourceNotFoundError(
+                f"Workflow {workflow_id} does not have an active version"
+            )
+
+        return self.get_edges_by_workflow_version(
+            workflow.active_version_id, skip=skip, limit=limit
         )
 
     def get_edges_by_source_node(

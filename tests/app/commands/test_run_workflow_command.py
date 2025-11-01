@@ -131,33 +131,14 @@ def test_run_workflow_no_active_version(db, faker):
     with pytest.raises(ResourceNotFoundError) as exc_info:
         command.execute(workflow.id, {"test": "data"})
 
-    assert f"Workflow {workflow.id} does not have an active version" in str(exc_info.value)
+    assert f"Workflow {workflow.id} does not have an active version" in str(
+        exc_info.value
+    )
 
 
-def test_run_workflow_no_nodes(db, faker):
+def test_run_workflow_no_nodes(db, setup_workflow):
     """Test running a workflow with no nodes."""
-    # Create workflow with active version but no nodes
-    workflow = Workflow(
-        name=faker.sentence(nb_words=3),
-        description=faker.text(max_nb_chars=200),
-        is_active=True,
-    )
-    db.add(workflow)
-    db.commit()
-    db.refresh(workflow)
-
-    workflow_version = WorkflowVersion(
-        workflow_id=workflow.id,
-        version=1,
-        is_active=True,
-    )
-    db.add(workflow_version)
-    db.commit()
-    db.refresh(workflow_version)
-
-    workflow.active_version_id = workflow_version.id
-    db.commit()
-    db.refresh(workflow)
+    workflow = setup_workflow
 
     command = RunWorkflowCommand(db)
 
@@ -173,31 +154,9 @@ def test_run_workflow_no_nodes(db, faker):
     assert "Workflow has no nodes to execute" in workflow.execution_status_message
 
 
-def test_run_workflow_no_trigger_nodes(db, faker):
+def test_run_workflow_no_trigger_nodes(db, setup_workflow, setup_workflow_version):
     """Test running a workflow with no trigger nodes (all nodes have incoming edges)."""
-    # Create workflow
-    workflow = Workflow(
-        name=faker.sentence(nb_words=3),
-        description=faker.text(max_nb_chars=200),
-        is_active=True,
-    )
-    db.add(workflow)
-    db.commit()
-    db.refresh(workflow)
-
-    # Create workflow version
-    workflow_version = WorkflowVersion(
-        workflow_id=workflow.id,
-        version=1,
-        is_active=True,
-    )
-    db.add(workflow_version)
-    db.commit()
-    db.refresh(workflow_version)
-
-    workflow.active_version_id = workflow_version.id
-    db.commit()
-    db.refresh(workflow)
+    workflow = setup_workflow
 
     # Create nodes (all with incoming edges)
     node1 = Node(
@@ -206,7 +165,7 @@ def test_run_workflow_no_trigger_nodes(db, faker):
         kind="orcha-nodes.base.http_request",
         settings={},
         ui_settings={},
-        workflow_version_id=workflow_version.id,
+        workflow_version_id=workflow.active_version_id,
     )
     node2 = Node(
         name="Node 2",
@@ -214,7 +173,7 @@ def test_run_workflow_no_trigger_nodes(db, faker):
         kind="orcha-nodes.base.http_request",
         settings={},
         ui_settings={},
-        workflow_version_id=workflow_version.id,
+        workflow_version_id=workflow.active_version_id,
     )
     db.add(node1)
     db.add(node2)
@@ -227,7 +186,7 @@ def test_run_workflow_no_trigger_nodes(db, faker):
         name=None,
         source_node_id=node1.id,
         target_node_id=node2.id,
-        workflow_version_id=workflow_version.id,
+        workflow_version_id=workflow.active_version_id,
         settings={},
         ui_settings={},
     )
@@ -235,17 +194,22 @@ def test_run_workflow_no_trigger_nodes(db, faker):
     db.commit()
 
     command = RunWorkflowCommand(db)
-
     result = command.execute(workflow.id, {"test": "data"})
 
     # Should fail because there are no trigger nodes
     assert result["status"] == WorkflowExecutionStatus.FAILED
-    assert "Workflow has no trigger nodes" in result["error"]
+    assert (
+        "Workflow has nodes with no incoming edges that are not from the trigger"
+        in result["error"]
+    )
 
     # Verify workflow status was updated
     db.refresh(workflow)
     assert workflow.execution_status == WorkflowExecutionStatus.FAILED
-    assert "Workflow has no trigger nodes" in workflow.execution_status_message
+    assert (
+        "Workflow has nodes with no incoming edges that are not from the trigger"
+        in workflow.execution_status_message
+    )
 
 
 def test_run_workflow_updates_status_to_running(db, workflow_with_nodes):
@@ -357,4 +321,3 @@ def test_run_workflow_linear_execution(db, faker):
     # Verify workflow status
     db.refresh(workflow)
     assert workflow.execution_status == WorkflowExecutionStatus.SUCCESS
-

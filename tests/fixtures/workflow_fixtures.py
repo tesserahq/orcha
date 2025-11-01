@@ -1,3 +1,4 @@
+from app.models.workflow_version import WorkflowVersion
 import pytest
 from app.models.workflow import Workflow
 
@@ -30,6 +31,21 @@ def setup_workflow(db, faker):
 
     workflow = Workflow(**workflow_data)
     db.add(workflow)
+    db.commit()
+    db.refresh(workflow)
+
+    workflow_version_data = {
+        "workflow_id": workflow.id,
+        "version": 1,
+        "is_active": True,
+    }
+
+    workflow_version = WorkflowVersion(**workflow_version_data)
+    db.add(workflow_version)
+    db.commit()
+    db.refresh(workflow_version)
+
+    workflow.active_version_id = workflow_version.id
     db.commit()
     db.refresh(workflow)
 

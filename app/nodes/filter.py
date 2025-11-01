@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Any
 
-from app.constants.node_kinds import (
+from app.constants.node_categories import (
     CATEGORY_FLOW,
     ExecutionData,
     NodeDescription,

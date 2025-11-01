@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.schemas.common import ListResponse
 from app.schemas.node_kind import CategoryWithNodes
-from app.constants.node_kinds import NODE_CATEGORIES, NODE_KINDS_BY_CATEGORY
+from app.constants.node_categories import NODE_CATEGORIES, NODE_KINDS_BY_CATEGORY
 
 
 router = APIRouter(

@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 class NodeKind(BaseModel):
     """Schema representing an available node kind.
 
-    Mirrors the structure defined in app.constants.node_kinds.
+    Mirrors the structure defined in app.constants.node_categories.
     """
 
     id: str

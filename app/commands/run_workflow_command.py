@@ -13,7 +13,7 @@ from app.services.node_service import NodeService
 from app.services.edge_service import EdgeService
 from app.schemas.workflow import WorkflowUpdate
 from app.constants.workflow_execution_status import WorkflowExecutionStatus
-from app.constants.node_kinds import NODE_BY_ID, ExecutionData
+from app.constants.node_categories import NODE_BY_ID, ExecutionData, CATEGORY_TRIGGER
 from app.exceptions.resource_not_found_error import ResourceNotFoundError
 
 
@@ -46,17 +46,6 @@ class RunWorkflowCommand:
         Raises:
             ResourceNotFoundError: If workflow or active version not found
         """
-        # Get workflow
-        workflow = self.workflow_service.get_workflow(workflow_id)
-        if not workflow:
-            raise ResourceNotFoundError(f"Workflow with id {workflow_id} not found")
-
-        # Check if workflow has an active version
-        if not workflow.active_version_id:
-            raise ResourceNotFoundError(
-                f"Workflow {workflow_id} does not have an active version"
-            )
-
         # Update workflow status to running
         workflow = self.workflow_service.update_workflow(
             workflow_id,
@@ -67,14 +56,14 @@ class RunWorkflowCommand:
             ),
         )
 
+        if not workflow:
+            raise ResourceNotFoundError(f"Workflow with id {workflow_id} not found")
+
         try:
             # Get all nodes and edges for the active version
-            nodes = self.node_service.get_nodes_by_workflow_version(
-                workflow.active_version_id
-            )
-            edges = self.edge_service.get_edges_by_workflow_version(
-                workflow.active_version_id
-            )
+            # This will raise ResourceNotFoundError if workflow has no active version
+            nodes = self.node_service.get_nodes_by_workflow(workflow_id)
+            edges = self.edge_service.get_edges_by_workflow(workflow_id)
 
             if not nodes:
                 raise ValueError("Workflow has no nodes to execute")
@@ -96,20 +85,47 @@ class RunWorkflowCommand:
                 outgoing_edges_map[edge.source_node_id].append(edge)
 
             # Find trigger nodes (nodes with no incoming edges)
-            trigger_nodes = [
+            nodes_with_no_incoming_edges = [
                 node
                 for node in nodes
                 if node.id not in incoming_edges_map
                 or len(incoming_edges_map[node.id]) == 0
             ]
 
+            if not nodes_with_no_incoming_edges:
+                raise ValueError(
+                    "Workflow has no trigger nodes (nodes with no incoming edges)"
+                )
+
+            # Validate that all nodes with no incoming edges are from the trigger category
+            trigger_nodes = []
+            invalid_trigger_nodes = []
+            for node in nodes_with_no_incoming_edges:
+                node_kind = NODE_BY_ID.get(node.kind)
+                if node_kind and node_kind.category == CATEGORY_TRIGGER:
+                    trigger_nodes.append(node)
+                else:
+                    invalid_trigger_nodes.append(node)
+
+            if invalid_trigger_nodes:
+                node_names = [node.name for node in invalid_trigger_nodes]
+                raise ValueError(
+                    f"Workflow has nodes with no incoming edges that are not from the trigger category: {', '.join(node_names)}"
+                )
+
             if not trigger_nodes:
-                raise ValueError("Workflow has no trigger nodes (nodes with no incoming edges)")
+                raise ValueError(
+                    "Workflow has no trigger nodes (nodes with no incoming edges from trigger category)"
+                )
 
             # Execute workflow starting from trigger nodes
             execution_data = ExecutionData(json=input_data)
             result_data = self._execute_nodes(
-                trigger_nodes, node_map, incoming_edges_map, outgoing_edges_map, execution_data
+                trigger_nodes,
+                node_map,
+                incoming_edges_map,
+                outgoing_edges_map,
+                execution_data,
             )
 
             # Update workflow status to success
@@ -127,7 +143,13 @@ class RunWorkflowCommand:
                 "error": None,
             }
 
+        except ResourceNotFoundError:
+            # Re-raise ResourceNotFoundError without updating workflow status
+            # These are validation errors, not execution failures
+            raise
+
         except Exception as e:
+
             # Update workflow status to failed
             error_message = str(e)
             workflow = self.workflow_service.update_workflow(
@@ -239,4 +261,3 @@ class RunWorkflowCommand:
             )
 
         return current_data
-

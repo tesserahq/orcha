@@ -1,6 +1,6 @@
 """Constants package for the application."""
 
-from app.constants.node_kinds import (
+from app.constants.node_categories import (
     CategoryKey,
     NodeCategory,
     Node,
