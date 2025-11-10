@@ -137,6 +137,17 @@ class WorkflowVersionService(SoftDeleteService[WorkflowVersion]):
                 workflow_version.workflow_id
             )
 
+        if workflow_version.is_active:
+            (
+                self.db.query(WorkflowVersion)
+                .filter(
+                    WorkflowVersion.workflow_id == workflow_version.workflow_id,
+                    WorkflowVersion.is_active.is_(True),
+                    WorkflowVersion.deleted_at.is_(None),
+                )
+                .update({"is_active": False}, synchronize_session=False)
+            )
+
         db_workflow_version = WorkflowVersion(**workflow_version.model_dump())
         self.db.add(db_workflow_version)
         self.db.commit()
