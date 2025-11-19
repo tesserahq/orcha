@@ -56,6 +56,11 @@ class Settings(BaseSettings):
     redis_namespace: str = Field(
         default="llama_index", json_schema_extra={"env": "REDIS_NAMESPACE"}
     )
+    nats_enabled: bool = Field(default=False, json_schema_extra={"env": "NATS_ENABLED"})
+    nats_url: str = Field(
+        default="nats://localhost:4222", json_schema_extra={"env": "NATS_URL"}
+    )
+    nats_queue: str = Field(default="orcha", json_schema_extra={"env": "NATS_QUEUE"})
     service_account_client_id: str = Field(
         default="", json_schema_extra={"env": "SERVICE_ACCOUNT_CLIENT_ID"}
     )
@@ -68,6 +73,9 @@ class Settings(BaseSettings):
     quore_api_url: str = Field(
         default="https://quore-api.meetorcha.com",
         json_schema_extra={"env": "QUORE_API_URL"},
+    )
+    db_app_name: str = Field(
+        default="orcha-api", json_schema_extra={"env": "DB_APP_NAME"}
     )
 
     @model_validator(mode="before")
