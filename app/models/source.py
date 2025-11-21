@@ -19,7 +19,5 @@ class Source(Base, TimestampMixin, SoftDeleteMixin):
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     identifier: Mapped[str] = mapped_column(String, nullable=False)
 
-    events = relationship("Event", back_populates="source")
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

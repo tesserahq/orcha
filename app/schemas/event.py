@@ -1,102 +1,81 @@
-from pydantic import BaseModel
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 from datetime import datetime
+from pydantic import BaseModel
+
+from app.schemas.user import User
 
 
 class EventBase(BaseModel):
     """Base event model containing common event attributes."""
 
-    id: Optional[UUID] = None
-    """Unique identifier for the event. Defaults to None."""
+    source: str
+    """Source of the event. Required field."""
 
-    data: dict
-    """Event data as JSONB. Required field."""
+    spec_version: str
+    """Spec version of the event. Required field."""
 
     event_type: str
     """Type of the event. Required field."""
 
-    spec_version: str = "1.0"
-    """CloudEvents specification version. Defaults to '1.0'."""
+    event_data: dict[str, Any]
+    """Data of the event. Required field."""
+
+    data_content_type: str
+    """Content type of the event data. Required field."""
+
+    subject: str
+    """Subject of the event. Required field."""
 
     time: datetime
-    """Timestamp when the event occurred. Required field."""
+    """Time of the event. Required field."""
 
-    source_id: UUID
-    """ID of the source that generated this event. Required field."""
+    tags: Optional[list[str]] = None
+    """Tags associated with the event."""
+
+    labels: Optional[dict[str, Any]] = None
+    """Labels applied to the event."""
+
+    privy: bool = False
+    """Whether the event is private. Defaults to False."""
+
+    user_id: Optional[UUID] = None
+    """User ID associated with the event."""
 
 
 class EventCreate(EventBase):
-    """Schema for creating a new event. Inherits all fields from EventBase."""
+    """Schema for creating a new event."""
 
     pass
 
 
 class EventUpdate(BaseModel):
-    """Schema for updating an existing event. All fields are optional."""
+    """Schema for updating an existing event."""
 
-    data: Optional[dict] = None
-    """Updated event data."""
-
-    event_type: Optional[str] = None
-    """Updated event type."""
-
+    source: Optional[str] = None
     spec_version: Optional[str] = None
-    """Updated specification version."""
-
+    event_type: Optional[str] = None
+    event_data: Optional[dict[str, Any]] = None
+    data_content_type: Optional[str] = None
+    subject: Optional[str] = None
     time: Optional[datetime] = None
-    """Updated event timestamp."""
-
-    source_id: Optional[UUID] = None
-    """Updated source ID."""
+    tags: Optional[list[str]] = None
+    labels: Optional[dict[str, Any]] = None
+    privy: Optional[bool] = None
 
 
 class EventInDB(EventBase):
-    """Schema representing an event as stored in the database. Includes database-specific fields."""
+    """Schema representing an event stored in the database."""
 
     id: UUID
-    """Unique identifier for the event in the database."""
-
     created_at: datetime
-    """Timestamp when the event record was created."""
-
     updated_at: datetime
-    """Timestamp when the event record was last updated."""
 
     model_config = {"from_attributes": True}
 
 
 class Event(EventInDB):
-    """Schema for event data returned in API responses. Inherits all fields from EventInDB."""
+    """Schema for event data returned in API responses."""
 
-    pass
-
-
-class EventDetails(BaseModel):
-    """Schema for detailed event information, typically used in event views."""
-
-    id: UUID
-    """Unique identifier for the event."""
-
-    data: dict
-    """Event data."""
-
-    event_type: str
-    """Type of the event."""
-
-    spec_version: str
-    """CloudEvents specification version."""
-
-    time: datetime
-    """Timestamp when the event occurred."""
-
-    source_id: UUID
-    """ID of the source that generated this event."""
-
-    created_at: datetime
-    """Timestamp when the event record was created."""
-
-    updated_at: datetime
-    """Timestamp when the event record was last updated."""
-
-    model_config = {"from_attributes": True}
+    user: Optional[User] = None
+    """User associated with the event. None if user_id doesn't exist in users table."""

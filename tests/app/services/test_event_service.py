@@ -7,13 +7,19 @@ from datetime import datetime, UTC
 
 
 @pytest.fixture
-def sample_event_data(test_source):
+def sample_event_data():
     return {
-        "data": {"message": "Test event", "value": 42},
+        "event_data": {"message": "Test event", "value": 42},
         "event_type": "test.event",
         "spec_version": "1.0",
         "time": datetime.now(UTC),
-        "source_id": test_source.id,
+        "data_content_type": "application/json",
+        "subject": "Test event",
+        "tags": ["test", "event"],
+        "labels": {"environment": "test"},
+        "privy": False,
+        "user_id": None,
+        "source": "test.source",
     }
 
 
@@ -25,128 +31,115 @@ def test_create_event(db: Session, sample_event_data):
 
     # Assertions
     assert event.id is not None
-    assert event.data == sample_event_data["data"]
+    assert event.event_data == sample_event_data["event_data"]
     assert event.event_type == sample_event_data["event_type"]
     assert event.spec_version == sample_event_data["spec_version"]
-    assert event.source_id == sample_event_data["source_id"]
     assert event.created_at is not None
     assert event.updated_at is not None
 
 
-def test_get_event(db: Session, test_event):
+def test_get_event(db: Session, setup_event):
     """Test retrieving an event by ID."""
     # Get event
-    retrieved_event = EventService(db).get_event(test_event.id)
+    retrieved_event = EventService(db).get_event(setup_event.id)
 
     # Assertions
     assert retrieved_event is not None
-    assert retrieved_event.id == test_event.id
-    assert retrieved_event.event_type == test_event.event_type
+    assert retrieved_event.id == setup_event.id
+    assert retrieved_event.event_type == setup_event.event_type
 
 
-def test_get_events(db: Session, test_event):
+def test_get_events(db: Session, setup_event):
     """Test retrieving all events."""
     # Get all events
     events = EventService(db).get_events()
 
     # Assertions
     assert len(events) >= 1
-    assert any(e.id == test_event.id for e in events)
+    assert any(e.id == setup_event.id for e in events)
 
 
-def test_get_events_by_source(db: Session, test_event, test_source):
-    """Test retrieving events by source."""
-    # Get events for the source
-    events = EventService(db).get_events_by_source(test_source.id)
-
-    # Assertions
-    assert len(events) >= 1
-    assert any(e.id == test_event.id for e in events)
-    assert all(e.source_id == test_source.id for e in events)
-
-
-def test_get_events_by_type(db: Session, test_event):
+def test_get_events_by_type(db: Session, setup_event):
     """Test retrieving events by type."""
     # Get events by type
-    events = EventService(db).get_events_by_type(test_event.event_type)
+    events = EventService(db).get_events_by_type(setup_event.event_type)
 
     # Assertions
     assert len(events) >= 1
-    assert any(e.id == test_event.id for e in events)
-    assert all(e.event_type == test_event.event_type for e in events)
+    assert any(e.id == setup_event.id for e in events)
+    assert all(e.event_type == setup_event.event_type for e in events)
 
 
-def test_update_event(db: Session, test_event):
+def test_update_event(db: Session, setup_event):
     """Test updating an event."""
     # Update data
     update_data = {
-        "data": {"message": "Updated event", "value": 100},
+        "event_data": {"message": "Updated event", "value": 100},
         "event_type": "updated.event",
     }
     event_update = EventUpdate(**update_data)
 
     # Update event
-    updated_event = EventService(db).update_event(test_event.id, event_update)
+    updated_event = EventService(db).update_event(setup_event.id, event_update)
 
     # Assertions
     assert updated_event is not None
-    assert updated_event.id == test_event.id
-    assert updated_event.data == update_data["data"]
+    assert updated_event.id == setup_event.id
+    assert updated_event.event_data == update_data["event_data"]
     assert updated_event.event_type == update_data["event_type"]
     # Other fields should remain unchanged
-    assert updated_event.source_id == test_event.source_id
 
 
-def test_delete_event(db: Session, test_event):
+def test_delete_event(db: Session, setup_event):
     """Test soft deleting an event."""
     event_service = EventService(db)
     # Delete event
-    success = event_service.delete_event(test_event.id)
+    success = event_service.delete_event(setup_event.id)
 
     # Assertions
     assert success is True
-    deleted_event = event_service.get_event(test_event.id)
+    deleted_event = event_service.get_event(setup_event.id)
     assert deleted_event is None  # Soft delete should hide it from regular queries
 
 
-def test_get_deleted_event(db: Session, test_event):
+def test_get_deleted_event(db: Session, setup_event):
     """Test retrieving a soft-deleted event."""
     event_service = EventService(db)
     # Delete event
-    event_service.delete_event(test_event.id)
+    event_service.delete_event(setup_event.id)
 
     # Get deleted event
-    deleted_event = event_service.get_deleted_event(test_event.id)
+    deleted_event = event_service.get_deleted_event(setup_event.id)
 
     # Assertions
     assert deleted_event is not None
-    assert deleted_event.id == test_event.id
+    assert deleted_event.id == setup_event.id
     assert deleted_event.deleted_at is not None
 
 
-def test_restore_event(db: Session, test_event):
+def test_restore_event(db: Session, setup_event):
     """Test restoring a soft-deleted event."""
     event_service = EventService(db)
     # Delete event
-    event_service.delete_event(test_event.id)
+    event_service.delete_event(setup_event.id)
 
     # Verify it's deleted
-    assert event_service.get_event(test_event.id) is None
+    assert event_service.get_event(setup_event.id) is None
 
     # Restore event
-    success = event_service.restore_event(test_event.id)
+    success = event_service.restore_event(setup_event.id)
 
     # Assertions
     assert success is True
-    restored_event = event_service.get_event(test_event.id)
+    restored_event = event_service.get_event(setup_event.id)
     assert restored_event is not None
-    assert restored_event.id == test_event.id
+    assert restored_event.id == setup_event.id
 
 
-def test_hard_delete_event(db: Session, test_event):
+def test_hard_delete_event(db: Session, setup_event):
     """Test permanently deleting an event."""
     event_service = EventService(db)
-    event_id = test_event.id
+    event_id = setup_event.id
 
     # Hard delete event
     success = event_service.hard_delete_event(event_id)
@@ -158,37 +151,37 @@ def test_hard_delete_event(db: Session, test_event):
     assert deleted_event is None
 
 
-def test_get_deleted_events(db: Session, test_event):
+def test_get_deleted_events(db: Session, setup_event):
     """Test retrieving all soft-deleted events."""
     event_service = EventService(db)
     # Delete event
-    event_service.delete_event(test_event.id)
+    event_service.delete_event(setup_event.id)
 
     # Get deleted events
     deleted_events = event_service.get_deleted_events()
 
     # Assertions
     assert len(deleted_events) >= 1
-    assert any(e.id == test_event.id for e in deleted_events)
+    assert any(e.id == setup_event.id for e in deleted_events)
 
 
-def test_search_events_with_filters(db: Session, test_event):
+def test_search_events_with_filters(db: Session, setup_event):
     """Test searching events with filters."""
     # Search using exact match on event_type
-    filters = {"event_type": test_event.event_type}
+    filters = {"event_type": setup_event.event_type}
     results = EventService(db).search(filters)
 
     assert len(results) >= 1
-    assert any(event.id == test_event.id for event in results)
+    assert any(event.id == setup_event.id for event in results)
 
     # Search using ilike filter on event_type
     filters = {
-        "event_type": {"operator": "ilike", "value": f"%{test_event.event_type}%"}
+        "event_type": {"operator": "ilike", "value": f"%{setup_event.event_type}%"}
     }
     results = EventService(db).search(filters)
 
     assert len(results) >= 1
-    assert any(event.id == test_event.id for event in results)
+    assert any(event.id == setup_event.id for event in results)
 
     # Search with no match
     filters = {"event_type": "nonexistent.event.type"}
@@ -197,7 +190,7 @@ def test_search_events_with_filters(db: Session, test_event):
     assert len(results) == 0
 
 
-def test_event_not_found_cases(db: Session):
+def setup_event_not_found_cases(db: Session):
     """Test various not found cases."""
     event_service = EventService(db)
     non_existent_id = uuid4()
@@ -220,13 +213,20 @@ def test_event_not_found_cases(db: Session):
     assert event_service.hard_delete_event(non_existent_id) is False
 
 
-def test_create_event_with_default_spec_version(db: Session, test_source):
+def test_create_event_with_default_spec_version(db: Session):
     """Test creating an event with default spec_version."""
     event_data = {
-        "data": {"message": "Test"},
+        "event_data": {"message": "Test"},
         "event_type": "test.event",
         "time": datetime.now(UTC),
-        "source_id": test_source.id,
+        "spec_version": "1.0",
+        "data_content_type": "application/json",
+        "subject": "Test event",
+        "tags": ["test", "event"],
+        "labels": {"environment": "test"},
+        "privy": False,
+        "user_id": None,
+        "source": "test.source",
     }
     event_create = EventCreate(**event_data)
     event = EventService(db).create_event(event_create)
@@ -235,11 +235,11 @@ def test_create_event_with_default_spec_version(db: Session, test_source):
     assert event.spec_version == "1.0"  # Should use default
 
 
-def test_get_events_query(db: Session, test_event):
+def test_get_events_query(db: Session, setup_event):
     """Test getting events query object."""
     select_stmt = EventService(db).get_events_query()
     events = db.execute(select_stmt).scalars().all()
 
     # Assertions
     assert len(events) >= 1
-    assert any(e.id == test_event.id for e in events)
+    assert any(e.id == setup_event.id for e in events)
