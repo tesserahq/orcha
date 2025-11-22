@@ -3224,7 +3224,7 @@ full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart 
 
 [[package]]
 name = "tessera-sdk"
-version = "0.1.2"
+version = "0.1.3"
 description = "A Python SDK for Tessera with Identies integration, authentication middleware, and user onboarding"
 optional = false
 python-versions = ">=3.11"
@@ -3234,6 +3234,7 @@ develop = false
 
 [package.dependencies]
 cryptography = "^46.0.3"
+faststream = {version = "^0.6.3", extras = ["nats"]}
 pydantic = {version = "^2.12.4", extras = ["email"]}
 pydantic-settings = "^2.9.1"
 redis = ">=5.0.1,<7"
@@ -3246,7 +3247,7 @@ urllib3 = ">=1.26.0"
 type = "git"
 url = "https://github.com/tesserahq/tessera-sdk-py.git"
 reference = "main"
-resolved_reference = "05189a2f3a7e1766f66fc5b333c6fe417d6f5629"
+resolved_reference = "3c511e0bc33eaeba2801b648456685bae692561b"
 
 [[package]]
 name = "text-unidecode"

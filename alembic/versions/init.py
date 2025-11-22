@@ -123,14 +123,31 @@ def upgrade() -> None:
 
     op.create_table(
         "events",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("data", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("event_type", sa.String(), nullable=False),
-        sa.Column("spec_version", sa.String(), nullable=False),
-        sa.Column("time", sa.DateTime(), nullable=False),
-        sa.Column("source_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("created_at", sa.DateTime(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.Column(
+            "event_data", postgresql.JSONB(astext_type=sa.Text()), nullable=False
+        ),
+        sa.Column("event_type", sa.String, nullable=False),
+        sa.Column("source", sa.String, nullable=False),
+        sa.Column("spec_version", sa.String, nullable=False, server_default="1.0"),
+        sa.Column("data_content_type", sa.String, nullable=False),
+        sa.Column("subject", sa.String, nullable=False),
+        sa.Column("time", sa.DateTime, nullable=False),
+        sa.Column("tags", sa.ARRAY(sa.String), nullable=True),
+        sa.Column(
+            "labels",
+            postgresql.JSONB(astext_type=sa.Text()),
+            nullable=False,
+            server_default="{}",
+        ),
+        sa.Column("privy", sa.Boolean, nullable=False, server_default=sa.text("false")),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column(
+            "created_at", sa.DateTime, nullable=False, server_default=sa.text("now()")
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime, nullable=False, server_default=sa.text("now()")
+        ),
         sa.Column("deleted_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )

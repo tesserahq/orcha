@@ -22,15 +22,6 @@ router = APIRouter(
 def create_event(event: EventCreate, db: Session = Depends(get_db)):
     """Create a new event."""
     event_service = EventService(db)
-    source_service = SourceService(db)
-
-    # Validate that the source exists
-    source = source_service.get_source(event.source_id)
-    if not source:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Source not found",
-        )
 
     return event_service.create_event(event)
 
@@ -39,29 +30,6 @@ def create_event(event: EventCreate, db: Session = Depends(get_db)):
 def list_events(db: Session = Depends(get_db)):
     """List all events."""
     return paginate(db, EventService(db).get_events_query())
-
-
-@router.get("/source/{source_id}", response_model=Page[EventSchema])
-def list_events_by_source(source_id: UUID, db: Session = Depends(get_db)):
-    """List all events for a specific source."""
-    event_service = EventService(db)
-    source_service = SourceService(db)
-
-    # Validate that the source exists
-    source = source_service.get_source(source_id)
-    if not source:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Source not found",
-        )
-
-    from app.models.event import Event
-    from sqlalchemy import select
-
-    return paginate(
-        db,
-        select(Event).filter(Event.source_id == source_id).order_by(Event.time.desc()),
-    )
 
 
 @router.get("/type/{event_type}", response_model=Page[EventSchema])
@@ -92,16 +60,6 @@ def update_event(
 ):
     """Update an event."""
     event_service = EventService(db)
-
-    # If updating source_id, validate it exists
-    if update.source_id:
-        source_service = SourceService(db)
-        source = source_service.get_source(update.source_id)
-        if not source:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Source not found",
-            )
 
     updated_event = event_service.update_event(event.id, update)
     if not updated_event:

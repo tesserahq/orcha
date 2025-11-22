@@ -60,7 +60,12 @@ class Settings(BaseSettings):
     nats_url: str = Field(
         default="nats://localhost:4222", json_schema_extra={"env": "NATS_URL"}
     )
-    nats_queue: str = Field(default="orcha", json_schema_extra={"env": "NATS_QUEUE"})
+    nats_queue: str = Field(
+        default="orcha_worker", json_schema_extra={"env": "NATS_QUEUE"}
+    )
+    nats_subjects: str = Field(
+        default="com.>", json_schema_extra={"env": "NATS_SUBJECTS"}
+    )
     service_account_client_id: str = Field(
         default="", json_schema_extra={"env": "SERVICE_ACCOUNT_CLIENT_ID"}
     )
@@ -76,6 +81,9 @@ class Settings(BaseSettings):
     )
     db_app_name: str = Field(
         default="orcha-api", json_schema_extra={"env": "DB_APP_NAME"}
+    )
+    nats_stream_name: str = Field(
+        default="EVT_LINDEN", json_schema_extra={"env": "NATS_STREAM_NAME"}
     )
 
     @model_validator(mode="before")

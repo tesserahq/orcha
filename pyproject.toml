@@ -19,6 +19,7 @@ packages = [
 [tool.poetry.scripts]
 dev = "run:dev"
 worker = "run_worker:main"
+nats_worker = "run_nats_worker:main"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"

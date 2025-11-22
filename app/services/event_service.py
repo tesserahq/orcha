@@ -61,29 +61,6 @@ class EventService(SoftDeleteService[Event]):
         """
         return select(Event).order_by(Event.time.desc())
 
-    def get_events_by_source(
-        self, source_id: UUID, skip: int = 0, limit: int = 100
-    ) -> List[Event]:
-        """
-        Get all events for a specific source.
-
-        Args:
-            source_id: The ID of the source
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List[Event]: List of events for the source
-        """
-        return (
-            self.db.query(Event)
-            .filter(Event.source_id == source_id)
-            .order_by(Event.time.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-
     def get_events_by_type(
         self, event_type: str, skip: int = 0, limit: int = 100
     ) -> List[Event]:
