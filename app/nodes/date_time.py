@@ -3,11 +3,11 @@
 from dataclasses import dataclass, field
 from typing import Dict, Any
 
-from app.constants.node_kinds import (
-    CATEGORY_DATA_TRANSFORMATION,
+from app.constants.node_categories import CATEGORY_DATA_TRANSFORMATION
+from app.constants.node_types import (
     ExecutionData,
-    NodeDescription,
     Node,
+    NodeDescription,
     PropertyField,
 )
 

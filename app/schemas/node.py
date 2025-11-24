@@ -19,8 +19,11 @@ class NodeBase(BaseModel):
     kind: str
     """Type/kind of the node. Required field."""
 
-    settings: dict
-    """Settings for the node. Required field."""
+    properties: list[dict]
+    """Properties for the node. Required field."""
+
+    parameters: Optional[dict] = None
+    """Parameters for the node. Optional field."""
 
     ui_settings: dict
     """UI settings for the node. Required field."""
@@ -47,11 +50,14 @@ class NodeUpdate(BaseModel):
     kind: Optional[str] = None
     """Updated node kind."""
 
-    settings: Optional[dict] = None
-    """Updated node settings."""
+    properties: Optional[list[dict]] = None
+    """Updated node properties."""
 
     ui_settings: Optional[dict] = None
     """Updated node UI settings."""
+
+    parameters: Optional[dict] = None
+    """Updated node parameters."""
 
     workflow_version_id: Optional[UUID] = None
     """Updated workflow version ID."""
@@ -93,14 +99,17 @@ class NodeDetails(BaseModel):
     kind: str
     """Type/kind of the node."""
 
-    settings: dict
-    """Settings for the node."""
+    properties: list[dict]
+    """Properties for the node."""
 
     ui_settings: dict
     """UI settings for the node."""
 
     workflow_version_id: UUID
     """ID of the workflow version this node belongs to."""
+
+    parameters: dict | None
+    """Parameters for the node."""
 
     created_at: datetime
     """Timestamp when the node record was created."""
@@ -117,5 +126,6 @@ class NodeCreatePayload(BaseModel):
     name: str
     description: Optional[str] = None
     kind: str
-    settings: dict
+    properties: list[dict]
     ui_settings: dict
+    parameters: dict | None = None

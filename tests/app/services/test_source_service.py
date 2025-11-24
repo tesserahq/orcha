@@ -14,7 +14,7 @@ def sample_source_data():
     }
 
 
-def test_create_source(db: Session, sample_source_data):
+def test_create_source(db, sample_source_data):
     """Test creating a new source."""
     # Create source
     source_create = SourceCreate(**sample_source_data)
@@ -29,7 +29,7 @@ def test_create_source(db: Session, sample_source_data):
     assert source.updated_at is not None
 
 
-def test_get_source(db: Session, test_source):
+def test_get_source(db, test_source):
     """Test retrieving a source by ID."""
     # Get source
     retrieved_source = SourceService(db).get_source(test_source.id)
@@ -40,7 +40,7 @@ def test_get_source(db: Session, test_source):
     assert retrieved_source.name == test_source.name
 
 
-def test_get_source_by_identifier(db: Session, test_source):
+def test_get_source_by_identifier(db, test_source):
     """Test retrieving a source by identifier."""
     # Get source by identifier
     retrieved_source = SourceService(db).get_source_by_identifier(
@@ -53,7 +53,7 @@ def test_get_source_by_identifier(db: Session, test_source):
     assert retrieved_source.identifier == test_source.identifier
 
 
-def test_get_sources(db: Session, test_source):
+def test_get_sources(db, test_source):
     """Test retrieving all sources."""
     # Get all sources
     sources = SourceService(db).get_sources()
@@ -63,7 +63,7 @@ def test_get_sources(db: Session, test_source):
     assert any(s.id == test_source.id for s in sources)
 
 
-def test_update_source(db: Session, test_source):
+def test_update_source(db, test_source):
     """Test updating a source."""
     # Update data
     update_data = {
@@ -84,7 +84,7 @@ def test_update_source(db: Session, test_source):
     assert updated_source.identifier == test_source.identifier
 
 
-def test_delete_source(db: Session, test_source):
+def test_delete_source(db, test_source):
     """Test soft deleting a source."""
     source_service = SourceService(db)
     # Delete source
@@ -96,7 +96,7 @@ def test_delete_source(db: Session, test_source):
     assert deleted_source is None  # Soft delete should hide it from regular queries
 
 
-def test_get_deleted_source(db: Session, test_source):
+def test_get_deleted_source(db, test_source):
     """Test retrieving a soft-deleted source."""
     source_service = SourceService(db)
     # Delete source
@@ -111,7 +111,7 @@ def test_get_deleted_source(db: Session, test_source):
     assert deleted_source.deleted_at is not None
 
 
-def test_restore_source(db: Session, test_source):
+def test_restore_source(db, test_source):
     """Test restoring a soft-deleted source."""
     source_service = SourceService(db)
     # Delete source
@@ -130,7 +130,7 @@ def test_restore_source(db: Session, test_source):
     assert restored_source.id == test_source.id
 
 
-def test_hard_delete_source(db: Session, test_source):
+def test_hard_delete_source(db, test_source):
     """Test permanently deleting a source."""
     source_service = SourceService(db)
     source_id = test_source.id
@@ -145,7 +145,7 @@ def test_hard_delete_source(db: Session, test_source):
     assert deleted_source is None
 
 
-def test_get_deleted_sources(db: Session, test_source):
+def test_get_deleted_sources(db, test_source):
     """Test retrieving all soft-deleted sources."""
     source_service = SourceService(db)
     # Delete source
@@ -159,7 +159,7 @@ def test_get_deleted_sources(db: Session, test_source):
     assert any(s.id == test_source.id for s in deleted_sources)
 
 
-def test_search_sources_with_filters(db: Session, test_source):
+def test_search_sources_with_filters(db, test_source):
     """Test searching sources with filters."""
     # First, let's get some actual text from the source name to search for
     source_name_part = test_source.name.split()[0] if test_source.name else ""
@@ -186,7 +186,7 @@ def test_search_sources_with_filters(db: Session, test_source):
     assert len(results) == 0
 
 
-def test_source_not_found_cases(db: Session):
+def test_source_not_found_cases(db):
     """Test various not found cases."""
     source_service = SourceService(db)
     non_existent_id = uuid4()

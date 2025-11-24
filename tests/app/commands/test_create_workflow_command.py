@@ -1,7 +1,6 @@
 """Tests for the create_workflow command."""
 
 import pytest
-from sqlalchemy.orm import Session
 from app.commands.create_workflow_command import CreateWorkflowCommand
 from app.schemas.workflow import WorkflowCreate
 from app.schemas.node import NodeCreatePayload
@@ -10,7 +9,7 @@ from app.services.node_service import NodeService
 from app.services.edge_service import EdgeService
 
 
-def test_create_workflow_creates_both_workflow_and_version(db: Session):
+def test_create_workflow_creates_both_workflow_and_version(db):
     """Test that the command creates both workflow and initial version."""
     workflow_data = WorkflowCreate(
         name="Test Workflow",
@@ -41,7 +40,7 @@ def test_create_workflow_creates_both_workflow_and_version(db: Session):
     assert workflow.active_version_id == versions[0].id
 
 
-def test_create_workflow_inactive(db: Session):
+def test_create_workflow_inactive(db):
     """Test that the command creates an inactive workflow version when workflow is inactive."""
     workflow_data = WorkflowCreate(
         name="Inactive Workflow",
@@ -67,7 +66,7 @@ def test_create_workflow_inactive(db: Session):
     assert workflow.active_version_id == versions[0].id
 
 
-def test_create_workflow_multiple_workflows(db: Session):
+def test_create_workflow_multiple_workflows(db):
     """Test creating multiple workflows with versions."""
     workflow1_data = WorkflowCreate(
         name="Workflow 1",
@@ -108,20 +107,20 @@ def test_create_workflow_multiple_workflows(db: Session):
     assert workflow1.active_version_id != workflow2.active_version_id
 
 
-def test_create_workflow_with_nodes_auto_edges(db: Session):
+def test_create_workflow_with_nodes_auto_edges(db):
     """Test that creating a workflow with nodes also creates edges between them."""
     node1 = NodeCreatePayload(
         name="Node 1",
         description="Test node 1",
         kind="action",
-        settings={"a": 1},
+        properties=[{"a": 1}],
         ui_settings={"x": 1},
     )
     node2 = NodeCreatePayload(
         name="Node 2",
         description="Test node 2",
         kind="condition",
-        settings={"b": 2},
+        properties=[{"b": 2}],
         ui_settings={"x": 2},
     )
     workflow_data = WorkflowCreate(

@@ -1,7 +1,14 @@
 """Constants package for the application."""
 
-from app.constants.node_kinds import (
+from app.constants.node_categories import (
     CategoryKey,
+    CATEGORY_TRIGGER,
+    CATEGORY_CORE,
+    CATEGORY_FLOW,
+    CATEGORY_DATA_TRANSFORMATION,
+    CATEGORY_ACTION_APP,
+)
+from app.constants.node_kinds import (
     NodeCategory,
     Node,
     NodeDescription,
@@ -10,11 +17,6 @@ from app.constants.node_kinds import (
     OptionItem,
     RequestConfig,
     Routing,
-    CATEGORY_TRIGGER,
-    CATEGORY_CORE,
-    CATEGORY_FLOW,
-    CATEGORY_DATA_TRANSFORMATION,
-    CATEGORY_ACTION_APP,
     NODE_CATEGORIES,
     NODE_KINDS,
     NODE_KIND_BY_ID,

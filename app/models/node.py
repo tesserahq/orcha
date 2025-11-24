@@ -18,11 +18,12 @@ class Node(Base, TimestampMixin, SoftDeleteMixin):
     name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     kind: Mapped[str] = mapped_column(String, nullable=False)
-    settings: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    properties: Mapped[list[dict]] = mapped_column(JSONB, nullable=False)
     ui_settings: Mapped[dict] = mapped_column(JSONB, nullable=False)
     workflow_version_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("workflow_versions.id"), nullable=False
     )
+    parameters: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     workflow_version = relationship("WorkflowVersion", back_populates="nodes")
     source_edges = relationship(
         "Edge", foreign_keys="Edge.source_node_id", back_populates="source_node"
