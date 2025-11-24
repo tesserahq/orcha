@@ -23,7 +23,7 @@ def sample_event_data():
     }
 
 
-def test_create_event(db: Session, sample_event_data):
+def test_create_event(db, sample_event_data):
     """Test creating a new event."""
     # Create event
     event_create = EventCreate(**sample_event_data)
@@ -38,7 +38,7 @@ def test_create_event(db: Session, sample_event_data):
     assert event.updated_at is not None
 
 
-def test_get_event(db: Session, setup_event):
+def test_get_event(db, setup_event):
     """Test retrieving an event by ID."""
     # Get event
     retrieved_event = EventService(db).get_event(setup_event.id)
@@ -49,7 +49,7 @@ def test_get_event(db: Session, setup_event):
     assert retrieved_event.event_type == setup_event.event_type
 
 
-def test_get_events(db: Session, setup_event):
+def test_get_events(db, setup_event):
     """Test retrieving all events."""
     # Get all events
     events = EventService(db).get_events()
@@ -59,7 +59,7 @@ def test_get_events(db: Session, setup_event):
     assert any(e.id == setup_event.id for e in events)
 
 
-def test_get_events_by_type(db: Session, setup_event):
+def test_get_events_by_type(db, setup_event):
     """Test retrieving events by type."""
     # Get events by type
     events = EventService(db).get_events_by_type(setup_event.event_type)
@@ -70,7 +70,7 @@ def test_get_events_by_type(db: Session, setup_event):
     assert all(e.event_type == setup_event.event_type for e in events)
 
 
-def test_update_event(db: Session, setup_event):
+def test_update_event(db, setup_event):
     """Test updating an event."""
     # Update data
     update_data = {
@@ -90,7 +90,7 @@ def test_update_event(db: Session, setup_event):
     # Other fields should remain unchanged
 
 
-def test_delete_event(db: Session, setup_event):
+def test_delete_event(db, setup_event):
     """Test soft deleting an event."""
     event_service = EventService(db)
     # Delete event
@@ -102,7 +102,7 @@ def test_delete_event(db: Session, setup_event):
     assert deleted_event is None  # Soft delete should hide it from regular queries
 
 
-def test_get_deleted_event(db: Session, setup_event):
+def test_get_deleted_event(db, setup_event):
     """Test retrieving a soft-deleted event."""
     event_service = EventService(db)
     # Delete event
@@ -117,7 +117,7 @@ def test_get_deleted_event(db: Session, setup_event):
     assert deleted_event.deleted_at is not None
 
 
-def test_restore_event(db: Session, setup_event):
+def test_restore_event(db, setup_event):
     """Test restoring a soft-deleted event."""
     event_service = EventService(db)
     # Delete event
@@ -136,7 +136,7 @@ def test_restore_event(db: Session, setup_event):
     assert restored_event.id == setup_event.id
 
 
-def test_hard_delete_event(db: Session, setup_event):
+def test_hard_delete_event(db, setup_event):
     """Test permanently deleting an event."""
     event_service = EventService(db)
     event_id = setup_event.id
@@ -151,7 +151,7 @@ def test_hard_delete_event(db: Session, setup_event):
     assert deleted_event is None
 
 
-def test_get_deleted_events(db: Session, setup_event):
+def test_get_deleted_events(db, setup_event):
     """Test retrieving all soft-deleted events."""
     event_service = EventService(db)
     # Delete event
@@ -165,7 +165,7 @@ def test_get_deleted_events(db: Session, setup_event):
     assert any(e.id == setup_event.id for e in deleted_events)
 
 
-def test_search_events_with_filters(db: Session, setup_event):
+def test_search_events_with_filters(db, setup_event):
     """Test searching events with filters."""
     # Search using exact match on event_type
     filters = {"event_type": setup_event.event_type}
@@ -190,7 +190,7 @@ def test_search_events_with_filters(db: Session, setup_event):
     assert len(results) == 0
 
 
-def setup_event_not_found_cases(db: Session):
+def setup_event_not_found_cases(db):
     """Test various not found cases."""
     event_service = EventService(db)
     non_existent_id = uuid4()
@@ -213,7 +213,7 @@ def setup_event_not_found_cases(db: Session):
     assert event_service.hard_delete_event(non_existent_id) is False
 
 
-def test_create_event_with_default_spec_version(db: Session):
+def test_create_event_with_default_spec_version(db):
     """Test creating an event with default spec_version."""
     event_data = {
         "event_data": {"message": "Test"},
@@ -235,7 +235,7 @@ def test_create_event_with_default_spec_version(db: Session):
     assert event.spec_version == "1.0"  # Should use default
 
 
-def test_get_events_query(db: Session, setup_event):
+def test_get_events_query(db, setup_event):
     """Test getting events query object."""
     select_stmt = EventService(db).get_events_query()
     events = db.execute(select_stmt).scalars().all()

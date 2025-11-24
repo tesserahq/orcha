@@ -35,8 +35,9 @@ class WorkflowCommandBase:
                 name=node_payload.name,
                 description=node_payload.description,
                 kind=node_payload.kind,
-                settings=node_payload.settings,
+                properties=node_payload.properties,
                 ui_settings=node_payload.ui_settings,
+                parameters=node_payload.parameters,
                 workflow_version_id=workflow_version_id,
             )
             created_node = node_service.create_node(node_data)

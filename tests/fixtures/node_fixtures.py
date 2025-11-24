@@ -9,7 +9,7 @@ def test_node(db, faker, test_workflow_version):
         "name": faker.word(),
         "description": faker.text(max_nb_chars=200),
         "kind": "action",
-        "settings": {"key": "value"},
+        "properties": [{"key": "value"}],
         "ui_settings": {"x": 100, "y": 200},
         "workflow_version_id": test_workflow_version.id,
     }
@@ -29,7 +29,7 @@ def setup_node(db, faker, test_workflow_version):
         "name": faker.word(),
         "description": faker.text(max_nb_chars=200),
         "kind": "trigger",
-        "settings": {"key": "value"},
+        "properties": [{"key": "value"}],
         "ui_settings": {"x": 100, "y": 200},
         "workflow_version_id": test_workflow_version.id,
     }
@@ -49,7 +49,7 @@ def setup_another_node(db, faker, test_workflow_version):
         "name": faker.word(),
         "description": faker.text(max_nb_chars=200),
         "kind": "condition",
-        "settings": {"key": "value2"},
+        "properties": [{"key": "value2"}],
         "ui_settings": {"x": 300, "y": 400},
         "workflow_version_id": test_workflow_version.id,
     }

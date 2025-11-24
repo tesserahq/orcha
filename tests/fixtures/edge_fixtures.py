@@ -10,7 +10,7 @@ def test_edge(db, faker, test_node, setup_node):
         "source_node_id": test_node.id,
         "target_node_id": setup_node.id,
         "workflow_version_id": test_node.workflow_version_id,
-        "settings": {"key": "value"},
+        "properties": [{"key": "value"}],
         "ui_settings": {"type": "bezier"},
     }
 
@@ -30,7 +30,7 @@ def setup_edge(db, faker, setup_node, setup_another_node):
         "source_node_id": setup_node.id,
         "target_node_id": setup_another_node.id,
         "workflow_version_id": setup_node.workflow_version_id,
-        "settings": {"key": "value"},
+        "properties": [{"key": "value"}],
         "ui_settings": {"type": "straight"},
     }
 
@@ -50,7 +50,7 @@ def setup_another_edge(db, faker, test_node, setup_another_node):
         "source_node_id": test_node.id,
         "target_node_id": setup_another_node.id,
         "workflow_version_id": test_node.workflow_version_id,
-        "settings": {"key": "value2"},
+        "properties": [{"key": "value2"}],
         "ui_settings": {"type": "step"},
     }
 

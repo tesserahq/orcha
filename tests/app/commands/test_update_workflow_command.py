@@ -30,14 +30,14 @@ def test_update_workflow_with_nodes_auto_edges(db, test_workflow):
         name="Node 1",
         description="Test node 1",
         kind="action",
-        settings={"a": 1},
+        properties=[{"a": 1}],
         ui_settings={"x": 1},
     )
     node2 = NodeCreatePayload(
         name="Node 2",
         description="Test node 2",
         kind="condition",
-        settings={"b": 2},
+        properties=[{"b": 2}],
         ui_settings={"x": 2},
     )
     payload = WorkflowUpdateRequest(

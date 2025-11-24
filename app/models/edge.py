@@ -25,7 +25,8 @@ class Edge(Base, TimestampMixin, SoftDeleteMixin):
     workflow_version_id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("workflow_versions.id"), nullable=False
     )
-    settings: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    properties: Mapped[list[dict]] = mapped_column(JSONB, nullable=True)
+    parameters: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     ui_settings: Mapped[dict] = mapped_column(JSONB, nullable=False)
 
     target_node = relationship(

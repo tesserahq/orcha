@@ -22,8 +22,11 @@ class EdgeBase(BaseModel):
     workflow_version_id: UUID
     """ID of the workflow version this edge belongs to. Required field."""
 
-    settings: dict
-    """Settings for the edge. Required field."""
+    properties: Optional[list[dict]] = None
+    """Properties for the edge. Required field."""
+
+    parameters: Optional[dict] = None
+    """Parameters for the edge. Optional field."""
 
     ui_settings: dict
     """UI settings for the edge. Required field."""
@@ -47,8 +50,11 @@ class EdgeUpdate(BaseModel):
     target_node_id: Optional[UUID] = None
     """Updated target node ID."""
 
-    settings: Optional[dict] = None
-    """Updated edge settings."""
+    properties: Optional[list[dict]] = None
+    """Updated edge properties."""
+
+    parameters: Optional[dict] = None
+    """Updated edge parameters."""
 
     ui_settings: Optional[dict] = None
     """Updated edge UI settings."""
@@ -96,8 +102,11 @@ class EdgeDetails(BaseModel):
     workflow_version_id: UUID
     """ID of the workflow version this edge belongs to."""
 
-    settings: dict
-    """Settings for the edge."""
+    properties: Optional[list[dict]] = None
+    """Properties for the edge."""
+
+    parameters: Optional[dict] = None
+    """Parameters for the edge."""
 
     ui_settings: dict
     """UI settings for the edge."""

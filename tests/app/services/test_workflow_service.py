@@ -14,7 +14,7 @@ def sample_workflow_data():
     }
 
 
-def test_create_workflow(db: Session, sample_workflow_data):
+def test_create_workflow(db, sample_workflow_data):
     """Test creating a new workflow."""
     workflow_create = WorkflowCreate(**sample_workflow_data)
     workflow = WorkflowService(db).create_workflow(workflow_create)
@@ -27,7 +27,7 @@ def test_create_workflow(db: Session, sample_workflow_data):
     assert workflow.updated_at is not None
 
 
-def test_get_workflow(db: Session, test_workflow):
+def test_get_workflow(db, test_workflow):
     """Test retrieving a workflow by ID."""
     retrieved_workflow = WorkflowService(db).get_workflow(test_workflow.id)
 
@@ -36,7 +36,7 @@ def test_get_workflow(db: Session, test_workflow):
     assert retrieved_workflow.name == test_workflow.name
 
 
-def test_get_workflows(db: Session, test_workflow):
+def test_get_workflows(db, test_workflow):
     """Test retrieving all workflows."""
     workflows = WorkflowService(db).get_workflows()
 
@@ -44,7 +44,7 @@ def test_get_workflows(db: Session, test_workflow):
     assert any(w.id == test_workflow.id for w in workflows)
 
 
-def test_get_active_workflows(db: Session, test_workflow):
+def test_get_active_workflows(db, test_workflow):
     """Test retrieving active workflows."""
     workflows = WorkflowService(db).get_active_workflows()
 
@@ -53,7 +53,7 @@ def test_get_active_workflows(db: Session, test_workflow):
     assert all(w.is_active == True for w in workflows)
 
 
-def test_update_workflow(db: Session, test_workflow):
+def test_update_workflow(db, test_workflow):
     """Test updating a workflow."""
     update_data = {
         "name": "Updated Workflow Name",
@@ -73,7 +73,7 @@ def test_update_workflow(db: Session, test_workflow):
     assert updated_workflow.is_active == update_data["is_active"]
 
 
-def test_delete_workflow(db: Session, test_workflow):
+def test_delete_workflow(db, test_workflow):
     """Test soft deleting a workflow."""
     workflow_service = WorkflowService(db)
     success = workflow_service.delete_workflow(test_workflow.id)
@@ -83,7 +83,7 @@ def test_delete_workflow(db: Session, test_workflow):
     assert deleted_workflow is None
 
 
-def test_get_deleted_workflow(db: Session, test_workflow):
+def test_get_deleted_workflow(db, test_workflow):
     """Test retrieving a soft-deleted workflow."""
     workflow_service = WorkflowService(db)
     workflow_service.delete_workflow(test_workflow.id)
@@ -95,7 +95,7 @@ def test_get_deleted_workflow(db: Session, test_workflow):
     assert deleted_workflow.deleted_at is not None
 
 
-def test_restore_workflow(db: Session, test_workflow):
+def test_restore_workflow(db, test_workflow):
     """Test restoring a soft-deleted workflow."""
     workflow_service = WorkflowService(db)
     workflow_service.delete_workflow(test_workflow.id)
@@ -110,7 +110,7 @@ def test_restore_workflow(db: Session, test_workflow):
     assert restored_workflow.id == test_workflow.id
 
 
-def test_hard_delete_workflow(db: Session, test_workflow):
+def test_hard_delete_workflow(db, test_workflow):
     """Test permanently deleting a workflow."""
     workflow_service = WorkflowService(db)
     workflow_id = test_workflow.id
@@ -122,7 +122,7 @@ def test_hard_delete_workflow(db: Session, test_workflow):
     assert deleted_workflow is None
 
 
-def test_get_deleted_workflows(db: Session, test_workflow):
+def test_get_deleted_workflows(db, test_workflow):
     """Test retrieving all soft-deleted workflows."""
     workflow_service = WorkflowService(db)
     workflow_service.delete_workflow(test_workflow.id)
@@ -133,7 +133,7 @@ def test_get_deleted_workflows(db: Session, test_workflow):
     assert any(w.id == test_workflow.id for w in deleted_workflows)
 
 
-def test_search_workflows_with_filters(db: Session, test_workflow):
+def test_search_workflows_with_filters(db, test_workflow):
     """Test searching workflows with filters."""
     filters = {"name": {"operator": "ilike", "value": f"%{test_workflow.name}%"}}
     results = WorkflowService(db).search(filters)
@@ -142,7 +142,7 @@ def test_search_workflows_with_filters(db: Session, test_workflow):
     assert any(workflow.id == test_workflow.id for workflow in results)
 
 
-def test_workflow_not_found_cases(db: Session):
+def test_workflow_not_found_cases(db):
     """Test various not found cases."""
     workflow_service = WorkflowService(db)
     non_existent_id = uuid4()
@@ -161,7 +161,7 @@ def test_workflow_not_found_cases(db: Session):
     assert workflow_service.hard_delete_workflow(non_existent_id) is False
 
 
-def test_toggle_workflow_active_status(db: Session, test_workflow):
+def test_toggle_workflow_active_status(db, test_workflow):
     """Test toggling workflow active status."""
     workflow_service = WorkflowService(db)
     original_status = test_workflow.is_active
@@ -176,7 +176,7 @@ def test_toggle_workflow_active_status(db: Session, test_workflow):
     assert toggled_workflow.is_active == original_status
 
 
-def test_get_workflows_query(db: Session, test_workflow):
+def test_get_workflows_query(db, test_workflow):
     """Test getting workflows query object."""
 
     select_stmt = WorkflowService(db).get_workflows_query()

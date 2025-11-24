@@ -1,15 +1,16 @@
 """Event Received node definition."""
 
 from dataclasses import dataclass, field
-from typing import Dict, Any
+from typing import Dict, Any, List
 
-from app.constants.node_kinds import (
-    CATEGORY_TRIGGER,
+from app.constants.node_categories import CATEGORY_TRIGGER
+from app.constants.node_types import (
     ExecutionData,
-    NodeDescription,
     Node,
-    PropertyField,
+    NodeDescription,
 )
+
+from app.nodes.schemas.node_property import NodeProperty
 
 
 @dataclass
@@ -28,7 +29,17 @@ class EventReceivedDescription(NodeDescription):
     outputs: list = field(default_factory=lambda: ["main"])
     credentials: list = field(default_factory=list)
     requestDefaults: Any = None
-    properties: list = field(default_factory=list)
+    properties: List[NodeProperty] = field(
+        default_factory=lambda: [
+            NodeProperty(
+                display_name="Event Type",
+                name="event_type",
+                type="string",
+                default="",
+                description="The name of the event to receive.",
+            )
+        ]
+    )
 
     def execute(self, input: ExecutionData) -> ExecutionData:
         return input
