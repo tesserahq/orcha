@@ -110,7 +110,7 @@ class WorkflowVersionService(SoftDeleteService[WorkflowVersion]):
         """
         return (
             self.db.query(WorkflowVersion)
-            .filter(WorkflowVersion.is_active == True)
+            .filter(WorkflowVersion.is_active)
             .order_by(WorkflowVersion.version.desc())
             .offset(skip)
             .limit(limit)

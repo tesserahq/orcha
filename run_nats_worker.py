@@ -1,7 +1,6 @@
 import asyncio
 import sys
 from datetime import datetime, timezone
-from uuid import UUID
 from app.config import get_settings
 from app.core.logging_config import LoggingConfig, get_logger
 from app.services.event_service import EventService
@@ -10,9 +9,6 @@ from app.db import SessionLocal
 from faststream import FastStream
 from faststream.nats import NatsBroker, JStream
 from nats.js.api import DeliverPolicy
-from app.schemas.user import UserOnboard
-from app.services.user_service import UserService
-from tessera_sdk import IdentiesClient
 
 # Initialize logging configuration
 LoggingConfig()

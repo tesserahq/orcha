@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from app.constants.node_categories import CategoryKey
+from app.schemas.event import EventBase as EventSchema
 
 if TYPE_CHECKING:
     from app.nodes.schemas.node_property import NodeProperty
@@ -29,6 +30,10 @@ class RequestConfig:
 class ExecutionData:
     json: Dict[str, Any]
     error: Optional[str] = None
+    event: Optional[EventSchema] = None
+
+    def has_event(self) -> bool:
+        return self.event is not None
 
 
 @dataclass
@@ -68,7 +73,7 @@ class NodeCategory:
 @dataclass
 class NodeDescription(ABC):
     displayName: str
-    name: str
+    kind: str
     icon: str
     group: List[str]
     version: Any  # int or list
@@ -80,6 +85,7 @@ class NodeDescription(ABC):
     credentials: Optional[List[Dict[str, Any]]] = None
     requestDefaults: Optional[RequestConfig] = None
     properties: List["NodeProperty"] = field(default_factory=list)
+    parameters: Dict[str, Any] = field(default_factory=dict)
 
     @abstractmethod
     def execute(self, input: ExecutionData) -> ExecutionData:

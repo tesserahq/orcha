@@ -1,6 +1,5 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.orm import Session
 from app.schemas.workflow import WorkflowCreate, WorkflowUpdate
 from app.services.workflow_service import WorkflowService
 
@@ -50,7 +49,7 @@ def test_get_active_workflows(db, test_workflow):
 
     assert len(workflows) >= 1
     assert any(w.id == test_workflow.id for w in workflows)
-    assert all(w.is_active == True for w in workflows)
+    assert all(w.is_active for w in workflows)
 
 
 def test_update_workflow(db, test_workflow):

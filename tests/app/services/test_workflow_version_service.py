@@ -1,6 +1,5 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.orm import Session
 from app.schemas.workflow_version import (
     WorkflowVersionCreate,
     WorkflowVersionUpdate,
@@ -89,7 +88,7 @@ def test_get_active_workflow_versions(db, test_workflow_version):
 
     assert len(workflow_versions) >= 1
     assert any(wv.id == test_workflow_version.id for wv in workflow_versions)
-    assert all(wv.is_active == True for wv in workflow_versions)
+    assert all(wv.is_active for wv in workflow_versions)
 
 
 def test_update_workflow_version(db, test_workflow_version):
@@ -248,7 +247,6 @@ def test_toggle_workflow_version_active_status(db, test_workflow_version):
 
 def test_get_workflow_versions_query(db, test_workflow_version):
     """Test getting workflow versions query object."""
-    from sqlalchemy import select
 
     select_stmt = WorkflowVersionService(db).get_workflow_versions_query()
     workflow_versions = db.execute(select_stmt).scalars().all()

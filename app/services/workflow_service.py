@@ -75,7 +75,7 @@ class WorkflowService(SoftDeleteService[Workflow]):
         """
         return (
             self.db.query(Workflow)
-            .filter(Workflow.is_active == True)
+            .filter(Workflow.is_active)
             .order_by(Workflow.created_at.desc())
             .offset(skip)
             .limit(limit)
@@ -227,7 +227,7 @@ class WorkflowService(SoftDeleteService[Workflow]):
         # Deactivate all active versions for this workflow
         self.db.query(WorkflowVersion).filter(
             WorkflowVersion.workflow_id == workflow_id,
-            WorkflowVersion.is_active == True,
+            WorkflowVersion.is_active,
         ).update({"is_active": False})
 
         # Activate the specified version

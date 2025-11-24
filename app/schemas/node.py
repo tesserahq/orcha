@@ -19,13 +19,13 @@ class NodeBase(BaseModel):
     kind: str
     """Type/kind of the node. Required field."""
 
-    properties: list[dict]
-    """Properties for the node. Required field."""
+    properties: Optional[list[dict]] = []
+    """Properties for the node. Optional field. Defaults to an empty list."""
 
     parameters: Optional[dict] = None
     """Parameters for the node. Optional field."""
 
-    ui_settings: dict
+    ui_settings: Optional[dict] = {}
     """UI settings for the node. Required field."""
 
     workflow_version_id: Optional[UUID] = None
@@ -126,6 +126,6 @@ class NodeCreatePayload(BaseModel):
     name: str
     description: Optional[str] = None
     kind: str
-    properties: list[dict]
-    ui_settings: dict
-    parameters: dict | None = None
+    properties: Optional[list[dict]] = None
+    ui_settings: Optional[dict] = None
+    parameters: Optional[dict] = None

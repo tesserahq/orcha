@@ -17,7 +17,7 @@ class EditFieldsDescription(NodeDescription):
     """Description for the Edit Fields node."""
 
     displayName: str = "Edit Fields"
-    name: str = "editFields"
+    kind: str = "orcha-nodes.base.edit_fields"
     icon: str = "fa:edit"
     group: list = field(default_factory=lambda: ["data_transformation"])
     version: int = 1

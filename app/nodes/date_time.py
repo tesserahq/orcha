@@ -17,7 +17,7 @@ class DateTimeDescription(NodeDescription):
     """Description for the Date & Time node."""
 
     displayName: str = "Date & Time"
-    name: str = "dateTime"
+    kind: str = "orcha-nodes.base.date_time"
     icon: str = "fa:clock"
     group: list = field(default_factory=lambda: ["data_transformation"])
     version: int = 1

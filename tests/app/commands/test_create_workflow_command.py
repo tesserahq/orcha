@@ -1,7 +1,8 @@
 """Tests for the create_workflow command."""
 
 import pytest
-from app.commands.create_workflow_command import CreateWorkflowCommand
+from app.commands.workflow.create_workflow_command import CreateWorkflowCommand
+from app.commands.workflow import CreateWorkflowCommand
 from app.schemas.workflow import WorkflowCreate
 from app.schemas.node import NodeCreatePayload
 from app.services.workflow_version_service import WorkflowVersionService
@@ -112,14 +113,14 @@ def test_create_workflow_with_nodes_auto_edges(db):
     node1 = NodeCreatePayload(
         name="Node 1",
         description="Test node 1",
-        kind="action",
+        kind="orcha-nodes.base.http_request",
         properties=[{"a": 1}],
         ui_settings={"x": 1},
     )
     node2 = NodeCreatePayload(
         name="Node 2",
         description="Test node 2",
-        kind="condition",
+        kind="orcha-nodes.base.if",
         properties=[{"b": 2}],
         ui_settings={"x": 2},
     )
