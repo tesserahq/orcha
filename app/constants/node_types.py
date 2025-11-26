@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from app.constants.node_categories import CategoryKey
 from app.schemas.event import EventBase as EventSchema
+from tessera_sdk.utils.expressions.engine import ExpressionEngine
 
 if TYPE_CHECKING:
     from app.nodes.schemas.node_property import NodeProperty
@@ -90,6 +91,43 @@ class NodeDescription(ABC):
     @abstractmethod
     def execute(self, input: ExecutionData) -> ExecutionData:
         pass
+
+    def get_parsed_parameter(
+        self, parameter_name: str, input_data: ExecutionData
+    ) -> Any:
+        """
+        Get a parameter value parsed through the expression engine.
+
+        This method retrieves a parameter from self.parameters and if it's a string,
+        parses it through the ExpressionEngine using the input data context.
+
+        Args:
+            parameter_name: The name of the parameter to retrieve
+            input_data: The ExecutionData containing json, node outputs, etc.
+
+        Returns:
+            The parsed parameter value. If the parameter is a string, it will be
+            rendered through the expression engine. Non-string values are returned as-is.
+        """
+        # Get the raw parameter value
+        raw_value = self.parameters.get(parameter_name)
+
+        # If it's not a string, return as-is
+        if not isinstance(raw_value, str):
+            return raw_value
+
+        # Build context for expression engine
+        # json: current execution data
+        context: Dict[str, Any] = {
+            "json": input_data.json,
+            "event": input_data.event.model_dump() if input_data.event else {},
+            # env: environment variables (empty dict for now, can be extended)
+            "env": {},
+        }
+
+        # Use expression engine to render the template
+        engine = ExpressionEngine()
+        return engine.render(raw_value, context)
 
 
 @dataclass

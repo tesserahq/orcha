@@ -73,11 +73,12 @@ class HttpRequestDescription(NodeDescription):
 
     def execute(self, input: ExecutionData) -> ExecutionData:
         """Execute the HTTP request based on parameters."""
-        # Get parameters from self.parameters
-        url = self.parameters.get("url", "")
+        # Get parameters parsed through expression engine
+        url = self.get_parsed_parameter("url", input) or ""
+        # We don't need to parse the method, it's a static parameter
         method = self.parameters.get("method", "GET").upper()
-        headers = self.parameters.get("headers", {})
-        body = self.parameters.get("body", {})
+        headers = self.get_parsed_parameter("headers", input) or {}
+        body = self.get_parsed_parameter("body", input) or {}
 
         # Validate URL
         if not url:

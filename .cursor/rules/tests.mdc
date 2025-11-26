@@ -15,6 +15,7 @@ In the tests directory:
 * Inject dependencies like setup_user or setup_another_user to populate foreign key fields
 * Add the model instance to the DB, then commit and refresh
 
+
 * Example fixture:
 
 ```
@@ -36,8 +37,7 @@ workspace = setup_workspace
 assert workspace.id is not None
 ```
 
+Rules:
 * Prefer fixtures over inline setup for clarity and reuse
 * Add a clear docstring to each fixture describing its purpose
-* Run tests using ENV=test poetry run pytest
-
-Reference: setup_workspace in workspace_fixtures.py
+* ALWAYS run tests using ENV=test poetry run pytest
