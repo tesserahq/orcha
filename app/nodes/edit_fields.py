@@ -8,7 +8,6 @@ from app.constants.node_types import (
     ExecutionData,
     Node,
     NodeDescription,
-    PropertyField,
 )
 
 

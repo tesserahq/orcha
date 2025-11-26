@@ -20,7 +20,6 @@ from app.constants.node_categories import (
     CategoryKey,
 )
 from app.constants.node_types import (
-    ExecutionData,
     Node,
     NodeCategory,
     NodeDescription,
@@ -135,11 +134,6 @@ def _serialize_property_field(prop: PropertyField) -> Dict[str, Any]:
 
 def _serialize_node_property(prop: "NodeProperty") -> Dict[str, Any]:
     """Serialize a NodeProperty (Pydantic model) to a dictionary."""
-    from app.nodes.schemas.node_property import (
-        NodeProperty as NodePropertyType,
-        NodePropertyOption,
-        NodePropertyCollection,
-    )
 
     result: Dict[str, Any] = {
         "displayName": prop.display_name,

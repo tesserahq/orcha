@@ -1,6 +1,5 @@
 """Tests for the create_workflow command."""
 
-import pytest
 from app.commands.workflow.create_workflow_command import CreateWorkflowCommand
 from app.commands.workflow import CreateWorkflowCommand
 from app.schemas.workflow import WorkflowCreate

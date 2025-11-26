@@ -9,7 +9,6 @@ from app.constants.node_types import (
     ExecutionData,
     Node,
     NodeDescription,
-    PropertyField,
 )
 from app.nodes.schemas.node_property import NodeProperty, NodePropertyOption
 
