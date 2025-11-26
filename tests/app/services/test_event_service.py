@@ -1,6 +1,5 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.orm import Session
 from app.schemas.event import EventCreate, EventUpdate
 from app.services.event_service import EventService
 from datetime import datetime, UTC

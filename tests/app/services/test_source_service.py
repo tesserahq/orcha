@@ -1,6 +1,5 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.orm import Session
 from app.schemas.source import SourceCreate, SourceUpdate
 from app.services.source_service import SourceService
 

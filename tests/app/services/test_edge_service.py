@@ -1,6 +1,5 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.orm import Session
 from app.schemas.edge import EdgeCreate, EdgeUpdate
 from app.services.edge_service import EdgeService
 

@@ -1,10 +1,8 @@
-import datetime
 from sqlalchemy.dialects.postgresql import JSONB, UUID, ARRAY
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixins import TimestampMixin, SoftDeleteMixin
-from sqlalchemy import Column, DateTime, ForeignKey, String
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy import Boolean, ARRAY
-from sqlalchemy.dialects.postgresql import JSONB
 import uuid
 
 from app.db import Base

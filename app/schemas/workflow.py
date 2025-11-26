@@ -1,9 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 from datetime import datetime
-from app.schemas.node import NodeCreate
-from app.schemas.edge import EdgeCreate
 from app.schemas.node import NodeCreatePayload
 from app.schemas.node import Node
 
@@ -109,3 +107,61 @@ class WorkflowWithNodes(Workflow):
     """Workflow response including ordered nodes for the active version."""
 
     nodes: List[Node]
+
+
+class WorkflowExecuteRequest(BaseModel):
+    """Schema for executing a workflow."""
+
+    initial_data: Optional[Dict[str, Any]] = None
+    """Optional initial data to pass to trigger nodes."""
+
+    manual: bool = False
+    """Whether this is a manual execution (bypasses is_active check)."""
+
+
+class NodeExecutionResult(BaseModel):
+    """Schema for a single node execution result."""
+
+    node_id: str
+    """ID of the executed node."""
+
+    node_name: str
+    """Name of the executed node."""
+
+    node_kind: str
+    """Kind of the executed node."""
+
+    status: str
+    """Execution status (success or error)."""
+
+    data: Optional[Dict[str, Any]] = None
+    """Output data from the node execution."""
+
+    error: Optional[str] = None
+    """Error message if execution failed."""
+
+
+class TriggerExecutionResult(BaseModel):
+    """Schema for execution results starting from a trigger node."""
+
+    trigger_node_id: str
+    """ID of the trigger node."""
+
+    trigger_node_name: str
+    """Name of the trigger node."""
+
+    execution_results: List[NodeExecutionResult]
+    """List of node execution results."""
+
+
+class WorkflowExecuteResponse(BaseModel):
+    """Schema for workflow execution response."""
+
+    workflow_id: str
+    """ID of the executed workflow."""
+
+    status: str
+    """Overall execution status (completed or error)."""
+
+    results: List[TriggerExecutionResult]
+    """List of execution results for each trigger node."""

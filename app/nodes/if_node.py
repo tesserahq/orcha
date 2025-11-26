@@ -8,7 +8,6 @@ from app.constants.node_types import (
     ExecutionData,
     Node,
     NodeDescription,
-    PropertyField,
 )
 
 
@@ -17,7 +16,7 @@ class IfDescription(NodeDescription):
     """Description for the If node."""
 
     displayName: str = "If"
-    name: str = "if"
+    kind: str = "orcha-nodes.base.if"
     icon: str = "fa:code-branch"
     group: list = field(default_factory=lambda: ["flow"])
     version: int = 1

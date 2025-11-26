@@ -3,7 +3,7 @@
 from app.schemas.workflow import Workflow, WorkflowCreate
 from app.schemas.workflow_version import WorkflowVersionCreate
 from app.services.workflow_version_service import WorkflowVersionService
-from app.commands.update_workflow_command import WorkflowCommandBase
+from app.commands.workflow.workflow_command_base import WorkflowCommandBase
 
 
 class CreateWorkflowCommand(WorkflowCommandBase):

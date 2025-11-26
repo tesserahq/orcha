@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.mixins import TimestampMixin, SoftDeleteMixin
-from sqlalchemy import Boolean, Column, ForeignKey, String
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 import uuid
 

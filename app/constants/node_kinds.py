@@ -20,7 +20,6 @@ from app.constants.node_categories import (
     CategoryKey,
 )
 from app.constants.node_types import (
-    ExecutionData,
     Node,
     NodeCategory,
     NodeDescription,
@@ -98,7 +97,7 @@ def _serialize_property_field(prop: PropertyField) -> Dict[str, Any]:
     """Serialize a PropertyField to a dictionary."""
     result: Dict[str, Any] = {
         "displayName": prop.displayName,
-        "name": prop.name,
+        "kind": prop.kind,
         "type": prop.type,
         "required": prop.required,
     }
@@ -135,11 +134,6 @@ def _serialize_property_field(prop: PropertyField) -> Dict[str, Any]:
 
 def _serialize_node_property(prop: "NodeProperty") -> Dict[str, Any]:
     """Serialize a NodeProperty (Pydantic model) to a dictionary."""
-    from app.nodes.schemas.node_property import (
-        NodeProperty as NodePropertyType,
-        NodePropertyOption,
-        NodePropertyCollection,
-    )
 
     result: Dict[str, Any] = {
         "displayName": prop.display_name,
@@ -315,13 +309,25 @@ def _serialize_request_config(request: RequestConfig) -> Dict[str, Any]:
     return result
 
 
+def _kind_to_name(kind: str) -> str:
+    """Convert a node kind to a camelCase name.
+
+    Example: "orcha-nodes.base.date_time" -> "dateTime"
+    """
+    # Extract the last part after the last dot
+    last_part = kind.split(".")[-1]
+    # Convert snake_case to camelCase
+    parts = last_part.split("_")
+    return parts[0] + "".join(word.capitalize() for word in parts[1:])
+
+
 def _node_to_kind_dict(node: Node) -> NodeKindDict:
     """Convert a Node instance to the API format."""
     desc = node.description
     result: NodeKindDict = {
         "id": node.id,
         "displayName": desc.displayName,
-        "name": desc.name,
+        "name": _kind_to_name(desc.kind),
         "icon": desc.icon,
         "group": desc.group,
         "version": desc.version,
@@ -352,6 +358,7 @@ from app.nodes import (
     IF_NODE,
     DATE_TIME_NODE,
     EDIT_FIELDS_NODE,
+    TEST_ACTION_NODE,
 )
 
 # All node instances
@@ -362,11 +369,11 @@ _ALL_NODES = [
     IF_NODE,
     DATE_TIME_NODE,
     EDIT_FIELDS_NODE,
+    TEST_ACTION_NODE,
 ]
 
 # Kind registry - converted to dict format for API compatibility
 NODE_KINDS: List[NodeKindDict] = [_node_to_kind_dict(node) for node in _ALL_NODES]
-
 
 # Fast lookups by id or category
 NODE_KIND_BY_ID: Dict[str, NodeKindDict] = {kind["id"]: kind for kind in NODE_KINDS}

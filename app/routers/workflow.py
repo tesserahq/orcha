@@ -12,12 +12,16 @@ from app.schemas.workflow import (
     WorkflowCreate,
     WorkflowUpdateRequest,
     WorkflowWithNodes,
+    WorkflowExecuteRequest,
+    WorkflowExecuteResponse,
 )
 from app.services.workflow_service import WorkflowService
-from app.commands.create_workflow_command import CreateWorkflowCommand
-from app.commands.update_workflow_command import UpdateWorkflowCommand
+from app.commands.workflow import (
+    CreateWorkflowCommand,
+    UpdateWorkflowCommand,
+    ExecuteWorkflowCommand,
+)
 from app.services.node_service import NodeService
-from app.services.workflow_version_service import WorkflowVersionService
 from app.schemas.node import Node as NodeSchema
 
 router = APIRouter(
@@ -72,7 +76,7 @@ def get_workflow(
     return WorkflowWithNodes(**wf_schema.model_dump(), nodes=node_schemas)
 
 
-@router.put("/{workflow_id}", response_model=Workflow)
+@router.put("/{workflow_id}", response_model=WorkflowWithNodes)
 def update_workflow(
     workflow_data: WorkflowUpdateRequest,
     db: Session = Depends(get_db),
@@ -80,7 +84,20 @@ def update_workflow(
 ):
     """Update a workflow."""
     command = UpdateWorkflowCommand(db)
-    return command.execute(workflow.id, workflow_data)
+    updated_workflow = command.execute(workflow.id, workflow_data)
+
+    nodes: list = []
+    if updated_workflow.active_version_id:
+        node_service = NodeService(db)
+        # get_nodes_by_workflow_version returns descending by created_at; reverse for ascending order
+        nodes_desc = node_service.get_nodes_by_workflow_version(
+            updated_workflow.active_version_id
+        )
+        nodes = list(reversed(nodes_desc))
+
+    wf_schema = Workflow.model_validate(updated_workflow, from_attributes=True)
+    node_schemas = [NodeSchema.model_validate(n, from_attributes=True) for n in nodes]
+    return WorkflowWithNodes(**wf_schema.model_dump(), nodes=node_schemas)
 
 
 @router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -90,3 +107,25 @@ def delete_workflow(
     """Delete a workflow (soft delete)."""
     WorkflowService(db).delete_workflow(workflow.id)
     return None
+
+
+@router.post("/{workflow_id}/execute", response_model=WorkflowExecuteResponse)
+def execute_workflow(
+    workflow_id: UUID,
+    execute_data: WorkflowExecuteRequest,
+    db: Session = Depends(get_db),
+):
+    """Execute a workflow."""
+    try:
+        command = ExecuteWorkflowCommand(db)
+        result = command.execute(
+            workflow_id=workflow_id,
+            initial_data=execute_data.initial_data,
+            manual=execute_data.manual,
+        )
+        return WorkflowExecuteResponse(**result)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )

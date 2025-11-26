@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixins import TimestampMixin, SoftDeleteMixin
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID

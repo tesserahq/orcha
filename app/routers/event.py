@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from uuid import UUID
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
@@ -8,7 +7,6 @@ from app.db import get_db
 from app.schemas.event import Event as EventSchema, EventCreate, EventUpdate
 from app.models.event import Event as EventModel
 from app.services.event_service import EventService
-from app.services.source_service import SourceService
 from app.routers.utils.dependencies import get_event_by_id
 
 router = APIRouter(

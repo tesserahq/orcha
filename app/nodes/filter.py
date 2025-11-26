@@ -8,7 +8,6 @@ from app.constants.node_types import (
     ExecutionData,
     Node,
     NodeDescription,
-    PropertyField,
 )
 
 
@@ -17,7 +16,7 @@ class FilterDescription(NodeDescription):
     """Description for the Filter node."""
 
     displayName: str = "Filter"
-    name: str = "filter"
+    kind: str = "orcha-nodes.base.filter"
     icon: str = "fa:filter"
     group: list = field(default_factory=lambda: ["flow"])
     version: int = 1

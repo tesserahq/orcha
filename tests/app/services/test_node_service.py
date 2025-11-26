@@ -1,6 +1,5 @@
 import pytest
 from uuid import uuid4
-from sqlalchemy.orm import Session
 from app.schemas.node import NodeCreate, NodeUpdate
 from app.services.node_service import NodeService
 

@@ -3,7 +3,6 @@ from app.constants.node_kinds import (
     CATEGORY_FLOW,
     CATEGORY_ACTION_APP,
     NODE_CATEGORIES,
-    NODE_KINDS_BY_CATEGORY,
 )
 
 
