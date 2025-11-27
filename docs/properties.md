@@ -29,7 +29,7 @@ Every property follows the `NodeProperty` Pydantic model:
 
 ```python
 class NodeProperty(BaseModel):
-    display_name: str = Field(..., alias="displayName")
+    display_name: str = Field(..., alias="display_name")
     """Label shown in UI."""
 
     name: str
@@ -50,7 +50,7 @@ class NodeProperty(BaseModel):
     hint: Optional[str] = None
     """Additional hint text."""
 
-    display_options: Optional[DisplayOptions] = Field(None, alias="displayOptions")
+    display_options: Optional[DisplayOptions] = Field(None, alias="display_options")
     """Conditional visibility options."""
 
     disabled_options: Optional[DisplayOptions] = Field(None, alias="disabledOptions")
@@ -194,7 +194,7 @@ Options specific to `type: 'button'`:
 Configuration object for button behavior and appearance.
 
 - **`action`**: `str | NodePropertyAction` - Action identifier to trigger when button is clicked
-- **`label`**: `str` - Custom button label (defaults to `displayName` if not specified)
+- **`label`**: `str` - Custom button label (defaults to `display_name` if not specified)
 - **`hasInputField`**: `bool` - Whether the button has an input field
 - **`inputFieldMaxLength`**: `int` - Maximum length for input field (only used if `hasInputField: true`)
 
@@ -904,7 +904,7 @@ type_options = MultipleValuesOptions(
 )
 ```
 
-### `displayOptions`
+### `display_options`
 Conditionally show/hide properties based on other property values.
 
 ```python

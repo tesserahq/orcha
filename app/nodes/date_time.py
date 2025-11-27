@@ -15,7 +15,7 @@ from app.constants.node_types import (
 class DateTimeDescription(NodeDescription):
     """Description for the Date & Time node."""
 
-    displayName: str = "Date & Time"
+    display_name: str = "Date & Time"
     kind: str = "orcha-nodes.base.date_time"
     icon: str = "fa:clock"
     group: list = field(default_factory=lambda: ["data_transformation"])
@@ -23,10 +23,7 @@ class DateTimeDescription(NodeDescription):
     subtitle: str = "Manipulate dates"
     description: str = "Manipulate date and time values."
     defaults: Dict[str, Any] = field(default_factory=dict)
-    inputs: list = field(default_factory=lambda: ["main"])
-    outputs: list = field(default_factory=lambda: ["main"])
     credentials: list = field(default_factory=list)
-    requestDefaults: Any = None
     properties: list = field(default_factory=list)
 
     def execute(self, input: ExecutionData) -> ExecutionData:

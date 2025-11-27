@@ -17,7 +17,7 @@ from app.nodes.schemas.node_property import NodeProperty, NodePropertyOption
 class HttpRequestDescription(NodeDescription):
     """Description for the HttpRequest node."""
 
-    displayName: str = "HttpRequest"
+    display_name: str = "HttpRequest"
     kind: str = "orcha-nodes.base.http_request"
     icon: str = "fa:globe"
     group: list = field(default_factory=lambda: ["core"])
@@ -25,10 +25,7 @@ class HttpRequestDescription(NodeDescription):
     subtitle: str = "Make an HTTP request"
     description: str = "Makes an http request and returns the response data."
     defaults: Dict[str, Any] = field(default_factory=dict)
-    inputs: list = field(default_factory=lambda: ["main"])
-    outputs: list = field(default_factory=lambda: ["main"])
     credentials: list = field(default_factory=list)
-    requestDefaults: Any = None
     properties: List[NodeProperty] = field(
         default_factory=lambda: [
             NodeProperty(

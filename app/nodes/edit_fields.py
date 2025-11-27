@@ -15,7 +15,7 @@ from app.constants.node_types import (
 class EditFieldsDescription(NodeDescription):
     """Description for the Edit Fields node."""
 
-    displayName: str = "Edit Fields"
+    display_name: str = "Edit Fields"
     kind: str = "orcha-nodes.base.edit_fields"
     icon: str = "fa:edit"
     group: list = field(default_factory=lambda: ["data_transformation"])
@@ -23,10 +23,7 @@ class EditFieldsDescription(NodeDescription):
     subtitle: str = "Modify item fields"
     description: str = "Modify, add, or remove item fields."
     defaults: Dict[str, Any] = field(default_factory=dict)
-    inputs: list = field(default_factory=lambda: ["main"])
-    outputs: list = field(default_factory=lambda: ["main"])
     credentials: list = field(default_factory=list)
-    requestDefaults: Any = None
     properties: list = field(default_factory=list)
 
     def execute(self, input: ExecutionData) -> ExecutionData:

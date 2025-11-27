@@ -72,15 +72,13 @@ class NodeKindDictRequired(TypedDict):
     """Required fields for NodeKindDict."""
 
     id: str
-    displayName: str
+    display_name: str
     name: str
     icon: str
     group: List[str]
     version: Any  # int or list
     description: str
     defaults: Dict[str, Any]
-    inputs: List[str]
-    outputs: List[str]
     properties: List[Dict[str, Any]]
     category: str
 
@@ -90,13 +88,12 @@ class NodeKindDict(NodeKindDictRequired, total=False):
 
     subtitle: Optional[str]
     credentials: Optional[List[Dict[str, Any]]]
-    requestDefaults: Optional[Dict[str, Any]]
 
 
 def _serialize_property_field(prop: PropertyField) -> Dict[str, Any]:
     """Serialize a PropertyField to a dictionary."""
     result: Dict[str, Any] = {
-        "displayName": prop.displayName,
+        "display_name": prop.display_name,
         "kind": prop.kind,
         "type": prop.type,
         "required": prop.required,
@@ -122,13 +119,15 @@ def _serialize_property_field(prop: PropertyField) -> Dict[str, Any]:
                     else {}
                 ),
                 **(
-                    {"displayOptions": opt.displayOptions} if opt.displayOptions else {}
+                    {"display_options": opt.display_options}
+                    if opt.display_options
+                    else {}
                 ),
             }
             for opt in prop.options
         ]
-    if prop.displayOptions:
-        result["displayOptions"] = prop.displayOptions
+    if prop.display_options:
+        result["display_options"] = prop.display_options
     return result
 
 
@@ -136,7 +135,7 @@ def _serialize_node_property(prop: "NodeProperty") -> Dict[str, Any]:
     """Serialize a NodeProperty (Pydantic model) to a dictionary."""
 
     result: Dict[str, Any] = {
-        "displayName": prop.display_name,
+        "display_name": prop.display_name,
         "name": prop.name,
         "type": prop.type,
     }
@@ -242,7 +241,7 @@ def _serialize_node_property(prop: "NodeProperty") -> Dict[str, Any]:
         if prop.display_options.hide:
             display_opts["hide"] = prop.display_options.hide
         if display_opts:
-            result["displayOptions"] = display_opts
+            result["display_options"] = display_opts
 
     if prop.disabled_options:
         disabled_opts: Dict[str, Any] = {}
@@ -279,7 +278,7 @@ def _serialize_property_option(opt: Any) -> Dict[str, Any]:
         return result
     elif isinstance(opt, NodePropertyCollection):
         result = {
-            "displayName": opt.display_name,
+            "display_name": opt.display_name,
             "name": opt.name,
             "values": [_serialize_node_property(val) for val in opt.values],
         }
@@ -315,10 +314,7 @@ def _kind_to_name(kind: str) -> str:
     Example: "orcha-nodes.base.date_time" -> "dateTime"
     """
     # Extract the last part after the last dot
-    last_part = kind.split(".")[-1]
-    # Convert snake_case to camelCase
-    parts = last_part.split("_")
-    return parts[0] + "".join(word.capitalize() for word in parts[1:])
+    return kind.split(".")[-1]
 
 
 def _node_to_kind_dict(node: Node) -> NodeKindDict:
@@ -326,15 +322,13 @@ def _node_to_kind_dict(node: Node) -> NodeKindDict:
     desc = node.description
     result: NodeKindDict = {
         "id": node.id,
-        "displayName": desc.displayName,
+        "display_name": desc.display_name,
         "name": _kind_to_name(desc.kind),
         "icon": desc.icon,
         "group": desc.group,
         "version": desc.version,
         "description": desc.description,
         "defaults": desc.defaults,
-        "inputs": desc.inputs,
-        "outputs": desc.outputs,
         "properties": [_serialize_node_property(prop) for prop in desc.properties],
         "category": node.category,
     }
@@ -343,8 +337,6 @@ def _node_to_kind_dict(node: Node) -> NodeKindDict:
         result["subtitle"] = desc.subtitle
     if desc.credentials is not None:
         result["credentials"] = desc.credentials
-    if desc.requestDefaults is not None:
-        result["requestDefaults"] = _serialize_request_config(desc.requestDefaults)
 
     return result
 

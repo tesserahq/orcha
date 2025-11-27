@@ -18,7 +18,7 @@ from app.schemas.event import EventBase as EventSchema
 class EventReceivedDescription(NodeDescription):
     """Description for the Event Received node."""
 
-    displayName: str = "Event Received"
+    display_name: str = "Event Received"
     kind: str = "orcha-nodes.base.event_received"
     icon: str = "fa:calendar-check"
     group: list = field(default_factory=lambda: ["trigger"])
@@ -26,10 +26,7 @@ class EventReceivedDescription(NodeDescription):
     subtitle: str = "Trigger workflow on event"
     description: str = "Trigger a workflow when a matching event is received."
     defaults: Dict[str, Any] = field(default_factory=dict)
-    inputs: list = field(default_factory=list)
-    outputs: list = field(default_factory=lambda: ["main"])
     credentials: list = field(default_factory=list)
-    requestDefaults: Any = None
     properties: List[NodeProperty] = field(
         default_factory=lambda: [
             NodeProperty(

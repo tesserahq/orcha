@@ -11,14 +11,11 @@ Defines the node’s metadata and interface.
 
 | Field            | Description                                              |
 |------------------|----------------------------------------------------------|
-| `displayName`    | Human-readable name of the node.                         |
+| `display_name`    | Human-readable name of the node.                         |
 | `name`           | Internal identifier for the node.                        |
 | `version`        | Version number of the node.                              |
 | `description`    | Short summary of the node’s purpose.                     |
-| `inputs`         | Array of input channel identifiers (e.g., `["main"]`).   |
-| `outputs`        | Array of output channel identifiers.                      |
 | `credentials`    | *(Optional)* Credentials required by the node.           |
-| `requestDefaults`| *(Optional)* Default HTTP settings for operations.       |
 | `properties`     | Array of fields defining UI and operations available.    |
 
 ---
@@ -27,14 +24,14 @@ Defines the node’s metadata and interface.
 Defines UI fields and available operations.
 
 Each property field may include:
-- `displayName`: Label shown to the user.
+- `display_name`: Label shown to the user.
 - `name`: Internal field name.
 - `type`: Data type (e.g., `string`, `options`, `boolean`).
 - `default`: Default value.
 - `required`: Whether the field is mandatory.
 - `description`: Explanation of the field.
 - `options`: *(for `type = "options"`)* Array of `OptionItem`.
-- `displayOptions`: Conditions controlling visibility.
+- `display_options`: Conditions controlling visibility.
 - `routing`: *(Optional)* HTTP request definition when the field/option is selected.
 
 ---
@@ -90,30 +87,27 @@ class OptionItem:
     description: Optional[str] = None
     action: Optional[str] = None
     routing: Optional[Routing] = None
-    displayOptions: Optional[Dict[str, Any]] = None
+    display_options: Optional[Dict[str, Any]] = None
 
 @dataclass
 class PropertyField:
-    displayName: str
+    display_name: str
     name: str
     type: str
     default: Any = None
     required: bool = False
     description: Optional[str] = None
     options: Optional[List[OptionItem]] = None
-    displayOptions: Optional[Dict[str, Any]] = None
+    display_options: Optional[Dict[str, Any]] = None
     routing: Optional[Routing] = None
 
 @dataclass
 class NodeDescription:
-    displayName: str
+    display_name: str
     name: str
     version: Any
     description: str
-    inputs: List[str]
-    outputs: List[str]
     credentials: Optional[List[Dict[str, Any]]] = None
-    requestDefaults: Optional[RequestConfig] = None
     properties: List[PropertyField] = field(default_factory=list)
 
 @dataclass

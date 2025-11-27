@@ -9,7 +9,7 @@ class NodeKind(BaseModel):
     """
 
     id: str
-    displayName: str
+    display_name: str
     name: str
     icon: str
     group: List[str]
@@ -17,10 +17,7 @@ class NodeKind(BaseModel):
     subtitle: Optional[str] = None
     description: str
     defaults: Dict[str, Any] = {}
-    inputs: List[str] = []
-    outputs: List[str] = []
     credentials: Optional[List[Dict[str, Any]]] = None
-    requestDefaults: Optional[Dict[str, Any]] = None
     properties: List[Dict[str, Any]] = []
     category: str
 

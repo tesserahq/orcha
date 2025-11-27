@@ -15,7 +15,7 @@ from app.constants.node_types import (
 class FilterDescription(NodeDescription):
     """Description for the Filter node."""
 
-    displayName: str = "Filter"
+    display_name: str = "Filter"
     kind: str = "orcha-nodes.base.filter"
     icon: str = "fa:filter"
     group: list = field(default_factory=lambda: ["flow"])
@@ -23,10 +23,7 @@ class FilterDescription(NodeDescription):
     subtitle: str = "Remove matching items"
     description: str = "Remove items matching a condition."
     defaults: Dict[str, Any] = field(default_factory=dict)
-    inputs: list = field(default_factory=lambda: ["main"])
-    outputs: list = field(default_factory=lambda: ["main"])
     credentials: list = field(default_factory=list)
-    requestDefaults: Any = None
     properties: list = field(default_factory=list)
 
     def execute(self, input: ExecutionData) -> ExecutionData:

@@ -19,7 +19,7 @@ from app.constants.node_types import (
 class TestActionDescription(NodeDescription):
     """Description for the Test Action node."""
 
-    displayName: str = "Test Action"
+    display_name: str = "Test Action"
     kind: str = "orcha-nodes.base.test_action"
     icon: str = "fa:flask"
     group: list = field(default_factory=lambda: ["core"])
@@ -29,10 +29,7 @@ class TestActionDescription(NodeDescription):
         "A simple test node that passes through data. Used for testing only."
     )
     defaults: Dict[str, Any] = field(default_factory=dict)
-    inputs: list = field(default_factory=lambda: ["main"])
-    outputs: list = field(default_factory=lambda: ["main"])
     credentials: list = field(default_factory=list)
-    requestDefaults: Any = None
     properties: list = field(default_factory=list)
 
     def execute(self, input: ExecutionData) -> ExecutionData:

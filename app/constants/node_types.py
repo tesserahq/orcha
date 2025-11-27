@@ -44,14 +44,14 @@ class Routing:
 
 @dataclass
 class PropertyField:
-    displayName: str
+    display_name: str
     name: str
     type: str
     default: Any = None
     required: bool = False
     description: Optional[str] = None
     options: Optional[List[OptionItem]] = None
-    displayOptions: Optional[Dict[str, Any]] = None
+    display_options: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -61,7 +61,7 @@ class OptionItem:
     description: Optional[str] = None
     action: Optional[str] = None
     routing: Optional[Routing] = None
-    displayOptions: Optional[Dict[str, Any]] = None
+    display_options: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -73,7 +73,7 @@ class NodeCategory:
 
 @dataclass
 class NodeDescription(ABC):
-    displayName: str
+    display_name: str
     kind: str
     icon: str
     group: List[str]
@@ -81,10 +81,7 @@ class NodeDescription(ABC):
     subtitle: Optional[str]
     description: str
     defaults: Dict[str, Any]
-    inputs: List[str]
-    outputs: List[str]
     credentials: Optional[List[Dict[str, Any]]] = None
-    requestDefaults: Optional[RequestConfig] = None
     properties: List["NodeProperty"] = field(default_factory=list)
     parameters: Dict[str, Any] = field(default_factory=dict)
 

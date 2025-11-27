@@ -60,7 +60,7 @@ def test_list_categories(client):
         None,
     )
     assert date_time_node is not None
-    assert "displayName" in date_time_node
+    assert "display_name" in date_time_node
     assert "name" in date_time_node
     assert "icon" in date_time_node
     assert "group" in date_time_node
@@ -68,12 +68,10 @@ def test_list_categories(client):
     assert "subtitle" in date_time_node
     assert "description" in date_time_node
     assert "defaults" in date_time_node
-    assert "inputs" in date_time_node
-    assert "outputs" in date_time_node
     assert "properties" in date_time_node
     assert "category" in date_time_node
     # Validate specific values for date_time node
-    assert date_time_node["displayName"] == "Date & Time"
-    assert date_time_node["name"] == "dateTime"
+    assert date_time_node["display_name"] == "Date & Time"
+    assert date_time_node["name"] == "date_time"
     assert date_time_node["icon"] == "fa:clock"
     assert date_time_node["subtitle"] == "Manipulate dates"

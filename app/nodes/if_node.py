@@ -15,7 +15,7 @@ from app.constants.node_types import (
 class IfDescription(NodeDescription):
     """Description for the If node."""
 
-    displayName: str = "If"
+    display_name: str = "If"
     kind: str = "orcha-nodes.base.if"
     icon: str = "fa:code-branch"
     group: list = field(default_factory=lambda: ["flow"])
@@ -23,10 +23,7 @@ class IfDescription(NodeDescription):
     subtitle: str = "Route items conditionally"
     description: str = "Route items to different branches (true/false)."
     defaults: Dict[str, Any] = field(default_factory=dict)
-    inputs: list = field(default_factory=lambda: ["main"])
-    outputs: list = field(default_factory=lambda: ["true", "false"])
     credentials: list = field(default_factory=list)
-    requestDefaults: Any = None
     properties: list = field(default_factory=list)
 
     def execute(self, input: ExecutionData) -> ExecutionData:
