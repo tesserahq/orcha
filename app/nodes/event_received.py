@@ -21,6 +21,7 @@ class EventReceivedDescription(NodeDescription):
     display_name: str = "Event Received"
     kind: str = "orcha-nodes.base.event_received"
     icon: str = "fa:calendar-check"
+    icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["trigger"])
     version: int = 1
     subtitle: str = "Trigger workflow on event"

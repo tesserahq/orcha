@@ -18,6 +18,7 @@ class IfDescription(NodeDescription):
     display_name: str = "If"
     kind: str = "orcha-nodes.base.if"
     icon: str = "fa:code-branch"
+    icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["flow"])
     version: int = 1
     subtitle: str = "Route items conditionally"

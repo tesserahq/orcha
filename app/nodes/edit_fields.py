@@ -18,6 +18,7 @@ class EditFieldsDescription(NodeDescription):
     display_name: str = "Edit Fields"
     kind: str = "orcha-nodes.base.edit_fields"
     icon: str = "fa:edit"
+    icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["data_transformation"])
     version: int = 1
     subtitle: str = "Modify item fields"

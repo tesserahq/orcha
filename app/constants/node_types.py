@@ -76,6 +76,7 @@ class NodeDescription(ABC):
     display_name: str
     kind: str
     icon: str
+    icon_color: str
     group: List[str]
     version: Any  # int or list
     subtitle: Optional[str]

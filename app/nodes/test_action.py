@@ -22,6 +22,7 @@ class TestActionDescription(NodeDescription):
     display_name: str = "Test Action"
     kind: str = "orcha-nodes.base.test_action"
     icon: str = "fa:flask"
+    icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["core"])
     version: int = 1
     subtitle: str = "Test node for workflows"

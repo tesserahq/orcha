@@ -18,6 +18,7 @@ class FilterDescription(NodeDescription):
     display_name: str = "Filter"
     kind: str = "orcha-nodes.base.filter"
     icon: str = "fa:filter"
+    icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["flow"])
     version: int = 1
     subtitle: str = "Remove matching items"

@@ -75,6 +75,7 @@ class NodeKindDictRequired(TypedDict):
     display_name: str
     name: str
     icon: str
+    icon_color: str
     group: List[str]
     version: Any  # int or list
     description: str
@@ -325,6 +326,7 @@ def _node_to_kind_dict(node: Node) -> NodeKindDict:
         "display_name": desc.display_name,
         "name": _kind_to_name(desc.kind),
         "icon": desc.icon,
+        "icon_color": desc.icon_color,
         "group": desc.group,
         "version": desc.version,
         "description": desc.description,

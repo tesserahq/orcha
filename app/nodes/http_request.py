@@ -20,6 +20,7 @@ class HttpRequestDescription(NodeDescription):
     display_name: str = "HttpRequest"
     kind: str = "orcha-nodes.base.http_request"
     icon: str = "fa:globe"
+    icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["core"])
     version: int = 1
     subtitle: str = "Make an HTTP request"

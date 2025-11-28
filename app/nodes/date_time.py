@@ -18,6 +18,7 @@ class DateTimeDescription(NodeDescription):
     display_name: str = "Date & Time"
     kind: str = "orcha-nodes.base.date_time"
     icon: str = "fa:clock"
+    icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["data_transformation"])
     version: int = 1
     subtitle: str = "Manipulate dates"
