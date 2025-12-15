@@ -1,5 +1,6 @@
 # pyright: reportMissingTypeStubs=false
 from celery import Celery
+from celery.schedules import crontab
 from app.config import get_settings
 
 settings = get_settings()
@@ -25,6 +26,14 @@ celery_app.conf.update(
 )
 
 celery_app.autodiscover_tasks(["app.tasks"])  # ensure tasks are registered explicitly
+
+# Periodic task schedule
+celery_app.conf.beat_schedule = {
+    "prune-events-daily-at-midday": {
+        "task": "app.tasks.prune_events_tasks.prune_events_task",
+        "schedule": crontab(hour=12, minute=0),  # Run daily at 12:00 UTC
+    },
+}
 
 # # Explicitly register tasks to ensure they're available
 # def register_tasks():
