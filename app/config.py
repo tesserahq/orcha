@@ -9,7 +9,7 @@ DEFAULT_TEST_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/orcha
 
 
 class Settings(BaseSettings):
-    app_name: str = "Orcha"
+    app_name: str = "orcha-api"
     vaulta_api_url: str = Field(
         default="http://localhost:8004", json_schema_extra={"env": "VAULTA_API_URL"}
     )
