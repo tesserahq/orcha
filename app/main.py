@@ -14,6 +14,7 @@ from .routers import (
     event,
     workflow,
     node,
+    event_type,
 )
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from app.telemetry import setup_tracing
@@ -100,6 +101,7 @@ def create_app(testing: bool = False, auth_middleware=None) -> FastAPI:
     app.include_router(event.router)
     app.include_router(workflow.router)
     app.include_router(node.router)
+    app.include_router(event_type.router)
 
     register_exception_handlers(app)
 

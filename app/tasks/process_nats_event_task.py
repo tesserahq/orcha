@@ -8,6 +8,7 @@ from app.core.logging_config import get_logger
 from app.db import SessionLocal
 from app.schemas.event import EventCreate
 from app.services.event_service import EventService
+from app.utils.event_type_cache import add_event_type
 
 logger = get_logger("nats_event_task")
 
@@ -62,6 +63,11 @@ def process_nats_event_task(msg: Dict) -> Optional[str]:
         # Create event using EventService
         event_service = EventService(db)
         created_event = event_service.create_event(event_create)
+
+        # Add event type to cache (maintains unique list)
+        event_type = msg.get("event_type")
+        if event_type:
+            add_event_type(event_type)
 
         logger.info(f"Event created successfully: {created_event.id}")
         return str(created_event.id)

@@ -30,20 +30,6 @@ def list_events(db: Session = Depends(get_db)):
     return paginate(db, EventService(db).get_events_query())
 
 
-@router.get("/type/{event_type}", response_model=Page[EventSchema])
-def list_events_by_type(event_type: str, db: Session = Depends(get_db)):
-    """List all events of a specific type."""
-    from app.models.event import Event
-    from sqlalchemy import select
-
-    return paginate(
-        db,
-        select(Event)
-        .filter(Event.event_type == event_type)
-        .order_by(Event.time.desc()),
-    )
-
-
 @router.get("/{event_id}", response_model=EventSchema)
 def get_event(event: EventModel = Depends(get_event_by_id)):
     """Get an event by ID."""
