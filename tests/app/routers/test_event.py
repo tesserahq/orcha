@@ -52,6 +52,7 @@ def test_list_events_pagination(client, setup_event):
     """Test pagination in GET /events endpoint."""
     # Test with pagination
     response = client.get("/events?page=1&size=1")
+    print(response.json())
     assert response.status_code == 200
     data = response.json()
     assert len(data["items"]) <= 1

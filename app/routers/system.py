@@ -1,4 +1,6 @@
+from typing import Optional
 from fastapi import APIRouter, Depends
+from httpx import Request
 from sqlalchemy.orm import Session
 from app.db import get_db
 from app.schemas.system import (
@@ -11,8 +13,19 @@ from app.schemas.system import (
     ExternalServicesGroup,
 )
 from app.schemas.common import DataResponse
-from tessera_sdk.utils.auth import get_current_user
 from app.config import get_settings
+from app.auth.rbac import build_rbac_dependencies
+
+
+async def infer_domain(request: Request) -> Optional[str]:
+    return "*"
+
+
+RESOURCE = "settings"
+rbac = build_rbac_dependencies(
+    resource=RESOURCE,
+    domain_resolver=infer_domain,
+)
 
 router = APIRouter(
     prefix="/system",
@@ -24,7 +37,7 @@ router = APIRouter(
 @router.get("/settings", response_model=DataResponse[SystemSettingsGrouped])
 def get_system_settings(
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    _authorized: bool = Depends(rbac["read"]),
 ):
     """Return grouped, non-sensitive system configuration settings for troubleshooting."""
     s = get_settings()

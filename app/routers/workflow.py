@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 from app.routers.utils.dependencies import get_workflow_by_id
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
-
 
 from app.db import get_db
 from app.schemas.workflow import (
@@ -23,6 +23,18 @@ from app.commands.workflow import (
 )
 from app.services.node_service import NodeService
 from app.schemas.node import Node as NodeSchema
+from app.auth.rbac import build_rbac_dependencies
+
+
+async def infer_domain(request: Request) -> Optional[str]:
+    return "*"
+
+
+RESOURCE = "workflow"
+rbac = build_rbac_dependencies(
+    resource=RESOURCE,
+    domain_resolver=infer_domain,
+)
 
 router = APIRouter(
     prefix="/workflows",
@@ -32,7 +44,11 @@ router = APIRouter(
 
 
 @router.post("", response_model=WorkflowWithNodes, status_code=status.HTTP_201_CREATED)
-def create_workflow(workflow_data: WorkflowCreate, db: Session = Depends(get_db)):
+def create_workflow(
+    workflow_data: WorkflowCreate,
+    db: Session = Depends(get_db),
+    _authorized: bool = Depends(rbac["create"]),
+):
     """Create a new workflow with its initial version."""
     command = CreateWorkflowCommand(db)
     created_workflow = command.execute(workflow_data)
@@ -52,14 +68,18 @@ def create_workflow(workflow_data: WorkflowCreate, db: Session = Depends(get_db)
 
 
 @router.get("", response_model=Page[Workflow])
-def list_workflows(db: Session = Depends(get_db)):
+def list_workflows(
+    db: Session = Depends(get_db), _authorized: bool = Depends(rbac["read"])
+):
     """List all workflows."""
     return paginate(db, WorkflowService(db).get_workflows_query())
 
 
 @router.get("/{workflow_id}", response_model=WorkflowWithNodes)
 def get_workflow(
-    workflow: Workflow = Depends(get_workflow_by_id), db: Session = Depends(get_db)
+    workflow: Workflow = Depends(get_workflow_by_id),
+    db: Session = Depends(get_db),
+    _authorized: bool = Depends(rbac["read"]),
 ):
     """Get a workflow by ID, including ordered nodes for its active version."""
     nodes: list = []
@@ -81,6 +101,7 @@ def update_workflow(
     workflow_data: WorkflowUpdateRequest,
     db: Session = Depends(get_db),
     workflow: Workflow = Depends(get_workflow_by_id),
+    _authorized: bool = Depends(rbac["update"]),
 ):
     """Update a workflow."""
     command = UpdateWorkflowCommand(db)
@@ -102,7 +123,9 @@ def update_workflow(
 
 @router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_workflow(
-    workflow: Workflow = Depends(get_workflow_by_id), db: Session = Depends(get_db)
+    workflow: Workflow = Depends(get_workflow_by_id),
+    db: Session = Depends(get_db),
+    _authorized: bool = Depends(rbac["delete"]),
 ):
     """Delete a workflow (soft delete)."""
     WorkflowService(db).delete_workflow(workflow.id)
@@ -114,6 +137,7 @@ def execute_workflow(
     workflow_id: UUID,
     execute_data: WorkflowExecuteRequest,
     db: Session = Depends(get_db),
+    _authorized: bool = Depends(rbac["read"]),
 ):
     """Execute a workflow."""
     try:
