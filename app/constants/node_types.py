@@ -6,6 +6,8 @@ on node implementations to avoid circular imports.
 
 from __future__ import annotations
 
+import ast
+import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
@@ -96,26 +98,26 @@ class NodeDescription(ABC):
         """
         Get a parameter value parsed through the expression engine.
 
-        This method retrieves a parameter from self.parameters and if it's a string,
+        This method retrieves a parameter from self.parameters and if it's a string or dict,
         parses it through the ExpressionEngine using the input data context.
+
+        Supports two modes:
+        1. String templates: "{{ event.event_data.account }}" → renders as string
+        2. Expression objects: {"__expr__": "{{ event.event_data.account }}"} → evaluates
+           expression and returns the result as a Python object (dict, list, etc.)
 
         Args:
             parameter_name: The name of the parameter to retrieve
             input_data: The ExecutionData containing json, node outputs, etc.
 
         Returns:
-            The parsed parameter value. If the parameter is a string, it will be
-            rendered through the expression engine. Non-string values are returned as-is.
+            The parsed parameter value. If the parameter is a string or dict, it will be
+            rendered through the expression engine. Other non-string values are returned as-is.
         """
         # Get the raw parameter value
         raw_value = self.parameters.get(parameter_name)
 
-        # If it's not a string, return as-is
-        if not isinstance(raw_value, str):
-            return raw_value
-
         # Build context for expression engine
-        # json: current execution data
         context: Dict[str, Any] = {
             "json": input_data.json,
             "event": input_data.event.model_dump() if input_data.event else {},
@@ -123,9 +125,99 @@ class NodeDescription(ABC):
             "env": {},
         }
 
-        # Use expression engine to render the template
-        engine = ExpressionEngine()
-        return engine.render(raw_value, context)
+        # Recursively process the value to handle nested expression markers
+        # This must be called with the original value (not JSON string) to detect __expr__ markers
+        return self._process_parameter_value(raw_value, context)
+
+    def _process_parameter_value(self, value: Any, context: Dict[str, Any]) -> Any:
+        """
+        Recursively process a parameter value, handling expression markers.
+
+        Args:
+            value: The value to process (can be dict, list, string, or other)
+            context: The context for expression evaluation
+
+        Returns:
+            The processed value with expressions evaluated
+        """
+        # Check if this is an expression marker object
+        if isinstance(value, dict) and "__expr__" in value:
+            # This is an expression that should evaluate to an object (not a string)
+            expr_str = value["__expr__"]
+            if not isinstance(expr_str, str):
+                return value
+
+            # Evaluate the expression directly using Jinja2
+            engine = ExpressionEngine()
+            template = engine.env.from_string(expr_str)
+
+            # Render the template - Jinja2 always returns a string, so we need to parse it
+            result_str = template.render(context)
+
+            # Try to parse the result as a Python literal (dict, list, etc.)
+            # This handles cases where the expression evaluates to a dict/list
+            # and Jinja2 converts it to a string representation
+            if isinstance(result_str, str) and result_str.strip():
+                # Try parsing as Python literal first (handles single quotes, None, True, False)
+                # ast.literal_eval is safe and handles Python's repr format
+                try:
+                    return ast.literal_eval(result_str)
+                except (ValueError, SyntaxError):
+                    # If that fails, try parsing as JSON (handles double quotes)
+                    try:
+                        return json.loads(result_str)
+                    except (json.JSONDecodeError, TypeError):
+                        # If both fail, return as string
+                        return result_str
+
+            return result_str
+
+        # If it's a dict (but not an expression marker), process recursively
+        if isinstance(value, dict):
+            processed_dict = {}
+            has_expression_markers = False
+
+            for key, val in value.items():
+                # Check if this value is an expression marker before processing
+                if isinstance(val, dict) and "__expr__" in val:
+                    has_expression_markers = True
+                # Recursively process nested values
+                processed_dict[key] = self._process_parameter_value(val, context)
+
+            # If we processed expression markers, return the processed dict directly
+            # (don't treat the entire dict as a template string)
+            if has_expression_markers:
+                return processed_dict
+
+            # After processing all nested values, check if the entire dict should be
+            # treated as a template string (original behavior for backward compatibility)
+            # Convert to JSON string for template rendering
+            json_str = json.dumps(processed_dict)
+
+            # Check if the JSON string contains template expressions
+            if "{{" in json_str and "}}" in json_str:
+                engine = ExpressionEngine()
+                rendered = engine.render(json_str, context)
+                try:
+                    return json.loads(rendered)
+                except (json.JSONDecodeError, TypeError):
+                    return rendered
+
+            return processed_dict
+
+        # If it's a list, process each element recursively
+        if isinstance(value, list):
+            return [self._process_parameter_value(item, context) for item in value]
+
+        # If it's a string, check if it contains template expressions
+        if isinstance(value, str):
+            if "{{" in value and "}}" in value:
+                engine = ExpressionEngine()
+                return engine.render(value, context)
+            return value
+
+        # For other types (int, float, bool, None), return as-is
+        return value
 
 
 @dataclass

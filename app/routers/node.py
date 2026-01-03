@@ -12,7 +12,7 @@ async def infer_domain(request: Request) -> Optional[str]:
     return "*"
 
 
-RESOURCE = "node"
+RESOURCE = "node_category"
 rbac = build_rbac_dependencies(
     resource=RESOURCE,
     domain_resolver=infer_domain,

@@ -13,13 +13,15 @@ from app.constants.node_types import (
 from app.nodes.schemas.node_property import NodeProperty
 from app.schemas.event import EventBase as EventSchema
 
+EVENT_RECEIVED_NODE_ID = "orcha-nodes.base.event_received"
+
 
 @dataclass
 class EventReceivedDescription(NodeDescription):
     """Description for the Event Received node."""
 
     display_name: str = "Event Received"
-    kind: str = "orcha-nodes.base.event_received"
+    kind: str = EVENT_RECEIVED_NODE_ID
     icon: str = "fa:calendar-check"
     icon_color: str = "indigo"
     group: list = field(default_factory=lambda: ["trigger"])
@@ -62,7 +64,7 @@ class EventReceivedDescription(NodeDescription):
 
 
 NODE = Node(
-    id="orcha-nodes.base.event_received",
+    id=EVENT_RECEIVED_NODE_ID,
     category=CATEGORY_TRIGGER,
     description=EventReceivedDescription(),
 )
