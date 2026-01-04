@@ -7,6 +7,8 @@ from app.constants.rbac_actions import RBACActions
 
 DomainResolver = Callable[[Request], Awaitable[Optional[str]]]
 
+PREFIX = "orcha"
+
 
 def build_rbac_dependencies(
     *,
@@ -15,22 +17,22 @@ def build_rbac_dependencies(
 ):
     return {
         "create": authorize(
-            resource=resource,
+            resource=f"{PREFIX}.{resource}",
             action=RBACActions.CREATE,
             domain_resolver=domain_resolver,
         ),
         "read": authorize(
-            resource=resource,
+            resource=f"{PREFIX}.{resource}",
             action=RBACActions.READ,
             domain_resolver=domain_resolver,
         ),
         "update": authorize(
-            resource=resource,
+            resource=f"{PREFIX}.{resource}",
             action=RBACActions.UPDATE,
             domain_resolver=domain_resolver,
         ),
         "delete": authorize(
-            resource=resource,
+            resource=f"{PREFIX}.{resource}",
             action=RBACActions.DELETE,
             domain_resolver=domain_resolver,
         ),

@@ -9,6 +9,9 @@ from app.db import SessionLocal
 from app.schemas.event import EventCreate
 from app.services.event_service import EventService
 from app.utils.event_type_cache import add_event_type
+from app.commands.workflow.trigger_workflows_by_event_command import (
+    TriggerWorkflowsByEventCommand,
+)
 
 logger = get_logger("nats_event_task")
 
@@ -70,6 +73,26 @@ def process_nats_event_task(msg: Dict) -> Optional[str]:
             add_event_type(event_type)
 
         logger.info(f"Event created successfully: {created_event.id}")
+
+        # Trigger workflows that match this event
+        try:
+            trigger_command = TriggerWorkflowsByEventCommand(db)
+            execution_results = trigger_command.execute(created_event)
+            if execution_results:
+                logger.info(
+                    f"Triggered {len(execution_results)} workflow(s) for event {created_event.id}"
+                )
+            else:
+                logger.debug(
+                    f"No workflows matched event type: {created_event.event_type}"
+                )
+        except Exception as e:
+            # Log error but don't fail the event creation
+            logger.error(
+                f"Error triggering workflows for event {created_event.id}: {e}",
+                exc_info=True,
+            )
+
         return str(created_event.id)
     except Exception as e:
         logger.error(f"Error creating event: {e}", exc_info=True)

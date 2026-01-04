@@ -14,6 +14,7 @@ from app.services.edge_service import EdgeService
 from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
 from app.constants.node_types import ExecutionData
 from app.exceptions.resource_not_found_error import ResourceNotFoundError
+from app.schemas.event import EventBase
 
 
 class ExecuteWorkflowCommand:
@@ -36,6 +37,7 @@ class ExecuteWorkflowCommand:
         workflow_id: UUID,
         initial_data: Optional[Dict[str, Any]] = None,
         manual: bool = False,
+        event: Optional[EventBase] = None,
     ) -> Dict[str, Any]:
         """
         Execute a workflow.
@@ -48,6 +50,7 @@ class ExecuteWorkflowCommand:
             workflow_id: The ID of the workflow to execute
             initial_data: Optional initial data to pass to trigger nodes
             manual: Whether this is a manual execution (bypasses is_active check)
+            event: Optional event to pass to trigger nodes (for event-triggered workflows)
 
         Returns:
             Dict containing execution results
@@ -92,6 +95,7 @@ class ExecuteWorkflowCommand:
         execution_data = ExecutionData(
             json=initial_data or {},
             error=None,
+            event=event,
         )
 
         # Execute workflow starting from trigger nodes

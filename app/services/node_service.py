@@ -107,6 +107,37 @@ class NodeService(SoftDeleteService[Node]):
             .all()
         )
 
+    def get_nodes_by_workflow_version_and_kind(
+        self,
+        workflow_version_id: UUID,
+        kind: str,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> List[Node]:
+        """
+        Get nodes of a specific kind for a specific workflow version.
+
+        Args:
+            workflow_version_id: The ID of the workflow version
+            kind: The kind/type of node to filter by
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List[Node]: List of nodes matching both criteria
+        """
+        return (
+            self.db.query(Node)
+            .filter(
+                Node.workflow_version_id == workflow_version_id,
+                Node.kind == kind,
+            )
+            .order_by(Node.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
     def create_node(self, node: NodeCreate) -> Node:
         """
         Create a new node.
