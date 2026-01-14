@@ -11,3 +11,5 @@
 ## Overview
 
 **Orcha** is a workflow automation engine that connects APIs, services, and internal tools into visual, event-driven flows. It lets teams orchestrate complex processes with modular nodes, custom logic, and integrations, all without heavy scripting. Designed for scale and extensibility, it streamlines data movement, task automation, and service coordination across your stack.
+
+![Alt](https://repobeats.axiom.co/api/embed/94aeee8b4ba13d61fd3d958598491bd11c7b8d15.svg "Repobeats analytics image")
