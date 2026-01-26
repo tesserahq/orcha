@@ -29,7 +29,6 @@ from app.constants.node_types import (
     Routing,
 )
 
-
 # Category registry
 NODE_CATEGORIES: Dict[CategoryKey, NodeCategory] = {
     CATEGORY_TRIGGER: {

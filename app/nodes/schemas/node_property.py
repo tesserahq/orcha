@@ -8,7 +8,6 @@ boolean, options, collections, and more.
 from typing import Any, Dict, List, Literal, Optional, Union
 from pydantic import BaseModel
 
-
 # Property Type Definitions
 NodePropertyType = Literal[
     "boolean",
