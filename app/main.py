@@ -24,6 +24,8 @@ from app.db import db_manager
 
 SKIP_PATHS = ["/health", "/openapi.json", "/docs", "/metrics"]
 
+SKIP_ONBOARDING_PATHS = ["/health", "/openapi.json", "/docs", "/metrics"]
+
 
 class EndpointFilter(logging.Filter):
     # Uvicorn endpoint access log filter
@@ -68,6 +70,7 @@ def create_app(testing: bool = False, auth_middleware=None) -> FastAPI:
 
         app.add_middleware(
             UserOnboardingMiddleware,
+            skip_onboarding_paths=SKIP_ONBOARDING_PATHS,
             identies_base_url=settings.identies_host,
             user_service_factory=user_service_factory,
         )
