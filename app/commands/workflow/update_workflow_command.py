@@ -3,7 +3,7 @@
 from uuid import UUID
 from app.schemas.workflow import Workflow, WorkflowUpdateRequest
 from app.schemas.workflow_version import WorkflowVersionCreate
-from app.services.workflow_version_service import WorkflowVersionService
+from app.repositories.workflow_version_repository import WorkflowVersionRepository
 from app.commands.workflow.workflow_command_base import WorkflowCommandBase
 
 
@@ -33,7 +33,7 @@ class UpdateWorkflowCommand(WorkflowCommandBase):
         return updated_workflow
 
     def create_new_version(self, workflow: Workflow):
-        workflow_version_service = WorkflowVersionService(self.db)
+        workflow_version_service = WorkflowVersionRepository(self.db)
         workflow_version = workflow_version_service.create_workflow_version(
             WorkflowVersionCreate(
                 workflow_id=workflow.id,

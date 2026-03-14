@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.source import Source
 from app.schemas.source import SourceCreate, SourceUpdate
-from app.services.soft_delete_service import SoftDeleteService
+from app.repositories.soft_delete_repository import SoftDeleteRepository
 from app.utils.db.filtering import apply_filters
 
 
-class SourceService(SoftDeleteService[Source]):
+class SourceRepository(SoftDeleteRepository[Source]):
     """Service class for managing source CRUD operations."""
 
     def __init__(self, db: Session):

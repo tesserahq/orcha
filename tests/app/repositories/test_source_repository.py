@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 from app.schemas.source import SourceCreate, SourceUpdate
-from app.services.source_service import SourceService
+from app.repositories.source_repository import SourceRepository
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def test_create_source(db, sample_source_data):
     """Test creating a new source."""
     # Create source
     source_create = SourceCreate(**sample_source_data)
-    source = SourceService(db).create_source(source_create)
+    source = SourceRepository(db).create_source(source_create)
 
     # Assertions
     assert source.id is not None
@@ -31,7 +31,7 @@ def test_create_source(db, sample_source_data):
 def test_get_source(db, test_source):
     """Test retrieving a source by ID."""
     # Get source
-    retrieved_source = SourceService(db).get_source(test_source.id)
+    retrieved_source = SourceRepository(db).get_source(test_source.id)
 
     # Assertions
     assert retrieved_source is not None
@@ -42,7 +42,7 @@ def test_get_source(db, test_source):
 def test_get_source_by_identifier(db, test_source):
     """Test retrieving a source by identifier."""
     # Get source by identifier
-    retrieved_source = SourceService(db).get_source_by_identifier(
+    retrieved_source = SourceRepository(db).get_source_by_identifier(
         test_source.identifier
     )
 
@@ -55,7 +55,7 @@ def test_get_source_by_identifier(db, test_source):
 def test_get_sources(db, test_source):
     """Test retrieving all sources."""
     # Get all sources
-    sources = SourceService(db).get_sources()
+    sources = SourceRepository(db).get_sources()
 
     # Assertions
     assert len(sources) >= 1
@@ -72,7 +72,7 @@ def test_update_source(db, test_source):
     source_update = SourceUpdate(**update_data)
 
     # Update source
-    updated_source = SourceService(db).update_source(test_source.id, source_update)
+    updated_source = SourceRepository(db).update_source(test_source.id, source_update)
 
     # Assertions
     assert updated_source is not None
@@ -85,7 +85,7 @@ def test_update_source(db, test_source):
 
 def test_delete_source(db, test_source):
     """Test soft deleting a source."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
     # Delete source
     success = source_service.delete_source(test_source.id)
 
@@ -97,7 +97,7 @@ def test_delete_source(db, test_source):
 
 def test_get_deleted_source(db, test_source):
     """Test retrieving a soft-deleted source."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
     # Delete source
     source_service.delete_source(test_source.id)
 
@@ -112,7 +112,7 @@ def test_get_deleted_source(db, test_source):
 
 def test_restore_source(db, test_source):
     """Test restoring a soft-deleted source."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
     # Delete source
     source_service.delete_source(test_source.id)
 
@@ -131,7 +131,7 @@ def test_restore_source(db, test_source):
 
 def test_hard_delete_source(db, test_source):
     """Test permanently deleting a source."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
     source_id = test_source.id
 
     # Hard delete source
@@ -146,7 +146,7 @@ def test_hard_delete_source(db, test_source):
 
 def test_get_deleted_sources(db, test_source):
     """Test retrieving all soft-deleted sources."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
     # Delete source
     source_service.delete_source(test_source.id)
 
@@ -166,28 +166,28 @@ def test_search_sources_with_filters(db, test_source):
     # Search using ilike filter on name
     if source_name_part:
         filters = {"name": {"operator": "ilike", "value": f"%{source_name_part}%"}}
-        results = SourceService(db).search(filters)
+        results = SourceRepository(db).search(filters)
 
         assert isinstance(results, list)
         assert any(source.id == test_source.id for source in results)
 
     # Search using exact match on identifier
     filters = {"identifier": test_source.identifier}
-    results = SourceService(db).search(filters)
+    results = SourceRepository(db).search(filters)
 
     assert len(results) == 1
     assert results[0].id == test_source.id
 
     # Search with no match
     filters = {"name": {"operator": "==", "value": "nonexistent-source-name-xyz"}}
-    results = SourceService(db).search(filters)
+    results = SourceRepository(db).search(filters)
 
     assert len(results) == 0
 
 
 def test_source_not_found_cases(db):
     """Test various not found cases."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
     non_existent_id = uuid4()
 
     # Get non-existent source

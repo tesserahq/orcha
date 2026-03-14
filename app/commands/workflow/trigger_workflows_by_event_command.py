@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from app.models.workflow import Workflow
 from app.models.node import Node
 from app.models.event import Event
-from app.services.workflow_service import WorkflowService
-from app.services.node_service import NodeService
+from app.repositories.workflow_repository import WorkflowRepository
+from app.repositories.node_repository import NodeRepository
 from app.commands.workflow.execute_workflow_command import ExecuteWorkflowCommand
 from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
 from app.schemas.event import EventBase
@@ -29,8 +29,8 @@ class TriggerWorkflowsByEventCommand:
             db: Database session
         """
         self.db = db
-        self.workflow_service = WorkflowService(self.db)
-        self.node_service = NodeService(self.db)
+        self.workflow_service = WorkflowRepository(self.db)
+        self.node_service = NodeRepository(self.db)
 
     def execute(self, event: Event) -> List[Dict[str, Any]]:
         """

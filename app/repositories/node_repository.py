@@ -4,11 +4,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.node import Node
 from app.schemas.node import NodeCreate, NodeUpdate
-from app.services.soft_delete_service import SoftDeleteService
+from app.repositories.soft_delete_repository import SoftDeleteRepository
 from app.utils.db.filtering import apply_filters
 
 
-class NodeService(SoftDeleteService[Node]):
+class NodeRepository(SoftDeleteRepository[Node]):
     """Service class for managing node CRUD operations."""
 
     def __init__(self, db: Session):

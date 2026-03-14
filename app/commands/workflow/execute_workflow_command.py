@@ -8,9 +8,9 @@ from datetime import datetime
 from app.models.workflow import Workflow
 from app.models.node import Node
 from app.models.edge import Edge
-from app.services.workflow_service import WorkflowService
-from app.services.node_service import NodeService
-from app.services.edge_service import EdgeService
+from app.repositories.workflow_repository import WorkflowRepository
+from app.repositories.node_repository import NodeRepository
+from app.repositories.edge_repository import EdgeRepository
 from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
 from app.constants.node_types import ExecutionData
 from app.exceptions.resource_not_found_error import ResourceNotFoundError
@@ -28,9 +28,9 @@ class ExecuteWorkflowCommand:
             db: Database session
         """
         self.db = db
-        self.workflow_service = WorkflowService(self.db)
-        self.node_service = NodeService(self.db)
-        self.edge_service = EdgeService(self.db)
+        self.workflow_service = WorkflowRepository(self.db)
+        self.node_service = NodeRepository(self.db)
+        self.edge_service = EdgeRepository(self.db)
 
     def execute(
         self,

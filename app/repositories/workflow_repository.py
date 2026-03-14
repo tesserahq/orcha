@@ -5,11 +5,11 @@ from sqlalchemy import select
 from app.models.workflow import Workflow
 from app.models.workflow_version import WorkflowVersion
 from app.schemas.workflow import WorkflowCreate, WorkflowUpdate, WorkflowUpdateRequest
-from app.services.soft_delete_service import SoftDeleteService
+from app.repositories.soft_delete_repository import SoftDeleteRepository
 from app.utils.db.filtering import apply_filters
 
 
-class WorkflowService(SoftDeleteService[Workflow]):
+class WorkflowRepository(SoftDeleteRepository[Workflow]):
     """Service class for managing workflow CRUD operations."""
 
     def __init__(self, db: Session):

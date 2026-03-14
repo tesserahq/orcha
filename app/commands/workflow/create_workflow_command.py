@@ -2,7 +2,7 @@
 
 from app.schemas.workflow import Workflow, WorkflowCreate
 from app.schemas.workflow_version import WorkflowVersionCreate
-from app.services.workflow_version_service import WorkflowVersionService
+from app.repositories.workflow_version_repository import WorkflowVersionRepository
 from app.commands.workflow.workflow_command_base import WorkflowCommandBase
 
 
@@ -13,7 +13,7 @@ class CreateWorkflowCommand(WorkflowCommandBase):
         workflow = self.workflow_service.create_workflow(workflow_data)
 
         # Create the initial workflow version with the same active status as the workflow
-        workflow_version_service = WorkflowVersionService(self.db)
+        workflow_version_service = WorkflowVersionRepository(self.db)
         version_data = WorkflowVersionCreate(
             workflow_id=workflow.id,
             version=1,

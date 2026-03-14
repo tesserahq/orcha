@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 from app.schemas.event import EventCreate, EventUpdate
-from app.services.event_service import EventService
+from app.repositories.event_repository import EventRepository
 from datetime import datetime, UTC
 
 
@@ -26,7 +26,7 @@ def test_create_event(db, sample_event_data):
     """Test creating a new event."""
     # Create event
     event_create = EventCreate(**sample_event_data)
-    event = EventService(db).create_event(event_create)
+    event = EventRepository(db).create_event(event_create)
 
     # Assertions
     assert event.id is not None
@@ -40,7 +40,7 @@ def test_create_event(db, sample_event_data):
 def test_get_event(db, setup_event):
     """Test retrieving an event by ID."""
     # Get event
-    retrieved_event = EventService(db).get_event(setup_event.id)
+    retrieved_event = EventRepository(db).get_event(setup_event.id)
 
     # Assertions
     assert retrieved_event is not None
@@ -51,7 +51,7 @@ def test_get_event(db, setup_event):
 def test_get_events(db, setup_event):
     """Test retrieving all events."""
     # Get all events
-    events = EventService(db).get_events()
+    events = EventRepository(db).get_events()
 
     # Assertions
     assert len(events) >= 1
@@ -61,7 +61,7 @@ def test_get_events(db, setup_event):
 def test_get_events_by_type(db, setup_event):
     """Test retrieving events by type."""
     # Get events by type
-    events = EventService(db).get_events_by_type(setup_event.event_type)
+    events = EventRepository(db).get_events_by_type(setup_event.event_type)
 
     # Assertions
     assert len(events) >= 1
@@ -79,7 +79,7 @@ def test_update_event(db, setup_event):
     event_update = EventUpdate(**update_data)
 
     # Update event
-    updated_event = EventService(db).update_event(setup_event.id, event_update)
+    updated_event = EventRepository(db).update_event(setup_event.id, event_update)
 
     # Assertions
     assert updated_event is not None
@@ -91,7 +91,7 @@ def test_update_event(db, setup_event):
 
 def test_delete_event(db, setup_event):
     """Test soft deleting an event."""
-    event_service = EventService(db)
+    event_service = EventRepository(db)
     # Delete event
     success = event_service.delete_event(setup_event.id)
 
@@ -103,7 +103,7 @@ def test_delete_event(db, setup_event):
 
 def test_get_deleted_event(db, setup_event):
     """Test retrieving a soft-deleted event."""
-    event_service = EventService(db)
+    event_service = EventRepository(db)
     # Delete event
     event_service.delete_event(setup_event.id)
 
@@ -118,7 +118,7 @@ def test_get_deleted_event(db, setup_event):
 
 def test_restore_event(db, setup_event):
     """Test restoring a soft-deleted event."""
-    event_service = EventService(db)
+    event_service = EventRepository(db)
     # Delete event
     event_service.delete_event(setup_event.id)
 
@@ -137,7 +137,7 @@ def test_restore_event(db, setup_event):
 
 def test_hard_delete_event(db, setup_event):
     """Test permanently deleting an event."""
-    event_service = EventService(db)
+    event_service = EventRepository(db)
     event_id = setup_event.id
 
     # Hard delete event
@@ -152,7 +152,7 @@ def test_hard_delete_event(db, setup_event):
 
 def test_get_deleted_events(db, setup_event):
     """Test retrieving all soft-deleted events."""
-    event_service = EventService(db)
+    event_service = EventRepository(db)
     # Delete event
     event_service.delete_event(setup_event.id)
 
@@ -168,7 +168,7 @@ def test_search_events_with_filters(db, setup_event):
     """Test searching events with filters."""
     # Search using exact match on event_type
     filters = {"event_type": setup_event.event_type}
-    results = EventService(db).search(filters)
+    results = EventRepository(db).search(filters)
 
     assert len(results) >= 1
     assert any(event.id == setup_event.id for event in results)
@@ -177,21 +177,21 @@ def test_search_events_with_filters(db, setup_event):
     filters = {
         "event_type": {"operator": "ilike", "value": f"%{setup_event.event_type}%"}
     }
-    results = EventService(db).search(filters)
+    results = EventRepository(db).search(filters)
 
     assert len(results) >= 1
     assert any(event.id == setup_event.id for event in results)
 
     # Search with no match
     filters = {"event_type": "nonexistent.event.type"}
-    results = EventService(db).search(filters)
+    results = EventRepository(db).search(filters)
 
     assert len(results) == 0
 
 
 def setup_event_not_found_cases(db):
     """Test various not found cases."""
-    event_service = EventService(db)
+    event_service = EventRepository(db)
     non_existent_id = uuid4()
 
     # Get non-existent event
@@ -228,7 +228,7 @@ def test_create_event_with_default_spec_version(db):
         "source": "test.source",
     }
     event_create = EventCreate(**event_data)
-    event = EventService(db).create_event(event_create)
+    event = EventRepository(db).create_event(event_create)
 
     # Assertions
     assert event.spec_version == "1.0"  # Should use default
@@ -236,7 +236,7 @@ def test_create_event_with_default_spec_version(db):
 
 def test_get_events_query(db, setup_event):
     """Test getting events query object."""
-    select_stmt = EventService(db).get_events_query()
+    select_stmt = EventRepository(db).get_events_query()
     events = db.execute(select_stmt).scalars().all()
 
     # Assertions
