@@ -7,7 +7,7 @@ from app.core.celery_app import celery_app
 from app.core.logging_config import get_logger
 from app.db import SessionLocal
 from app.schemas.event import EventCreate
-from app.services.event_service import EventService
+from app.repositories.event_repository import EventRepository
 from app.utils.event_type_cache import add_event_type
 from app.commands.workflow.trigger_workflows_by_event_command import (
     TriggerWorkflowsByEventCommand,
@@ -63,8 +63,8 @@ def process_nats_event_task(msg: Dict) -> Optional[str]:
             user_id=msg.get("user_id"),
         )
 
-        # Create event using EventService
-        event_service = EventService(db)
+        # Create event using EventRepository
+        event_service = EventRepository(db)
         created_event = event_service.create_event(event_create)
 
         # Add event type to cache (maintains unique list)

@@ -4,7 +4,7 @@ from app.schemas.workflow_version import (
     WorkflowVersionCreate,
     WorkflowVersionUpdate,
 )
-from app.services.workflow_version_service import WorkflowVersionService
+from app.repositories.workflow_version_repository import WorkflowVersionRepository
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def sample_workflow_version_data(test_workflow):
 
 def test_create_workflow_version_auto_increment(db, test_workflow):
     """Test creating workflow versions with auto-increment."""
-    service = WorkflowVersionService(db)
+    service = WorkflowVersionRepository(db)
 
     # Create first version without specifying version
     version_data = {"workflow_id": test_workflow.id, "is_active": True}
@@ -40,7 +40,7 @@ def test_create_workflow_version_auto_increment(db, test_workflow):
 def test_create_workflow_version(db, sample_workflow_version_data):
     """Test creating a new workflow version."""
     workflow_version_create = WorkflowVersionCreate(**sample_workflow_version_data)
-    workflow_version = WorkflowVersionService(db).create_workflow_version(
+    workflow_version = WorkflowVersionRepository(db).create_workflow_version(
         workflow_version_create
     )
 
@@ -54,7 +54,7 @@ def test_create_workflow_version(db, sample_workflow_version_data):
 
 def test_get_workflow_version(db, test_workflow_version):
     """Test retrieving a workflow version by ID."""
-    retrieved_workflow_version = WorkflowVersionService(db).get_workflow_version(
+    retrieved_workflow_version = WorkflowVersionRepository(db).get_workflow_version(
         test_workflow_version.id
     )
 
@@ -65,7 +65,7 @@ def test_get_workflow_version(db, test_workflow_version):
 
 def test_get_workflow_versions(db, test_workflow_version):
     """Test retrieving all workflow versions."""
-    workflow_versions = WorkflowVersionService(db).get_workflow_versions()
+    workflow_versions = WorkflowVersionRepository(db).get_workflow_versions()
 
     assert len(workflow_versions) >= 1
     assert any(wv.id == test_workflow_version.id for wv in workflow_versions)
@@ -73,7 +73,7 @@ def test_get_workflow_versions(db, test_workflow_version):
 
 def test_get_workflow_versions_by_workflow(db, test_workflow_version, test_workflow):
     """Test retrieving workflow versions by workflow ID."""
-    workflow_versions = WorkflowVersionService(db).get_workflow_versions_by_workflow(
+    workflow_versions = WorkflowVersionRepository(db).get_workflow_versions_by_workflow(
         test_workflow.id
     )
 
@@ -84,7 +84,7 @@ def test_get_workflow_versions_by_workflow(db, test_workflow_version, test_workf
 
 def test_get_active_workflow_versions(db, test_workflow_version):
     """Test retrieving active workflow versions."""
-    workflow_versions = WorkflowVersionService(db).get_active_workflow_versions()
+    workflow_versions = WorkflowVersionRepository(db).get_active_workflow_versions()
 
     assert len(workflow_versions) >= 1
     assert any(wv.id == test_workflow_version.id for wv in workflow_versions)
@@ -99,7 +99,7 @@ def test_update_workflow_version(db, test_workflow_version):
     }
     workflow_version_update = WorkflowVersionUpdate(**update_data)
 
-    updated_workflow_version = WorkflowVersionService(db).update_workflow_version(
+    updated_workflow_version = WorkflowVersionRepository(db).update_workflow_version(
         test_workflow_version.id, workflow_version_update
     )
 
@@ -111,7 +111,7 @@ def test_update_workflow_version(db, test_workflow_version):
 
 def test_delete_workflow_version(db, test_workflow_version):
     """Test soft deleting a workflow version."""
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     success = workflow_version_service.delete_workflow_version(test_workflow_version.id)
 
     assert success is True
@@ -123,7 +123,7 @@ def test_delete_workflow_version(db, test_workflow_version):
 
 def test_get_deleted_workflow_version(db, test_workflow_version):
     """Test retrieving a soft-deleted workflow version."""
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     workflow_version_service.delete_workflow_version(test_workflow_version.id)
 
     deleted_workflow_version = workflow_version_service.get_deleted_workflow_version(
@@ -137,7 +137,7 @@ def test_get_deleted_workflow_version(db, test_workflow_version):
 
 def test_restore_workflow_version(db, test_workflow_version):
     """Test restoring a soft-deleted workflow version."""
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     workflow_version_service.delete_workflow_version(test_workflow_version.id)
 
     assert (
@@ -158,7 +158,7 @@ def test_restore_workflow_version(db, test_workflow_version):
 
 def test_hard_delete_workflow_version(db, test_workflow_version):
     """Test permanently deleting a workflow version."""
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     workflow_version_id = test_workflow_version.id
 
     success = workflow_version_service.hard_delete_workflow_version(workflow_version_id)
@@ -172,7 +172,7 @@ def test_hard_delete_workflow_version(db, test_workflow_version):
 
 def test_get_deleted_workflow_versions(db, test_workflow_version):
     """Test retrieving all soft-deleted workflow versions."""
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     workflow_version_service.delete_workflow_version(test_workflow_version.id)
 
     deleted_workflow_versions = workflow_version_service.get_deleted_workflow_versions()
@@ -184,7 +184,7 @@ def test_get_deleted_workflow_versions(db, test_workflow_version):
 def test_search_workflow_versions_with_filters(db, test_workflow_version):
     """Test searching workflow versions with filters."""
     filters = {"version": test_workflow_version.version}
-    results = WorkflowVersionService(db).search(filters)
+    results = WorkflowVersionRepository(db).search(filters)
 
     assert isinstance(results, list)
     assert any(
@@ -192,14 +192,14 @@ def test_search_workflow_versions_with_filters(db, test_workflow_version):
     )
 
     filters = {"version": {"operator": ">=", "value": 1}}
-    results = WorkflowVersionService(db).search(filters)
+    results = WorkflowVersionRepository(db).search(filters)
 
     assert len(results) >= 1
 
 
 def test_workflow_version_not_found_cases(db):
     """Test various not found cases."""
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     non_existent_id = uuid4()
 
     assert workflow_version_service.get_workflow_version(non_existent_id) is None
@@ -224,7 +224,7 @@ def test_workflow_version_not_found_cases(db):
 
 def test_toggle_workflow_version_active_status(db, test_workflow_version):
     """Test toggling workflow version active status."""
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     original_status = test_workflow_version.is_active
 
     toggled_workflow_version = (
@@ -248,7 +248,7 @@ def test_toggle_workflow_version_active_status(db, test_workflow_version):
 def test_get_workflow_versions_query(db, test_workflow_version):
     """Test getting workflow versions query object."""
 
-    select_stmt = WorkflowVersionService(db).get_workflow_versions_query()
+    select_stmt = WorkflowVersionRepository(db).get_workflow_versions_query()
     workflow_versions = db.execute(select_stmt).scalars().all()
 
     assert len(workflow_versions) >= 1

@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from app.models.workflow import Workflow
 from app.models.node import Node
 from app.models.event import Event
-from app.services.workflow_service import WorkflowService
-from app.services.node_service import NodeService
+from app.repositories.workflow_repository import WorkflowRepository
+from app.repositories.node_repository import NodeRepository
 from app.commands.workflow.execute_workflow_command import ExecuteWorkflowCommand
 from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
 from app.schemas.event import EventBase
@@ -29,8 +29,8 @@ class TriggerWorkflowsByEventCommand:
             db: Database session
         """
         self.db = db
-        self.workflow_service = WorkflowService(self.db)
-        self.node_service = NodeService(self.db)
+        self.workflow_repository = WorkflowRepository(self.db)
+        self.node_repository = NodeRepository(self.db)
 
     def execute(self, event: Event) -> List[Dict[str, Any]]:
         """
@@ -47,7 +47,7 @@ class TriggerWorkflowsByEventCommand:
         )
 
         # Get all active workflows
-        active_workflows = self.workflow_service.get_active_workflows()
+        active_workflows = self.workflow_repository.get_active_workflows()
         logger.info(f"Found {len(active_workflows)} active workflows")
 
         matching_workflows = []
@@ -146,7 +146,7 @@ class TriggerWorkflowsByEventCommand:
             return False
 
         # Query for event trigger nodes using node service, filtered by workflow version and kind
-        event_trigger_nodes = self.node_service.get_nodes_by_workflow_version_and_kind(
+        event_trigger_nodes = self.node_repository.get_nodes_by_workflow_version_and_kind(
             workflow_version_id=workflow.active_version_id,  # type: ignore[arg-type]
             kind=EVENT_RECEIVED_NODE_ID,
         )

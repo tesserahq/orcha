@@ -8,7 +8,7 @@ from app.db import Base
 T = TypeVar("T", bound=Base)
 
 
-class SoftDeleteService(Generic[T]):
+class SoftDeleteRepository(Generic[T]):
     """
     Generic service class that provides soft delete functionality for any model.
 

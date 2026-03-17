@@ -10,10 +10,10 @@ from app.models.workflow import Workflow
 from app.models.node import Node
 from app.models.edge import Edge
 from app.models.workflow_execution import WorkflowExecution
-from app.services.workflow_service import WorkflowService
-from app.services.node_service import NodeService
-from app.services.edge_service import EdgeService
-from app.services.workflow_execution_service import WorkflowExecutionService
+from app.repositories.workflow_repository import WorkflowRepository
+from app.repositories.node_repository import NodeRepository
+from app.repositories.edge_repository import EdgeRepository
+from app.repositories.workflow_execution_repository import WorkflowExecutionRepository
 from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
 from app.constants.node_types import ExecutionData
 from app.exceptions.resource_not_found_error import ResourceNotFoundError
@@ -31,10 +31,10 @@ class ExecuteWorkflowCommand:
             db: Database session
         """
         self.db = db
-        self.workflow_service = WorkflowService(self.db)
-        self.node_service = NodeService(self.db)
-        self.edge_service = EdgeService(self.db)
-        self.execution_service = WorkflowExecutionService(self.db)
+        self.workflow_repository = WorkflowRepository(self.db)
+        self.node_repository = NodeRepository(self.db)
+        self.edge_repository = EdgeRepository(self.db)
+        self.execution_repository = WorkflowExecutionRepository(self.db)
 
     def execute(
         self,
@@ -66,7 +66,7 @@ class ExecuteWorkflowCommand:
             ValueError: If workflow cannot be executed
         """
         # Get the workflow
-        workflow = self.workflow_service.get_workflow(workflow_id)
+        workflow = self.workflow_repository.get_workflow(workflow_id)
         if not workflow:
             raise ResourceNotFoundError(f"Workflow with id {workflow_id} not found")
 
@@ -83,12 +83,12 @@ class ExecuteWorkflowCommand:
         workflow_version_id = workflow.active_version_id
 
         # Get all nodes for this workflow version
-        nodes = self.node_service.get_nodes_by_workflow_version(workflow_version_id)
+        nodes = self.node_repository.get_nodes_by_workflow_version(workflow_version_id)
         if not nodes:
             raise ValueError(f"Workflow version {workflow_version_id} has no nodes")
 
         # Get all edges for this workflow version
-        edges = self.edge_service.get_edges_by_workflow_version(workflow_version_id)
+        edges = self.edge_repository.get_edges_by_workflow_version(workflow_version_id)
 
         # Find trigger nodes (nodes with kind that maps to CATEGORY_TRIGGER)
         trigger_nodes = self._find_trigger_nodes(nodes)
@@ -127,7 +127,7 @@ class ExecuteWorkflowCommand:
         }
 
         # Record this execution as an immutable history entry
-        self.execution_service.create_execution(
+        self.execution_repository.create_execution(
             WorkflowExecution(
                 workflow_id=workflow_id,
                 workflow_version_id=workflow_version_id,

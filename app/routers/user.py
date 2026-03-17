@@ -5,7 +5,7 @@ from uuid import UUID
 
 from app.db import get_db
 from app.schemas.user import User
-from app.services.user_service import UserService
+from app.repositories.user_repository import UserRepository
 from app.auth.rbac import build_rbac_dependencies
 
 
@@ -33,7 +33,7 @@ def get_user(
     _authorized: bool = Depends(rbac["read"]),
 ):
     """Get a user by ID."""
-    user = UserService(db).get_user(user_id)
+    user = UserRepository(db).get_user(user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"

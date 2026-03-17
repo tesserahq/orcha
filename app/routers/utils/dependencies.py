@@ -5,9 +5,9 @@ from app.db import get_db
 from app.models.workflow import Workflow
 from app.models.event import Event
 from app.models.source import Source
-from app.services.workflow_service import WorkflowService
-from app.services.event_service import EventService
-from app.services.source_service import SourceService
+from app.repositories.workflow_repository import WorkflowRepository
+from app.repositories.event_repository import EventRepository
+from app.repositories.source_repository import SourceRepository
 
 
 def get_workflow_by_id(
@@ -26,7 +26,7 @@ def get_workflow_by_id(
     Raises:
         HTTPException: If the workflow is not found
     """
-    workflow = WorkflowService(db).get_workflow(workflow_id)
+    workflow = WorkflowRepository(db).get_workflow(workflow_id)
     if workflow is None:
         raise HTTPException(status_code=404, detail="Workflow not found")
     return workflow
@@ -48,7 +48,7 @@ def get_event_by_id(
     Raises:
         HTTPException: If the event is not found
     """
-    event = EventService(db).get_event(event_id)
+    event = EventRepository(db).get_event(event_id)
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
@@ -70,7 +70,7 @@ def get_source_by_id(
     Raises:
         HTTPException: If the source is not found
     """
-    source = SourceService(db).get_source(source_id)
+    source = SourceRepository(db).get_source(source_id)
     if source is None:
         raise HTTPException(status_code=404, detail="Source not found")
     return source

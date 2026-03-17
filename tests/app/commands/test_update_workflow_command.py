@@ -1,9 +1,9 @@
 from app.commands.workflow import UpdateWorkflowCommand
 from app.schemas.workflow import WorkflowUpdateRequest
 from app.schemas.node import NodeCreatePayload
-from app.services.node_service import NodeService
-from app.services.edge_service import EdgeService
-from app.services.workflow_version_service import WorkflowVersionService
+from app.repositories.node_repository import NodeRepository
+from app.repositories.edge_repository import EdgeRepository
+from app.repositories.workflow_version_repository import WorkflowVersionRepository
 
 
 def test_update_workflow_command_updates_fields(db, test_workflow):
@@ -49,9 +49,9 @@ def test_update_workflow_with_nodes_auto_edges(db, test_workflow):
     assert updated.name == "Workflow w/ graph"
 
     # Check new version has nodes and edges
-    workflow_version_service = WorkflowVersionService(db)
-    node_service = NodeService(db)
-    edge_service = EdgeService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
+    node_service = NodeRepository(db)
+    edge_service = EdgeRepository(db)
     version_obj = workflow_version_service.get_workflow_version(
         updated.active_version_id
     )

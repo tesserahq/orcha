@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 from app.schemas.workflow import WorkflowCreate, WorkflowUpdate
-from app.services.workflow_service import WorkflowService
+from app.repositories.workflow_repository import WorkflowRepository
 
 
 @pytest.fixture
@@ -16,7 +16,7 @@ def sample_workflow_data():
 def test_create_workflow(db, sample_workflow_data):
     """Test creating a new workflow."""
     workflow_create = WorkflowCreate(**sample_workflow_data)
-    workflow = WorkflowService(db).create_workflow(workflow_create)
+    workflow = WorkflowRepository(db).create_workflow(workflow_create)
 
     assert workflow.id is not None
     assert workflow.name == sample_workflow_data["name"]
@@ -28,7 +28,7 @@ def test_create_workflow(db, sample_workflow_data):
 
 def test_get_workflow(db, test_workflow):
     """Test retrieving a workflow by ID."""
-    retrieved_workflow = WorkflowService(db).get_workflow(test_workflow.id)
+    retrieved_workflow = WorkflowRepository(db).get_workflow(test_workflow.id)
 
     assert retrieved_workflow is not None
     assert retrieved_workflow.id == test_workflow.id
@@ -37,7 +37,7 @@ def test_get_workflow(db, test_workflow):
 
 def test_get_workflows(db, test_workflow):
     """Test retrieving all workflows."""
-    workflows = WorkflowService(db).get_workflows()
+    workflows = WorkflowRepository(db).get_workflows()
 
     assert len(workflows) >= 1
     assert any(w.id == test_workflow.id for w in workflows)
@@ -45,7 +45,7 @@ def test_get_workflows(db, test_workflow):
 
 def test_get_active_workflows(db, test_workflow):
     """Test retrieving active workflows."""
-    workflows = WorkflowService(db).get_active_workflows()
+    workflows = WorkflowRepository(db).get_active_workflows()
 
     assert len(workflows) >= 1
     assert any(w.id == test_workflow.id for w in workflows)
@@ -61,7 +61,7 @@ def test_update_workflow(db, test_workflow):
     }
     workflow_update = WorkflowUpdate(**update_data)
 
-    updated_workflow = WorkflowService(db).update_workflow(
+    updated_workflow = WorkflowRepository(db).update_workflow(
         test_workflow.id, workflow_update
     )
 
@@ -74,7 +74,7 @@ def test_update_workflow(db, test_workflow):
 
 def test_delete_workflow(db, test_workflow):
     """Test soft deleting a workflow."""
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowRepository(db)
     success = workflow_service.delete_workflow(test_workflow.id)
 
     assert success is True
@@ -84,7 +84,7 @@ def test_delete_workflow(db, test_workflow):
 
 def test_get_deleted_workflow(db, test_workflow):
     """Test retrieving a soft-deleted workflow."""
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowRepository(db)
     workflow_service.delete_workflow(test_workflow.id)
 
     deleted_workflow = workflow_service.get_deleted_workflow(test_workflow.id)
@@ -96,7 +96,7 @@ def test_get_deleted_workflow(db, test_workflow):
 
 def test_restore_workflow(db, test_workflow):
     """Test restoring a soft-deleted workflow."""
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowRepository(db)
     workflow_service.delete_workflow(test_workflow.id)
 
     assert workflow_service.get_workflow(test_workflow.id) is None
@@ -111,7 +111,7 @@ def test_restore_workflow(db, test_workflow):
 
 def test_hard_delete_workflow(db, test_workflow):
     """Test permanently deleting a workflow."""
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowRepository(db)
     workflow_id = test_workflow.id
 
     success = workflow_service.hard_delete_workflow(workflow_id)
@@ -123,7 +123,7 @@ def test_hard_delete_workflow(db, test_workflow):
 
 def test_get_deleted_workflows(db, test_workflow):
     """Test retrieving all soft-deleted workflows."""
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowRepository(db)
     workflow_service.delete_workflow(test_workflow.id)
 
     deleted_workflows = workflow_service.get_deleted_workflows()
@@ -135,7 +135,7 @@ def test_get_deleted_workflows(db, test_workflow):
 def test_search_workflows_with_filters(db, test_workflow):
     """Test searching workflows with filters."""
     filters = {"name": {"operator": "ilike", "value": f"%{test_workflow.name}%"}}
-    results = WorkflowService(db).search(filters)
+    results = WorkflowRepository(db).search(filters)
 
     assert isinstance(results, list)
     assert any(workflow.id == test_workflow.id for workflow in results)
@@ -143,7 +143,7 @@ def test_search_workflows_with_filters(db, test_workflow):
 
 def test_workflow_not_found_cases(db):
     """Test various not found cases."""
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowRepository(db)
     non_existent_id = uuid4()
 
     assert workflow_service.get_workflow(non_existent_id) is None
@@ -162,7 +162,7 @@ def test_workflow_not_found_cases(db):
 
 def test_toggle_workflow_active_status(db, test_workflow):
     """Test toggling workflow active status."""
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowRepository(db)
     original_status = test_workflow.is_active
 
     toggled_workflow = workflow_service.toggle_workflow_active_status(test_workflow.id)
@@ -178,7 +178,7 @@ def test_toggle_workflow_active_status(db, test_workflow):
 def test_get_workflows_query(db, test_workflow):
     """Test getting workflows query object."""
 
-    select_stmt = WorkflowService(db).get_workflows_query()
+    select_stmt = WorkflowRepository(db).get_workflows_query()
     workflows = db.execute(select_stmt).scalars().all()
 
     assert len(workflows) >= 1

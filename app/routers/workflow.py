@@ -15,14 +15,14 @@ from app.schemas.workflow import (
     WorkflowExecuteRequest,
     WorkflowExecuteResponse,
 )
-from app.services.workflow_service import WorkflowService
-from app.services.workflow_execution_service import WorkflowExecutionService
+from app.repositories.workflow_repository import WorkflowRepository
+from app.repositories.workflow_execution_repository import WorkflowExecutionRepository
 from app.commands.workflow import (
     CreateWorkflowCommand,
     UpdateWorkflowCommand,
     ExecuteWorkflowCommand,
 )
-from app.services.node_service import NodeService
+from app.repositories.node_repository import NodeRepository
 from app.schemas.node import Node as NodeSchema
 from app.schemas.workflow_execution import WorkflowExecution as WorkflowExecutionSchema
 from app.auth.rbac import build_rbac_dependencies
@@ -57,7 +57,7 @@ def create_workflow(
 
     nodes: list = []
     if created_workflow.active_version_id:
-        node_service = NodeService(db)
+        node_service = NodeRepository(db)
         # get_nodes_by_workflow_version returns descending by created_at; reverse for ascending order
         nodes_desc = node_service.get_nodes_by_workflow_version(
             created_workflow.active_version_id
@@ -74,7 +74,7 @@ def list_workflows(
     db: Session = Depends(get_db), _authorized: bool = Depends(rbac["read"])
 ):
     """List all workflows."""
-    return paginate(db, WorkflowService(db).get_workflows_query())
+    return paginate(db, WorkflowRepository(db).get_workflows_query())
 
 
 @router.get("/{workflow_id}", response_model=WorkflowWithNodes)
@@ -86,7 +86,7 @@ def get_workflow(
     """Get a workflow by ID, including ordered nodes for its active version."""
     nodes: list = []
     if workflow.active_version_id:
-        node_service = NodeService(db)
+        node_service = NodeRepository(db)
         # get_nodes_by_workflow_version returns descending by created_at; reverse for ascending order
         nodes_desc = node_service.get_nodes_by_workflow_version(
             workflow.active_version_id
@@ -111,7 +111,7 @@ def update_workflow(
 
     nodes: list = []
     if updated_workflow.active_version_id:
-        node_service = NodeService(db)
+        node_service = NodeRepository(db)
         # get_nodes_by_workflow_version returns descending by created_at; reverse for ascending order
         nodes_desc = node_service.get_nodes_by_workflow_version(
             updated_workflow.active_version_id
@@ -130,7 +130,7 @@ def delete_workflow(
     _authorized: bool = Depends(rbac["delete"]),
 ):
     """Delete a workflow (soft delete)."""
-    WorkflowService(db).delete_workflow(workflow.id)
+    WorkflowRepository(db).delete_workflow(workflow.id)
     return None
 
 
@@ -165,5 +165,5 @@ def list_workflow_executions(
 ):
     """List execution history for a workflow, newest first."""
     return paginate(
-        db, WorkflowExecutionService(db).get_executions_by_workflow(workflow.id)
+        db, WorkflowExecutionRepository(db).get_executions_by_workflow(workflow.id)
     )

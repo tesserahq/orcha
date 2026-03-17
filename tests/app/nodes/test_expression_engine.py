@@ -13,7 +13,6 @@ import pytest
 from app.constants.node_types import ExecutionData, NodeDescription
 from app.schemas.event import EventBase
 
-
 # ---------------------------------------------------------------------------
 # Minimal concrete subclass — only exists to make NodeDescription instantiable
 # ---------------------------------------------------------------------------
@@ -41,11 +40,15 @@ def _node(parameters: Dict[str, Any]) -> _TestNode:
     return n
 
 
-def _data(json: Dict[str, Any] | None = None, event: EventBase | None = None) -> ExecutionData:
+def _data(
+    json: Dict[str, Any] | None = None, event: EventBase | None = None
+) -> ExecutionData:
     return ExecutionData(json=json or {}, event=event)
 
 
-def _ctx(json: Dict[str, Any] | None = None, event: EventBase | None = None) -> Dict[str, Any]:
+def _ctx(
+    json: Dict[str, Any] | None = None, event: EventBase | None = None
+) -> Dict[str, Any]:
     """Build the same context dict that get_parsed_parameter builds internally."""
     return {
         "json": json or {},
