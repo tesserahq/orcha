@@ -16,6 +16,7 @@ from app.schemas.workflow import (
     WorkflowExecuteResponse,
 )
 from app.services.workflow_service import WorkflowService
+from app.services.workflow_execution_service import WorkflowExecutionService
 from app.commands.workflow import (
     CreateWorkflowCommand,
     UpdateWorkflowCommand,
@@ -23,6 +24,7 @@ from app.commands.workflow import (
 )
 from app.services.node_service import NodeService
 from app.schemas.node import Node as NodeSchema
+from app.schemas.workflow_execution import WorkflowExecution as WorkflowExecutionSchema
 from app.auth.rbac import build_rbac_dependencies
 
 
@@ -153,3 +155,15 @@ def execute_workflow(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
+
+
+@router.get("/{workflow_id}/executions", response_model=Page[WorkflowExecutionSchema])
+def list_workflow_executions(
+    workflow: Workflow = Depends(get_workflow_by_id),
+    db: Session = Depends(get_db),
+    _authorized: bool = Depends(rbac["read"]),
+):
+    """List execution history for a workflow, newest first."""
+    return paginate(
+        db, WorkflowExecutionService(db).get_executions_by_workflow(workflow.id)
+    )
