@@ -1,7 +1,7 @@
 from uuid import uuid4
-from app.services.workflow_version_service import WorkflowVersionService
-from app.services.node_service import NodeService
-from app.services.edge_service import EdgeService
+from app.repositories.workflow_version_repository import WorkflowVersionRepository
+from app.repositories.node_repository import NodeRepository
+from app.repositories.edge_repository import EdgeRepository
 
 
 def test_list_workflows(client):
@@ -106,9 +106,9 @@ def test_update_workflow_with_nodes_auto_edges_router(client, db, test_workflow)
     assert workflow["name"] == update_data["name"]
 
     # Verify nodes and auto edge exist for the new active version
-    wv_service = WorkflowVersionService(db)
-    node_service = NodeService(db)
-    edge_service = EdgeService(db)
+    wv_service = WorkflowVersionRepository(db)
+    node_service = NodeRepository(db)
+    edge_service = EdgeRepository(db)
 
     version_obj = wv_service.get_workflow_version(workflow["active_version_id"])
     nodes = node_service.get_nodes_by_workflow_version(version_obj.id)

@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 from app.schemas.edge import EdgeCreate, EdgeUpdate
-from app.services.edge_service import EdgeService
+from app.repositories.edge_repository import EdgeRepository
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def sample_edge_data(test_node, setup_node):
 def test_create_edge(db, sample_edge_data):
     """Test creating a new edge."""
     edge_create = EdgeCreate(**sample_edge_data)
-    edge = EdgeService(db).create_edge(edge_create)
+    edge = EdgeRepository(db).create_edge(edge_create)
 
     assert edge.id is not None
     assert edge.name == sample_edge_data["name"]
@@ -34,7 +34,7 @@ def test_create_edge(db, sample_edge_data):
 
 def test_get_edge(db, test_edge):
     """Test retrieving an edge by ID."""
-    retrieved_edge = EdgeService(db).get_edge(test_edge.id)
+    retrieved_edge = EdgeRepository(db).get_edge(test_edge.id)
 
     assert retrieved_edge is not None
     assert retrieved_edge.id == test_edge.id
@@ -43,7 +43,7 @@ def test_get_edge(db, test_edge):
 
 def test_get_edges(db, test_edge):
     """Test retrieving all edges."""
-    edges = EdgeService(db).get_edges()
+    edges = EdgeRepository(db).get_edges()
 
     assert len(edges) >= 1
     assert any(e.id == test_edge.id for e in edges)
@@ -51,7 +51,9 @@ def test_get_edges(db, test_edge):
 
 def test_get_edges_by_workflow_version(db, test_edge):
     """Test retrieving edges by workflow version."""
-    edges = EdgeService(db).get_edges_by_workflow_version(test_edge.workflow_version_id)
+    edges = EdgeRepository(db).get_edges_by_workflow_version(
+        test_edge.workflow_version_id
+    )
 
     assert len(edges) >= 1
     assert any(e.id == test_edge.id for e in edges)
@@ -60,7 +62,7 @@ def test_get_edges_by_workflow_version(db, test_edge):
 
 def test_get_edges_by_source_node(db, test_edge):
     """Test retrieving edges by source node."""
-    edges = EdgeService(db).get_edges_by_source_node(test_edge.source_node_id)
+    edges = EdgeRepository(db).get_edges_by_source_node(test_edge.source_node_id)
 
     assert len(edges) >= 1
     assert any(e.id == test_edge.id for e in edges)
@@ -69,7 +71,7 @@ def test_get_edges_by_source_node(db, test_edge):
 
 def test_get_edges_by_target_node(db, test_edge):
     """Test retrieving edges by target node."""
-    edges = EdgeService(db).get_edges_by_target_node(test_edge.target_node_id)
+    edges = EdgeRepository(db).get_edges_by_target_node(test_edge.target_node_id)
 
     assert len(edges) >= 1
     assert any(e.id == test_edge.id for e in edges)
@@ -78,8 +80,8 @@ def test_get_edges_by_target_node(db, test_edge):
 
 def test_get_edges_by_node(db, test_edge):
     """Test retrieving edges connected to a node (source or target)."""
-    edges_as_source = EdgeService(db).get_edges_by_node(test_edge.source_node_id)
-    edges_as_target = EdgeService(db).get_edges_by_node(test_edge.target_node_id)
+    edges_as_source = EdgeRepository(db).get_edges_by_node(test_edge.source_node_id)
+    edges_as_target = EdgeRepository(db).get_edges_by_node(test_edge.target_node_id)
 
     assert len(edges_as_source) >= 1
     assert any(e.id == test_edge.id for e in edges_as_source)
@@ -96,7 +98,7 @@ def test_update_edge(db, test_edge):
     }
     edge_update = EdgeUpdate(**update_data)
 
-    updated_edge = EdgeService(db).update_edge(test_edge.id, edge_update)
+    updated_edge = EdgeRepository(db).update_edge(test_edge.id, edge_update)
 
     assert updated_edge is not None
     assert updated_edge.id == test_edge.id
@@ -106,7 +108,7 @@ def test_update_edge(db, test_edge):
 
 def test_delete_edge(db, test_edge):
     """Test soft deleting an edge."""
-    edge_service = EdgeService(db)
+    edge_service = EdgeRepository(db)
     success = edge_service.delete_edge(test_edge.id)
 
     assert success is True
@@ -116,7 +118,7 @@ def test_delete_edge(db, test_edge):
 
 def test_get_deleted_edge(db, test_edge):
     """Test retrieving a soft-deleted edge."""
-    edge_service = EdgeService(db)
+    edge_service = EdgeRepository(db)
     edge_service.delete_edge(test_edge.id)
 
     deleted_edge = edge_service.get_deleted_edge(test_edge.id)
@@ -128,7 +130,7 @@ def test_get_deleted_edge(db, test_edge):
 
 def test_restore_edge(db, test_edge):
     """Test restoring a soft-deleted edge."""
-    edge_service = EdgeService(db)
+    edge_service = EdgeRepository(db)
     edge_service.delete_edge(test_edge.id)
 
     assert edge_service.get_edge(test_edge.id) is None
@@ -143,7 +145,7 @@ def test_restore_edge(db, test_edge):
 
 def test_hard_delete_edge(db, test_edge):
     """Test permanently deleting an edge."""
-    edge_service = EdgeService(db)
+    edge_service = EdgeRepository(db)
     edge_id = test_edge.id
 
     success = edge_service.hard_delete_edge(edge_id)
@@ -155,7 +157,7 @@ def test_hard_delete_edge(db, test_edge):
 
 def test_get_deleted_edges(db, test_edge):
     """Test retrieving all soft-deleted edges."""
-    edge_service = EdgeService(db)
+    edge_service = EdgeRepository(db)
     edge_service.delete_edge(test_edge.id)
 
     deleted_edges = edge_service.get_deleted_edges()
@@ -167,13 +169,13 @@ def test_get_deleted_edges(db, test_edge):
 def test_search_edges_with_filters(db, test_edge):
     """Test searching edges with filters."""
     filters = {"name": {"operator": "ilike", "value": f"%{test_edge.name}%"}}
-    results = EdgeService(db).search(filters)
+    results = EdgeRepository(db).search(filters)
 
     assert isinstance(results, list)
     assert any(edge.id == test_edge.id for edge in results)
 
     filters = {"source_node_id": test_edge.source_node_id}
-    results = EdgeService(db).search(filters)
+    results = EdgeRepository(db).search(filters)
 
     assert len(results) >= 1
     assert results[0].id == test_edge.id
@@ -181,7 +183,7 @@ def test_search_edges_with_filters(db, test_edge):
 
 def test_edge_not_found_cases(db):
     """Test various not found cases."""
-    edge_service = EdgeService(db)
+    edge_service = EdgeRepository(db)
     non_existent_id = uuid4()
 
     assert edge_service.get_edge(non_existent_id) is None
@@ -200,7 +202,7 @@ def test_edge_not_found_cases(db):
 def test_get_edges_query(db, test_edge):
     """Test getting edges query object."""
 
-    select_stmt = EdgeService(db).get_edges_query()
+    select_stmt = EdgeRepository(db).get_edges_query()
     edges = db.execute(select_stmt).scalars().all()
 
     assert len(edges) >= 1

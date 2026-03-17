@@ -2,9 +2,9 @@ from uuid import UUID
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.schemas.node import NodeCreatePayload
-from app.services.workflow_service import WorkflowService
-from app.services.node_service import NodeService
-from app.services.edge_service import EdgeService
+from app.repositories.workflow_repository import WorkflowRepository
+from app.repositories.node_repository import NodeRepository
+from app.repositories.edge_repository import EdgeRepository
 from app.schemas.edge import EdgeCreate
 from app.schemas.node import NodeCreate
 from app.constants.node_kinds import NODE_KIND_BY_ID
@@ -15,7 +15,7 @@ class WorkflowCommandBase:
 
     def __init__(self, db: Session):
         self.db = db
-        self.workflow_service = WorkflowService(self.db)
+        self.workflow_repository = WorkflowRepository(self.db)
 
     def create_nodes_and_edges(
         self, workflow_version_id: UUID, nodes: Optional[List[NodeCreatePayload]]
@@ -24,7 +24,7 @@ class WorkflowCommandBase:
         if not nodes:
             return []
 
-        node_service = NodeService(self.db)
+        node_service = NodeRepository(self.db)
         created_nodes = []
 
         for node_payload in nodes:
@@ -46,7 +46,7 @@ class WorkflowCommandBase:
 
         # Auto-create edges based on node order (consecutive pairs)
         if len(created_nodes) >= 2:
-            edge_service = EdgeService(self.db)
+            edge_service = EdgeRepository(self.db)
             for i in range(len(created_nodes) - 1):
                 src = created_nodes[i]
                 tgt = created_nodes[i + 1]

@@ -8,7 +8,7 @@ from fastapi_pagination import Page
 from app.db import get_db
 from app.schemas.event import Event as EventSchema, EventCreate, EventUpdate
 from app.models.event import Event as EventModel
-from app.services.event_service import EventService
+from app.repositories.event_repository import EventRepository
 from app.auth.rbac import build_rbac_dependencies
 from app.routers.utils.dependencies import get_event_by_id
 
@@ -35,7 +35,7 @@ def list_events(
     db: Session = Depends(get_db), _authorized: bool = Depends(rbac["read"])
 ):
     """List all events."""
-    return paginate(db, EventService(db).get_events_query())
+    return paginate(db, EventRepository(db).get_events_query())
 
 
 @router.get("/{event_id}", response_model=EventSchema)
@@ -54,7 +54,7 @@ def delete_event(
     _authorized: bool = Depends(rbac["delete"]),
 ):
     """Delete an event (soft delete)."""
-    if not EventService(db).delete_event(event.id):
+    if not EventRepository(db).delete_event(event.id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Event not found"
         )

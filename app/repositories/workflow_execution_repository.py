@@ -6,7 +6,7 @@ from sqlalchemy import select
 from app.models.workflow_execution import WorkflowExecution
 
 
-class WorkflowExecutionService:
+class WorkflowExecutionRepository:
     def __init__(self, db: Session):
         self.db = db
 

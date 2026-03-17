@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.models.edge import Edge
 from app.schemas.edge import EdgeCreate, EdgeUpdate
-from app.services.soft_delete_service import SoftDeleteService
+from app.repositories.soft_delete_repository import SoftDeleteRepository
 from app.utils.db.filtering import apply_filters
 
 
-class EdgeService(SoftDeleteService[Edge]):
-    """Service class for managing edge CRUD operations."""
+class EdgeRepository(SoftDeleteRepository[Edge]):
+    """Repository class for managing edge CRUD operations."""
 
     def __init__(self, db: Session):
         """

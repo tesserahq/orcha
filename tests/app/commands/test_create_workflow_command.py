@@ -4,9 +4,9 @@ from app.commands.workflow.create_workflow_command import CreateWorkflowCommand
 from app.commands.workflow import CreateWorkflowCommand
 from app.schemas.workflow import WorkflowCreate
 from app.schemas.node import NodeCreatePayload
-from app.services.workflow_version_service import WorkflowVersionService
-from app.services.node_service import NodeService
-from app.services.edge_service import EdgeService
+from app.repositories.workflow_version_repository import WorkflowVersionRepository
+from app.repositories.node_repository import NodeRepository
+from app.repositories.edge_repository import EdgeRepository
 
 
 def test_create_workflow_creates_both_workflow_and_version(db):
@@ -26,7 +26,7 @@ def test_create_workflow_creates_both_workflow_and_version(db):
     assert workflow.is_active is True
 
     # Verify version was created
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     versions = workflow_version_service.get_workflow_versions_by_workflow(workflow.id)
 
     assert len(versions) == 1
@@ -54,7 +54,7 @@ def test_create_workflow_inactive(db):
     assert workflow.is_active is False
 
     # Verify version is also inactive
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     versions = workflow_version_service.get_workflow_versions_by_workflow(workflow.id)
 
     assert len(versions) == 1
@@ -86,7 +86,7 @@ def test_create_workflow_multiple_workflows(db):
     assert workflow1.id != workflow2.id
 
     # Verify each workflow has its version
-    workflow_version_service = WorkflowVersionService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
     versions1 = workflow_version_service.get_workflow_versions_by_workflow(workflow1.id)
     versions2 = workflow_version_service.get_workflow_versions_by_workflow(workflow2.id)
 
@@ -138,9 +138,9 @@ def test_create_workflow_with_nodes_auto_edges(db):
     assert workflow.active_version_id is not None
 
     # Check that nodes and edges were created
-    workflow_version_service = WorkflowVersionService(db)
-    node_service = NodeService(db)
-    edge_service = EdgeService(db)
+    workflow_version_service = WorkflowVersionRepository(db)
+    node_service = NodeRepository(db)
+    edge_service = EdgeRepository(db)
     version_obj = workflow_version_service.get_workflow_version(
         workflow.active_version_id
     )

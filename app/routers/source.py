@@ -7,7 +7,7 @@ from fastapi_pagination import Page
 
 from app.db import get_db
 from app.schemas.source import Source as SourceSchema, SourceCreate, SourceUpdate
-from app.services.source_service import SourceService
+from app.repositories.source_repository import SourceRepository
 from app.models.source import Source as SourceModel
 from app.routers.utils.dependencies import get_source_by_id
 from app.auth.rbac import build_rbac_dependencies
@@ -37,7 +37,7 @@ def create_source(
     _authorized: bool = Depends(rbac["create"]),
 ):
     """Create a new source."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
 
     # Check if identifier already exists
     if source.identifier and source_service.get_source_by_identifier(source.identifier):
@@ -54,7 +54,7 @@ def list_sources(
     db: Session = Depends(get_db), _authorized: bool = Depends(rbac["read"])
 ):
     """List all sources."""
-    return paginate(db, SourceService(db).get_sources_query())
+    return paginate(db, SourceRepository(db).get_sources_query())
 
 
 @router.get("/{source_id}", response_model=SourceSchema)
@@ -74,7 +74,7 @@ def update_source(
     _authorized: bool = Depends(rbac["update"]),
 ):
     """Update a source."""
-    source_service = SourceService(db)
+    source_service = SourceRepository(db)
 
     # Check if identifier is being updated and already exists
     if update.identifier:
@@ -100,7 +100,7 @@ def delete_source(
     _authorized: bool = Depends(rbac["delete"]),
 ):
     """Delete a source (soft delete)."""
-    if not SourceService(db).delete_source(source.id):
+    if not SourceRepository(db).delete_source(source.id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Source not found"
         )

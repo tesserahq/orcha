@@ -25,9 +25,9 @@ alembic upgrade head
 Orcha is a visual workflow automation backend built with FastAPI + SQLAlchemy (async, PostgreSQL). It orchestrates event-driven workflows composed of typed nodes connected by edges.
 
 **Layers:**
-- `app/routers/` — FastAPI route handlers (thin: delegate to services/commands)
+- `app/routers/` — FastAPI route handlers (thin: delegate to repositories/commands)
 - `app/commands/` — Complex multi-step operations (create, update, delete, execute)
-- `app/services/` — Query/CRUD logic wrapping SQLAlchemy sessions
+- `app/repositories/` — Query/CRUD logic wrapping SQLAlchemy sessions (repository pattern)
 - `app/models/` — SQLAlchemy ORM models
 - `app/schemas/` — Pydantic request/response models
 
@@ -39,11 +39,11 @@ Orcha is a visual workflow automation backend built with FastAPI + SQLAlchemy (a
 
 ## Patterns
 
-### Services
-- Class named `<Model>Service`, takes `Session` in constructor
+### Repositories
+- Class named `<Model>Repository`, takes `Session` in constructor
 - Methods: `get_<model>()`, `get_<models>()`, `create_<model>()`, `update_<model>()`, `delete_<model>()`
 - Use `model.model_dump()` for Pydantic → dict; always `commit()` and `refresh()` after writes
-- Inherit from `SoftDeleteService` for soft-delete support
+- Inherit from `SoftDeleteRepository` for soft-delete support
 
 ### Routers
 - List endpoints: `Page[T]` with `paginate(query)` from `fastapi_pagination.ext.sqlalchemy`
