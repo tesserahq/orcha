@@ -4,6 +4,7 @@ from uuid import UUID
 from datetime import datetime
 from app.schemas.node import NodeCreatePayload
 from app.schemas.node import Node
+from app.schemas.user import User
 
 
 class WorkflowBase(BaseModel):
@@ -88,6 +89,9 @@ class WorkflowInDB(WorkflowBase):
     id: UUID
     """Unique identifier for the workflow in the database."""
 
+    created_by_id: Optional[UUID] = None
+    """ID of the user who created the workflow."""
+
     created_at: datetime
     """Timestamp when the workflow record was created."""
 
@@ -100,7 +104,8 @@ class WorkflowInDB(WorkflowBase):
 class Workflow(WorkflowInDB):
     """Schema for workflow data returned in API responses. Inherits all fields from WorkflowInDB."""
 
-    pass
+    created_by: Optional[User] = None
+    """The user who created the workflow."""
 
 
 class WorkflowWithNodes(Workflow):

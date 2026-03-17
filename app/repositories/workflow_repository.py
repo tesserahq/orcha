@@ -82,19 +82,22 @@ class WorkflowRepository(SoftDeleteRepository[Workflow]):
             .all()
         )
 
-    def create_workflow(self, workflow: WorkflowCreate) -> Workflow:
+    def create_workflow(
+        self, workflow: WorkflowCreate, created_by_id: UUID | None = None
+    ) -> Workflow:
         """
         Create a new workflow.
 
         Args:
             workflow: The workflow data to create
+            created_by_id: Optional ID of the user creating the workflow
 
         Returns:
             Workflow: The created workflow
         """
         # Exclude 'nodes' from model_dump as it's not a direct model attribute
         workflow_data = workflow.model_dump(exclude={"nodes"})
-        db_workflow = Workflow(**workflow_data)
+        db_workflow = Workflow(**workflow_data, created_by_id=created_by_id)
         self.db.add(db_workflow)
         self.db.commit()
         self.db.refresh(db_workflow)
