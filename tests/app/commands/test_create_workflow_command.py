@@ -9,7 +9,7 @@ from app.repositories.node_repository import NodeRepository
 from app.repositories.edge_repository import EdgeRepository
 
 
-def test_create_workflow_creates_both_workflow_and_version(db):
+def test_create_workflow_creates_both_workflow_and_version(db, setup_user):
     """Test that the command creates both workflow and initial version."""
     workflow_data = WorkflowCreate(
         name="Test Workflow",
@@ -17,7 +17,7 @@ def test_create_workflow_creates_both_workflow_and_version(db):
         is_active=True,
     )
 
-    workflow = CreateWorkflowCommand(db).execute(workflow_data)
+    workflow = CreateWorkflowCommand(db).execute(workflow_data, user_id=setup_user.id)
 
     # Verify workflow was created
     assert workflow is not None
@@ -40,7 +40,7 @@ def test_create_workflow_creates_both_workflow_and_version(db):
     assert workflow.active_version_id == versions[0].id
 
 
-def test_create_workflow_inactive(db):
+def test_create_workflow_inactive(db, setup_user):
     """Test that the command creates an inactive workflow version when workflow is inactive."""
     workflow_data = WorkflowCreate(
         name="Inactive Workflow",
@@ -48,7 +48,7 @@ def test_create_workflow_inactive(db):
         is_active=False,
     )
 
-    workflow = CreateWorkflowCommand(db).execute(workflow_data)
+    workflow = CreateWorkflowCommand(db).execute(workflow_data, user_id=setup_user.id)
 
     # Verify workflow is inactive
     assert workflow.is_active is False
@@ -66,7 +66,7 @@ def test_create_workflow_inactive(db):
     assert workflow.active_version_id == versions[0].id
 
 
-def test_create_workflow_multiple_workflows(db):
+def test_create_workflow_multiple_workflows(db, setup_user):
     """Test creating multiple workflows with versions."""
     workflow1_data = WorkflowCreate(
         name="Workflow 1",
@@ -80,8 +80,8 @@ def test_create_workflow_multiple_workflows(db):
         is_active=True,
     )
 
-    workflow1 = CreateWorkflowCommand(db).execute(workflow1_data)
-    workflow2 = CreateWorkflowCommand(db).execute(workflow2_data)
+    workflow1 = CreateWorkflowCommand(db).execute(workflow1_data, user_id=setup_user.id)
+    workflow2 = CreateWorkflowCommand(db).execute(workflow2_data, user_id=setup_user.id)
 
     assert workflow1.id != workflow2.id
 
@@ -107,7 +107,7 @@ def test_create_workflow_multiple_workflows(db):
     assert workflow1.active_version_id != workflow2.active_version_id
 
 
-def test_create_workflow_with_nodes_auto_edges(db):
+def test_create_workflow_with_nodes_auto_edges(db, setup_user):
     """Test that creating a workflow with nodes also creates edges between them."""
     node1 = NodeCreatePayload(
         name="Node 1",
@@ -130,7 +130,7 @@ def test_create_workflow_with_nodes_auto_edges(db):
         nodes=[node1, node2],
     )
 
-    workflow = CreateWorkflowCommand(db).execute(workflow_data)
+    workflow = CreateWorkflowCommand(db).execute(workflow_data, user_id=setup_user.id)
 
     # Verify workflow was created
     assert workflow is not None

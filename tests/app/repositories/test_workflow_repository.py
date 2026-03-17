@@ -13,10 +13,12 @@ def sample_workflow_data():
     }
 
 
-def test_create_workflow(db, sample_workflow_data):
+def test_create_workflow(db, setup_user, sample_workflow_data):
     """Test creating a new workflow."""
     workflow_create = WorkflowCreate(**sample_workflow_data)
-    workflow = WorkflowRepository(db).create_workflow(workflow_create)
+    workflow = WorkflowRepository(db).create_workflow(
+        workflow_create, created_by_id=setup_user.id
+    )
 
     assert workflow.id is not None
     assert workflow.name == sample_workflow_data["name"]
