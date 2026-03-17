@@ -1,5 +1,6 @@
 """Command for executing a workflow."""
 
+import copy
 from uuid import UUID
 from typing import Dict, Any, Optional, List
 from sqlalchemy.orm import Session
@@ -268,8 +269,10 @@ class ExecuteWorkflowCommand:
         if not node_def:
             raise ValueError(f"Node kind {node.kind} not found")
 
-        # Create a new instance of the node type
-        node_type_instance = node_def.description
+        # Copy the description to avoid mutating the global singleton in NODE_BY_ID.
+        # node_def.description is shared across all executions; without copying,
+        # concurrent runs of the same node kind overwrite each other's parameters.
+        node_type_instance = copy.copy(node_def.description)
         node_type_instance.parameters = node.parameters or {}
 
         # Execute the node
