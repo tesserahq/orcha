@@ -47,13 +47,15 @@ router = APIRouter(
 
 @router.post("", response_model=WorkflowWithNodes, status_code=status.HTTP_201_CREATED)
 def create_workflow(
+    request: Request,
     workflow_data: WorkflowCreate,
     db: Session = Depends(get_db),
     _authorized: bool = Depends(rbac["create"]),
 ):
     """Create a new workflow with its initial version."""
+    current_user = request.state.user
     command = CreateWorkflowCommand(db)
-    created_workflow = command.execute(workflow_data)
+    created_workflow = command.execute(workflow_data, user_id=current_user.id)
 
     nodes: list = []
     if created_workflow.active_version_id:
