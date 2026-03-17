@@ -5,7 +5,12 @@ from typing import Any, Dict, List
 
 from app.constants.node_categories import CATEGORY_ACTION_APP
 from app.constants.node_types import ExecutionData, Node, NodeDescription
-from app.nodes.schemas.node_property import DisplayOptions, NodeProperty, NodePropertyOption, StringTypeOptions
+from app.nodes.schemas.node_property import (
+    DisplayOptions,
+    NodeProperty,
+    NodePropertyOption,
+    StringTypeOptions,
+)
 
 
 @dataclass
