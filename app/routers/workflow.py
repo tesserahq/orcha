@@ -164,4 +164,6 @@ def list_workflow_executions(
     _authorized: bool = Depends(rbac["read"]),
 ):
     """List execution history for a workflow, newest first."""
-    return paginate(db, WorkflowExecutionService(db).get_executions_by_workflow(workflow.id))
+    return paginate(
+        db, WorkflowExecutionService(db).get_executions_by_workflow(workflow.id)
+    )

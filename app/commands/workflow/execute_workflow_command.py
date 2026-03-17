@@ -143,7 +143,11 @@ class ExecuteWorkflowCommand:
         self._update_workflow_execution_status(
             workflow,
             status,
-            "Workflow execution completed with errors" if has_errors else "Workflow executed successfully",
+            (
+                "Workflow execution completed with errors"
+                if has_errors
+                else "Workflow executed successfully"
+            ),
         )
 
         return full_result

@@ -44,9 +44,7 @@ def upgrade() -> None:
         sa.Column("triggered_by", sa.String(), nullable=False),
         sa.Column("started_at", sa.DateTime(), nullable=False),
         sa.Column("finished_at", sa.DateTime(), nullable=True),
-        sa.Column(
-            "result", postgresql.JSONB(astext_type=sa.Text()), nullable=True
-        ),
+        sa.Column("result", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("error_message", sa.String(), nullable=True),
         sa.Column(
             "created_at",
