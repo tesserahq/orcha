@@ -143,6 +143,27 @@ def test_delete_workflow_not_found(client):
     assert response.json()["detail"] == "Workflow not found"
 
 
+def test_create_workflow_returns_created_by(client, setup_user):
+    """Test that POST /workflows returns the created_by user object."""
+    response = client.post(
+        "/workflows",
+        json={"name": "Test Workflow", "description": "Test description"},
+    )
+    assert response.status_code == 201
+    workflow = response.json()
+    assert workflow["created_by"] is not None
+    assert workflow["created_by"]["id"] == str(setup_user.id)
+
+
+def test_get_workflow_returns_created_by(client, test_workflow, setup_user):
+    """Test that GET /workflows/:id returns the created_by user object."""
+    response = client.get(f"/workflows/{test_workflow.id}")
+    assert response.status_code == 200
+    workflow = response.json()
+    assert workflow["created_by"] is not None
+    assert workflow["created_by"]["id"] == str(setup_user.id)
+
+
 def test_list_workflows_pagination(client, test_workflow):
     """Test pagination in GET /workflows endpoint."""
     response = client.get("/workflows?page=1&size=1")
