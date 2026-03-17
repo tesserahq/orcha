@@ -24,13 +24,14 @@ def get_test_event_payload(event_type: str = "test_event") -> dict:
     }
 
 
-def test_execute_workflow_success(db, faker):
+def test_execute_workflow_success(db, faker, setup_user):
     """Test successful execution of an active workflow with trigger nodes."""
     # Create workflow with active version
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=True,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
@@ -119,13 +120,14 @@ def test_execute_workflow_success(db, faker):
     assert workflow.execution_status_message == "Workflow executed successfully"
 
 
-def test_execute_workflow_manual_execution(db, faker):
+def test_execute_workflow_manual_execution(db, faker, setup_user):
     """Test execution of inactive workflow with manual=True."""
     # Create inactive workflow
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=False,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
@@ -167,13 +169,14 @@ def test_execute_workflow_manual_execution(db, faker):
     assert result["status"] == "completed"
 
 
-def test_execute_workflow_inactive_raises_error(db, faker):
+def test_execute_workflow_inactive_raises_error(db, faker, setup_user):
     """Test that executing inactive workflow without manual=True raises error."""
     # Create inactive workflow
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=False,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
@@ -225,13 +228,14 @@ def test_execute_workflow_not_found_raises_error(db):
     assert "not found" in str(exc_info.value).lower()
 
 
-def test_execute_workflow_no_active_version_raises_error(db, faker):
+def test_execute_workflow_no_active_version_raises_error(db, faker, setup_user):
     """Test that executing workflow without active version raises error."""
     # Create workflow without active version
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=True,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
@@ -245,13 +249,14 @@ def test_execute_workflow_no_active_version_raises_error(db, faker):
     assert "no active version" in str(exc_info.value).lower()
 
 
-def test_execute_workflow_no_trigger_nodes_raises_error(db, faker):
+def test_execute_workflow_no_trigger_nodes_raises_error(db, faker, setup_user):
     """Test that executing workflow without trigger nodes raises error."""
     # Create workflow with active version
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=True,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
@@ -291,13 +296,14 @@ def test_execute_workflow_no_trigger_nodes_raises_error(db, faker):
     assert "no trigger nodes" in str(exc_info.value).lower()
 
 
-def test_execute_workflow_data_flow(db, faker):
+def test_execute_workflow_data_flow(db, faker, setup_user):
     """Test that data flows correctly through nodes."""
     # Create workflow with active version
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=True,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
@@ -373,13 +379,14 @@ def test_execute_workflow_data_flow(db, faker):
     assert action_data["input"] == "test_data"
 
 
-def test_execute_workflow_multiple_trigger_nodes(db, faker):
+def test_execute_workflow_multiple_trigger_nodes(db, faker, setup_user):
     """Test execution with multiple trigger nodes."""
     # Create workflow with active version
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=True,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
@@ -437,13 +444,14 @@ def test_execute_workflow_multiple_trigger_nodes(db, faker):
     ]
 
 
-def test_execute_workflow_no_nodes_raises_error(db, faker):
+def test_execute_workflow_no_nodes_raises_error(db, faker, setup_user):
     """Test that executing workflow version with no nodes raises error."""
     # Create workflow with active version
     workflow = Workflow(
         name=faker.sentence(nb_words=3),
         description=faker.text(max_nb_chars=200),
         is_active=True,
+        created_by_id=setup_user.id,
     )
     db.add(workflow)
     db.commit()
