@@ -102,8 +102,9 @@ class TriggerWorkflowsByEventCommand:
                 result = execute_command.execute(
                     workflow_id=workflow.id,  # type: ignore[arg-type]
                     initial_data=initial_data,
-                    manual=False,  # Use normal execution (will check is_active)
-                    event=event_schema,  # Pass event to ExecutionData
+                    manual=False,
+                    event=event_schema,
+                    triggered_by="event",
                 )
                 execution_results.append(
                     {

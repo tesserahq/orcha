@@ -4,14 +4,16 @@ import copy
 from uuid import UUID
 from typing import Dict, Any, Optional, List
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.models.workflow import Workflow
 from app.models.node import Node
 from app.models.edge import Edge
+from app.models.workflow_execution import WorkflowExecution
 from app.services.workflow_service import WorkflowService
 from app.services.node_service import NodeService
 from app.services.edge_service import EdgeService
+from app.services.workflow_execution_service import WorkflowExecutionService
 from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
 from app.constants.node_types import ExecutionData
 from app.exceptions.resource_not_found_error import ResourceNotFoundError
@@ -32,6 +34,7 @@ class ExecuteWorkflowCommand:
         self.workflow_service = WorkflowService(self.db)
         self.node_service = NodeService(self.db)
         self.edge_service = EdgeService(self.db)
+        self.execution_service = WorkflowExecutionService(self.db)
 
     def execute(
         self,
@@ -39,6 +42,7 @@ class ExecuteWorkflowCommand:
         initial_data: Optional[Dict[str, Any]] = None,
         manual: bool = False,
         event: Optional[EventBase] = None,
+        triggered_by: str = "manual",
     ) -> Dict[str, Any]:
         """
         Execute a workflow.
@@ -52,6 +56,7 @@ class ExecuteWorkflowCommand:
             initial_data: Optional initial data to pass to trigger nodes
             manual: Whether this is a manual execution (bypasses is_active check)
             event: Optional event to pass to trigger nodes (for event-triggered workflows)
+            triggered_by: Source of the execution ("manual" or "event")
 
         Returns:
             Dict containing execution results
@@ -99,6 +104,8 @@ class ExecuteWorkflowCommand:
             event=event,
         )
 
+        started_at = datetime.now(timezone.utc)
+
         # Execute workflow starting from trigger nodes
         execution_results = []
         has_errors = False
@@ -111,23 +118,35 @@ class ExecuteWorkflowCommand:
                     has_errors = True
                     break
 
-        # Update workflow execution status
-        if has_errors:
-            self._update_workflow_execution_status(
-                workflow, "error", "Workflow execution completed with errors"
-            )
-            status = "error"
-        else:
-            self._update_workflow_execution_status(
-                workflow, "completed", "Workflow executed successfully"
-            )
-            status = "completed"
-
-        return {
+        finished_at = datetime.now(timezone.utc)
+        status = "error" if has_errors else "completed"
+        full_result = {
             "workflow_id": str(workflow_id),
             "status": status,
             "results": execution_results,
         }
+
+        # Record this execution as an immutable history entry
+        self.execution_service.create_execution(
+            WorkflowExecution(
+                workflow_id=workflow_id,
+                workflow_version_id=workflow_version_id,
+                status=status,
+                triggered_by=triggered_by,
+                started_at=started_at,
+                finished_at=finished_at,
+                result=full_result,
+            )
+        )
+
+        # Update denormalized status cache on the workflow for fast dashboard reads
+        self._update_workflow_execution_status(
+            workflow,
+            status,
+            "Workflow execution completed with errors" if has_errors else "Workflow executed successfully",
+        )
+
+        return full_result
 
     def _find_trigger_nodes(self, nodes: List[Node]) -> List[Node]:
         """
@@ -295,7 +314,7 @@ class ExecuteWorkflowCommand:
             status: Execution status
             message: Execution status message
         """
-        workflow.last_execution_time = datetime.utcnow()
+        workflow.last_execution_time = datetime.now(timezone.utc)
         workflow.execution_status = status
         workflow.execution_status_message = message
         self.db.commit()

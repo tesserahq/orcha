@@ -4,6 +4,7 @@ from app.models.event import Event
 from app.models.workflow import Workflow
 from app.models.workflow_version import WorkflowVersion
 from app.models.node import Node
+from app.models.workflow_execution import WorkflowExecution
 
 __all__ = [
     "User",
@@ -12,4 +13,5 @@ __all__ = [
     "Workflow",
     "WorkflowVersion",
     "Node",
+    "WorkflowExecution",
 ]
