@@ -22,8 +22,8 @@ class Workflow(Base, TimestampMixin, SoftDeleteMixin):
     active_version_id: Mapped[UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("workflow_versions.id"), nullable=True
     )
-    created_by_id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
+    created_by_id: Mapped[UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
     last_execution_time: Mapped[datetime | None] = mapped_column(
         DateTime, nullable=True

@@ -89,7 +89,7 @@ class WorkflowInDB(WorkflowBase):
     id: UUID
     """Unique identifier for the workflow in the database."""
 
-    created_by_id: UUID
+    created_by_id: Optional[UUID] = None
     """ID of the user who created the workflow."""
 
     created_at: datetime
