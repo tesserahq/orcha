@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from uuid import UUID
-from app.routers.utils.dependencies import get_workflow_by_id
+from app.routers.utils.dependencies import get_workflow_by_id, get_current_user
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
@@ -47,13 +47,12 @@ router = APIRouter(
 
 @router.post("", response_model=WorkflowWithNodes, status_code=status.HTTP_201_CREATED)
 def create_workflow(
-    request: Request,
     workflow_data: WorkflowCreate,
     db: Session = Depends(get_db),
+    current_user: object = Depends(get_current_user),
     _authorized: bool = Depends(rbac["create"]),
 ):
     """Create a new workflow with its initial version."""
-    current_user = request.state.user
     command = CreateWorkflowCommand(db)
     created_workflow = command.execute(workflow_data, user_id=current_user.id)
 

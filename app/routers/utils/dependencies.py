@@ -1,13 +1,22 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 from app.db import get_db
 from app.models.workflow import Workflow
 from app.models.event import Event
 from app.models.source import Source
+from app.models.user import User
 from app.repositories.workflow_repository import WorkflowRepository
 from app.repositories.event_repository import EventRepository
 from app.repositories.source_repository import SourceRepository
+
+
+def get_current_user(request: Request) -> User:
+    if hasattr(request.state, "user") and request.state.user is not None:
+        return request.state.user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+    )
 
 
 def get_workflow_by_id(
