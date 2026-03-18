@@ -150,7 +150,7 @@ class SendlyDescription(NodeDescription):
         try:
             client = SendlyClient(api_token=m2m_token)
             request = CreateEmailRequest(
-                project_id=project_id or None,
+                project_id=str(project_id) or None,
                 from_email=from_email or None,
                 subject=subject,
                 html=html or None,
