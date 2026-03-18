@@ -139,6 +139,9 @@ class NodeExecutionResult(BaseModel):
     status: str
     """Execution status (success or error)."""
 
+    input_data: Optional[Dict[str, Any]] = None
+    """Input data passed into the node before execution."""
+
     data: Optional[Dict[str, Any]] = None
     """Output data from the node execution."""
 

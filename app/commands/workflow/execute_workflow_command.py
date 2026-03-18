@@ -228,6 +228,9 @@ class ExecuteWorkflowCommand:
                 continue
             visited.add(current_node.id)
 
+            # Snapshot input before execution for debugging
+            input_snapshot = dict(current_data.json)
+
             # Execute the current node
             try:
                 output_data = self._execute_single_node(current_node, current_data)
@@ -240,6 +243,7 @@ class ExecuteWorkflowCommand:
                             "node_name": current_node.name,
                             "node_kind": current_node.kind,
                             "status": "error",
+                            "input_data": input_snapshot,
                             "error": output_data.error,
                             "data": output_data.json,
                         }
@@ -253,6 +257,7 @@ class ExecuteWorkflowCommand:
                         "node_name": current_node.name,
                         "node_kind": current_node.kind,
                         "status": "success",
+                        "input_data": input_snapshot,
                         "data": output_data.json,
                     }
                 )
@@ -271,6 +276,7 @@ class ExecuteWorkflowCommand:
                         "node_name": current_node.name,
                         "node_kind": current_node.kind,
                         "status": "error",
+                        "input_data": input_snapshot,
                         "error": str(e),
                     }
                 )
