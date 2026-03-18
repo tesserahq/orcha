@@ -126,6 +126,17 @@ class ExecuteWorkflowCommand:
             "results": execution_results,
         }
 
+        # Collect error messages from failed node executions
+        error_message: Optional[str] = None
+        if has_errors:
+            errors = [
+                f"{exec_result['node_name']}: {exec_result['error']}"
+                for result in execution_results
+                for exec_result in result.get("execution_results", [])
+                if exec_result.get("status") == "error" and exec_result.get("error")
+            ]
+            error_message = "; ".join(errors) if errors else "Workflow execution failed"
+
         # Record this execution as an immutable history entry
         self.execution_repository.create_execution(
             WorkflowExecution(
@@ -136,6 +147,7 @@ class ExecuteWorkflowCommand:
                 started_at=started_at,
                 finished_at=finished_at,
                 result=full_result,
+                error_message=error_message,
             )
         )
 
