@@ -143,6 +143,11 @@ class SendlyDescription(NodeDescription):
 
         try:
             m2m_token = M2MTokenClient().get_token_sync().access_token
+        except Exception as e:
+            input.error = f"Sendly error (token): {str(e)}"
+            return input
+
+        try:
             client = SendlyClient(api_token=m2m_token)
             request = CreateEmailRequest(
                 project_id=project_id or None,
@@ -154,7 +159,7 @@ class SendlyDescription(NodeDescription):
             response = client.create_email(request)
             input.json[self.kind] = response.model_dump()
         except Exception as e:
-            input.error = f"Sendly error: {str(e)}"
+            input.error = f"Sendly error (send): {str(e)}"
 
         return input
 
