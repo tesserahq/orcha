@@ -28,7 +28,7 @@ def test_update_workflow_with_nodes_auto_edges(db, test_workflow):
     node1 = NodeCreatePayload(
         name="Node 1",
         description="Test node 1",
-        kind="orcha-nodes.base.http_request",
+        kind="orcha-nodes.base.event_received",
         properties=[{"a": 1}],
         ui_settings={"x": 1},
     )

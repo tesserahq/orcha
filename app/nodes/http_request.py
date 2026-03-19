@@ -6,6 +6,7 @@ import requests
 
 from app.constants.node_categories import CATEGORY_CORE
 from app.constants.node_types import (
+    ExecutionContext,
     ExecutionData,
     Node,
     NodeDescription,
@@ -69,67 +70,53 @@ class HttpRequestDescription(NodeDescription):
         ]
     )
 
-    def execute(self, input: ExecutionData) -> ExecutionData:
+    def execute(self, context: ExecutionContext) -> ExecutionData:
         """Execute the HTTP request based on parameters."""
-        print(f"DEBUG: Parameters: {self.parameters}")
-        # Get parameters parsed through expression engine
-        url = self.get_parsed_parameter("url", input) or ""
-        print(f"DEBUG: URL: {url}")
-        # We don't need to parse the method, it's a static parameter
+        url = self.get_parsed_parameter("url", context) or ""
         method = self.parameters.get("method", "GET").upper()
-        headers = self.get_parsed_parameter("headers", input) or {}
-        print(f"DEBUG: Headers: {headers}")
-        body = self.get_parsed_parameter("body", input) or {}
-        print(f"DEBUG: Body: {body}")
+        headers = self.get_parsed_parameter("headers", context) or {}
+        body = self.get_parsed_parameter("body", context) or {}
 
-        # Validate URL
+        output = context.get_previous_output()
+
         if not url:
-            input.error = "URL is required for HTTP request"
-            return input
+            output.error = "URL is required for HTTP request"
+            return output
 
         try:
-            # Prepare request arguments
             request_kwargs = {
                 "headers": headers if headers else None,
             }
 
-            # Add body for methods that support it
             if method in ["POST", "PUT", "PATCH", "DELETE"]:
                 if body:
-                    # If body is a dict, send as JSON, otherwise send as-is
                     if isinstance(body, dict):
                         request_kwargs["json"] = body
                     else:
                         request_kwargs["data"] = body
 
-            # Make the HTTP request
             response = requests.request(method, url, **request_kwargs)
 
-            # Store response data in input.json
             response_data = {
                 "status_code": response.status_code,
                 "headers": dict(response.headers),
                 "body": response.text,
             }
 
-            # Try to parse JSON response if possible
             try:
                 response_data["json"] = response.json()
             except (ValueError, requests.exceptions.JSONDecodeError):
-                # Not JSON, keep text in body
                 pass
 
-            # Update input with response data
-            input.json[self.kind] = response_data
+            output.json[self.kind] = response_data
 
-            # Set error if status code indicates failure
             if response.status_code >= 400:
-                input.error = f"HTTP {response.status_code}: {response.reason}"
+                output.error = f"HTTP {response.status_code}: {response.reason}"
 
         except requests.exceptions.RequestException as e:
-            input.error = f"HTTP request failed: {str(e)}"
+            output.error = f"HTTP request failed: {str(e)}"
 
-        return input
+        return output
 
 
 NODE = Node(

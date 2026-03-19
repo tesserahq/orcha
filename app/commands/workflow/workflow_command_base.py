@@ -7,7 +7,8 @@ from app.repositories.node_repository import NodeRepository
 from app.repositories.edge_repository import EdgeRepository
 from app.schemas.edge import EdgeCreate
 from app.schemas.node import NodeCreate
-from app.constants.node_kinds import NODE_KIND_BY_ID
+from app.constants.node_categories import CATEGORY_TRIGGER
+from app.constants.node_kinds import NODE_BY_ID, NODE_KIND_BY_ID
 
 
 class WorkflowCommandBase:
@@ -26,6 +27,18 @@ class WorkflowCommandBase:
 
         node_service = NodeRepository(self.db)
         created_nodes = []
+
+        trigger_count = sum(
+            1
+            for n in nodes
+            if NODE_BY_ID.get(n.kind) and NODE_BY_ID[n.kind].category == CATEGORY_TRIGGER
+        )
+        if trigger_count == 0:
+            raise ValueError("Workflow must have exactly one trigger node, found none")
+        if trigger_count > 1:
+            raise ValueError(
+                f"Workflow must have exactly one trigger node, found {trigger_count}"
+            )
 
         for node_payload in nodes:
             # Validate that the node kind is valid

@@ -5,6 +5,7 @@ from typing import Dict, Any
 
 from app.constants.node_categories import CATEGORY_FLOW
 from app.constants.node_types import (
+    ExecutionContext,
     ExecutionData,
     Node,
     NodeDescription,
@@ -27,8 +28,8 @@ class IfDescription(NodeDescription):
     credentials: list = field(default_factory=list)
     properties: list = field(default_factory=list)
 
-    def execute(self, input: ExecutionData) -> ExecutionData:
-        return input
+    def execute(self, context: ExecutionContext) -> ExecutionData:
+        return context.get_previous_output()
 
 
 NODE = Node(

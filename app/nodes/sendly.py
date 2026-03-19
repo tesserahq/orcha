@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from app.constants.node_categories import CATEGORY_ACTION_APP
-from app.constants.node_types import ExecutionData, Node, NodeDescription
+from app.constants.node_types import ExecutionContext, ExecutionData, Node, NodeDescription
 from app.nodes.schemas.node_property import (
     DisplayOptions,
     NodeProperty,
@@ -110,42 +110,44 @@ class SendlyDescription(NodeDescription):
         ]
     )
 
-    def execute(self, input: ExecutionData) -> ExecutionData:
+    def execute(self, context: ExecutionContext) -> ExecutionData:
         resource = self.parameters.get("resource", "email")
         operation = self.parameters.get("operation", "send")
 
         if resource == "email" and operation == "send":
-            return self._send_email(input)
+            return self._send_email(context)
 
-        input.error = f"Unknown resource/operation: {resource}/{operation}"
-        return input
+        output = context.get_previous_output()
+        output.error = f"Unknown resource/operation: {resource}/{operation}"
+        return output
 
-    def _send_email(self, input: ExecutionData) -> ExecutionData:
+    def _send_email(self, context: ExecutionContext) -> ExecutionData:
         from tessera_sdk.sendly.client import SendlyClient
         from tessera_sdk.sendly.schemas.create_email_request import CreateEmailRequest
         from tessera_sdk.utils.m2m_token import M2MTokenClient
 
-        to_raw = self.get_parsed_parameter("to", input) or ""
-        subject = self.get_parsed_parameter("subject", input) or ""
-        html = self.get_parsed_parameter("html", input) or ""
-        project_id = self.get_parsed_parameter("project_id", input) or ""
-        from_email = self.get_parsed_parameter("from_email", input) or ""
+        to_raw = self.get_parsed_parameter("to", context) or ""
+        subject = self.get_parsed_parameter("subject", context) or ""
+        html = self.get_parsed_parameter("html", context) or ""
+        project_id = self.get_parsed_parameter("project_id", context) or ""
+        from_email = self.get_parsed_parameter("from_email", context) or ""
 
+        output = context.get_previous_output()
         to = [addr.strip() for addr in to_raw.split(",") if addr.strip()]
 
         if not to:
-            input.error = "At least one recipient email address is required."
-            return input
+            output.error = "At least one recipient email address is required."
+            return output
 
         if not subject:
-            input.error = "Subject is required."
-            return input
+            output.error = "Subject is required."
+            return output
 
         try:
             m2m_token = M2MTokenClient().get_token_sync().access_token
         except Exception as e:
-            input.error = f"Sendly error (token): {str(e)}"
-            return input
+            output.error = f"Sendly error (token): {str(e)}"
+            return output
 
         try:
             client = SendlyClient(api_token=m2m_token)
@@ -157,11 +159,11 @@ class SendlyDescription(NodeDescription):
                 to=to,
             )
             response = client.create_email(request)
-            input.json[self.kind] = response.model_dump()
+            output.json[self.kind] = response.model_dump()
         except Exception as e:
-            input.error = f"Sendly error (send): {str(e)}"
+            output.error = f"Sendly error (send): {str(e)}"
 
-        return input
+        return output
 
 
 NODE = Node(

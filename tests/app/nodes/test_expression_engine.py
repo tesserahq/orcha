@@ -5,13 +5,11 @@ without requiring a database or full workflow execution.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import Any, Dict, List
 
 import pytest
 
-from app.constants.node_types import ExecutionData, NodeDescription
-from app.schemas.event import EventBase
+from app.constants.node_types import ExecutionContext, ExecutionData, NodeDescription
 
 # ---------------------------------------------------------------------------
 # Minimal concrete subclass — only exists to make NodeDescription instantiable
@@ -30,8 +28,8 @@ class _TestNode(NodeDescription):
     description: str = ""
     defaults: Dict[str, Any] = field(default_factory=dict)
 
-    def execute(self, input: ExecutionData) -> ExecutionData:  # pragma: no cover
-        return input
+    def execute(self, context: ExecutionContext) -> ExecutionData:  # pragma: no cover
+        return context.get_previous_output()
 
 
 def _node(parameters: Dict[str, Any]) -> _TestNode:
@@ -40,19 +38,31 @@ def _node(parameters: Dict[str, Any]) -> _TestNode:
     return n
 
 
-def _data(
-    json: Dict[str, Any] | None = None, event: EventBase | None = None
-) -> ExecutionData:
-    return ExecutionData(json=json or {}, event=event)
+def _context(json: Dict[str, Any] | None = None) -> ExecutionContext:
+    """Build an ExecutionContext with the given json as the last node's output."""
+    ctx = ExecutionContext(trigger_event={}, execution_id="test", triggered_by="manual")
+    if json:
+        from app.constants.node_types import NodeResult
+        ctx.append_result(
+            NodeResult(
+                node_id="prev",
+                node_name="Prev Node",
+                node_kind="test",
+                status="success",
+                input={},
+                output=json,
+                timestamp="2024-01-01T00:00:00+00:00",
+            )
+        )
+    return ctx
 
 
-def _ctx(
-    json: Dict[str, Any] | None = None, event: EventBase | None = None
-) -> Dict[str, Any]:
-    """Build the same context dict that get_parsed_parameter builds internally."""
+def _ctx(json: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    """Build the expression context dict that get_parsed_parameter builds internally."""
     return {
         "json": json or {},
-        "event": event.model_dump() if event else {},
+        "nodes": {},
+        "execution": {"id": "test", "triggered_by": "manual"},
         "env": {},
     }
 
@@ -262,40 +272,36 @@ def test_nested_list_in_dict():
 
 def test_get_parsed_parameter_missing_key_returns_none():
     n = _node({})
-    data = _data(json={"foo": "bar"})
-    assert n.get_parsed_parameter("nonexistent", data) is None
+    ctx = _context(json={"foo": "bar"})
+    assert n.get_parsed_parameter("nonexistent", ctx) is None
 
 
 def test_get_parsed_parameter_resolves_json_context():
     n = _node({"url": "{{ json.base }}/path"})
-    data = _data(json={"base": "https://api.example.com"})
-    assert n.get_parsed_parameter("url", data) == "https://api.example.com/path"
+    ctx = _context(json={"base": "https://api.example.com"})
+    assert n.get_parsed_parameter("url", ctx) == "https://api.example.com/path"
 
 
-def test_get_parsed_parameter_resolves_event_context():
-    event = EventBase(
-        source="test",
-        spec_version="1.0",
-        event_type="user.created",
-        event_data={"account": "acme"},
-        data_content_type="application/json",
-        subject="user",
-        time=datetime.utcnow(),
+def test_get_parsed_parameter_resolves_nodes_context():
+    from app.constants.node_types import NodeResult
+
+    ctx = ExecutionContext(trigger_event={}, execution_id="test", triggered_by="manual")
+    ctx.append_result(
+        NodeResult(
+            node_id="n1",
+            node_name="Trigger",
+            node_kind="test",
+            status="success",
+            input={},
+            output={"account": "acme"},
+            timestamp="2024-01-01T00:00:00+00:00",
+        )
     )
-    n = _node({"account": "{{ event.event_data.account }}"})
-    data = _data(event=event)
-    assert n.get_parsed_parameter("account", data) == "acme"
-
-
-def test_get_parsed_parameter_no_event_uses_empty_dict():
-    # Without an event, {{ event.anything }} should render as empty string (not raise)
-    n = _node({"value": "{{ event.event_type }}"})
-    data = _data()
-    result = n.get_parsed_parameter("value", data)
-    assert result == ""
+    n = _node({"account": "{{ nodes['Trigger'].account }}"})
+    assert n.get_parsed_parameter("account", ctx) == "acme"
 
 
 def test_get_parsed_parameter_returns_primitive_unchanged():
     n = _node({"count": 5})
-    data = _data()
-    assert n.get_parsed_parameter("count", data) == 5
+    ctx = _context()
+    assert n.get_parsed_parameter("count", ctx) == 5

@@ -88,12 +88,6 @@ class TriggerWorkflowsByEventCommand:
             user_id=event.user_id,  # type: ignore[arg-type]
         )
 
-        # Prepare initial data with event information (for backward compatibility)
-        initial_data = {
-            "event_type": event.event_type,
-            "event_data": event.event_data,
-        }
-
         for workflow in matching_workflows:
             try:
                 logger.info(
@@ -101,7 +95,6 @@ class TriggerWorkflowsByEventCommand:
                 )
                 result = execute_command.execute(
                     workflow_id=workflow.id,  # type: ignore[arg-type]
-                    initial_data=initial_data,
                     manual=False,
                     event=event_schema,
                     triggered_by="event",
