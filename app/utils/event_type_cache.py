@@ -1,7 +1,7 @@
 """Utility for caching unique event types using tessera cache."""
 
 from typing import List, Optional
-from tessera_sdk.utils.cache import Cache
+from tessera_sdk.infra.cache import Cache
 
 # Cache key for storing event types list
 EVENT_TYPES_CACHE_KEY = "orcha.event_types"

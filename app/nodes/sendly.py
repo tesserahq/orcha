@@ -132,9 +132,8 @@ class SendlyDescription(NodeDescription):
         return output
 
     def _send_email(self, context: ExecutionContext) -> ExecutionData:
-        from tessera_sdk.sendly.client import SendlyClient
-        from tessera_sdk.sendly.schemas.create_email_request import CreateEmailRequest
-        from tessera_sdk.utils.m2m_token import M2MTokenClient
+        from tessera_sdk.clients.sendly import SendlyClient, CreateEmailRequest
+        from tessera_sdk.infra.m2m_token import M2MTokenClient
 
         p = ParameterRenderer.for_node(self.parameters, context)
         to_raw = p.get("to") or ""

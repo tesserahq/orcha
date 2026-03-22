@@ -10,7 +10,7 @@ import ast
 import json
 from typing import Any, Dict, Optional
 
-from tessera_sdk.utils.expressions.engine import ExpressionEngine
+from tessera_sdk.infra.expressions import ExpressionEngine
 
 from app.constants.node_types import ExecutionContext
 
