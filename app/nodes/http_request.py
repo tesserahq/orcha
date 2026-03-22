@@ -11,6 +11,7 @@ from app.constants.node_types import (
     Node,
     NodeDescription,
 )
+from app.nodes.parameter_renderer import ParameterRenderer
 from app.nodes.schemas.node_property import NodeProperty, NodePropertyOption
 
 
@@ -72,10 +73,11 @@ class HttpRequestDescription(NodeDescription):
 
     def execute(self, context: ExecutionContext) -> ExecutionData:
         """Execute the HTTP request based on parameters."""
-        url = self.get_parsed_parameter("url", context) or ""
+        p = ParameterRenderer.for_node(self.parameters, context)
+        url = p.get("url") or ""
         method = self.parameters.get("method", "GET").upper()
-        headers = self.get_parsed_parameter("headers", context) or {}
-        body = self.get_parsed_parameter("body", context) or {}
+        headers = p.get("headers") or {}
+        body = p.get("body") or {}
 
         output = context.get_previous_output()
 

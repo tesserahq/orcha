@@ -10,6 +10,7 @@ from app.constants.node_types import (
     Node,
     NodeDescription,
 )
+from app.nodes.parameter_renderer import ParameterRenderer
 from app.nodes.schemas.node_property import (
     DisplayOptions,
     NodeProperty,
@@ -135,11 +136,12 @@ class SendlyDescription(NodeDescription):
         from tessera_sdk.sendly.schemas.create_email_request import CreateEmailRequest
         from tessera_sdk.utils.m2m_token import M2MTokenClient
 
-        to_raw = self.get_parsed_parameter("to", context) or ""
-        subject = self.get_parsed_parameter("subject", context) or ""
-        html = self.get_parsed_parameter("html", context) or ""
-        project_id = self.get_parsed_parameter("project_id", context) or ""
-        from_email = self.get_parsed_parameter("from_email", context) or ""
+        p = ParameterRenderer.for_node(self.parameters, context)
+        to_raw = p.get("to") or ""
+        subject = p.get("subject") or ""
+        html = p.get("html") or ""
+        project_id = p.get("project_id") or ""
+        from_email = p.get("from_email") or ""
 
         output = context.get_previous_output()
         to = [addr.strip() for addr in to_raw.split(",") if addr.strip()]

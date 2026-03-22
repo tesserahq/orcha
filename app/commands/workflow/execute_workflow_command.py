@@ -9,16 +9,16 @@ from datetime import datetime, timezone
 
 from app.models.workflow import Workflow
 from app.models.node import Node
-from app.models.edge import Edge
 from app.models.workflow_execution import WorkflowExecution
 from app.repositories.workflow_repository import WorkflowRepository
 from app.repositories.node_repository import NodeRepository
 from app.repositories.edge_repository import EdgeRepository
 from app.repositories.workflow_execution_repository import WorkflowExecutionRepository
 from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
-from app.constants.node_types import ExecutionContext, ExecutionData, NodeResult
+from app.constants.node_types import ExecutionContext, ExecutionData
 from app.exceptions.resource_not_found_error import ResourceNotFoundError
 from app.schemas.event import EventBase
+from app.execution.node_tree_executor import NodeTreeExecutor
 
 
 class ExecuteWorkflowCommand:
@@ -36,6 +36,9 @@ class ExecuteWorkflowCommand:
         self.node_repository = NodeRepository(self.db)
         self.edge_repository = EdgeRepository(self.db)
         self.execution_repository = WorkflowExecutionRepository(self.db)
+        self._node_tree_executor = NodeTreeExecutor(
+            execute_node=self._execute_single_node
+        )
 
     def execute(
         self,
@@ -107,7 +110,9 @@ class ExecuteWorkflowCommand:
         )
 
         started_at = datetime.now(timezone.utc)
-        error_message = self._execute_node_tree(trigger_node, nodes, edges, context)
+        error_message = self._node_tree_executor.run(
+            trigger_node, nodes, edges, context
+        )
         finished_at = datetime.now(timezone.utc)
 
         status = "error" if error_message else "completed"
@@ -153,66 +158,6 @@ class ExecuteWorkflowCommand:
             if node_def.category == CATEGORY_TRIGGER:
                 trigger_nodes.append(node)
         return trigger_nodes
-
-    def _execute_node_tree(
-        self,
-        start_node: Node,
-        all_nodes: List[Node],
-        all_edges: List[Edge],
-        context: ExecutionContext,
-    ) -> Optional[str]:
-        """Execute nodes via BFS starting from the trigger node.
-
-        Returns an error message string if any node fails, or None on success.
-        Failed nodes are not recorded in the context.
-        """
-        node_map = {node.id: node for node in all_nodes}
-
-        edge_map: Dict[UUID, List[Edge]] = {}
-        for edge in all_edges:
-            if edge.source_node_id not in edge_map:
-                edge_map[edge.source_node_id] = []
-            edge_map[edge.source_node_id].append(edge)
-
-        visited = set()
-        queue = [start_node]
-
-        while queue:
-            current_node = queue.pop(0)
-
-            if current_node.id in visited:
-                continue
-            visited.add(current_node.id)
-
-            input_snapshot = dict(context.get_previous_output().json)
-
-            try:
-                output_data = self._execute_single_node(current_node, context)
-
-                if output_data.error:
-                    return f"{current_node.name}: {output_data.error}"
-
-                context.append_result(
-                    NodeResult(
-                        node_id=str(current_node.id),
-                        node_name=current_node.name,
-                        node_kind=current_node.kind,
-                        status="success",
-                        input=input_snapshot,
-                        output=output_data.json,
-                        timestamp=datetime.now(timezone.utc).isoformat(),
-                    )
-                )
-
-                for edge in edge_map.get(current_node.id, []):
-                    target_node = node_map.get(edge.target_node_id)
-                    if target_node and target_node.id not in visited:
-                        queue.append(target_node)
-
-            except Exception as e:
-                return f"{current_node.name}: {str(e)}"
-
-        return None
 
     def _execute_single_node(
         self, node: Node, context: ExecutionContext
