@@ -5,13 +5,13 @@ from typing import Dict, Any, List
 
 from app.constants.node_categories import CATEGORY_TRIGGER
 from app.constants.node_types import (
+    ExecutionContext,
     ExecutionData,
     Node,
     NodeDescription,
 )
 
 from app.nodes.schemas.node_property import NodeProperty
-from app.schemas.event import EventBase as EventSchema
 
 EVENT_RECEIVED_NODE_ID = "orcha-nodes.base.event_received"
 
@@ -49,18 +49,19 @@ class EventReceivedDescription(NodeDescription):
         ]
     )
 
-    def execute(self, input: ExecutionData) -> ExecutionData:
-        # If there is no event that triggered this node, we can asume it's a manual trigger.
-        # So we need to check if the property event_test_payload is set. Otherwise we return an error.
-        if not input.has_event():
-            if not self.parameters.get("event_test_payload"):
-                input.error = "No event or event test payload provided"
-                return input
-            else:
-                input.event = EventSchema(**self.parameters.get("event_test_payload"))
-                return input
+    def execute(self, context: ExecutionContext) -> ExecutionData:
+        # If a real trigger event exists (event-triggered run), output it as json.
+        if context.trigger_event:
+            return ExecutionData(json=context.trigger_event)
 
-        return input
+        # No trigger event — manual run. Fall back to the configured test payload.
+        test_payload = self.parameters.get("event_test_payload")
+        if not test_payload:
+            return ExecutionData(
+                json={}, error="No event or event test payload provided"
+            )
+
+        return ExecutionData(json=test_payload)
 
 
 NODE = Node(

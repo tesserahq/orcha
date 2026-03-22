@@ -9,6 +9,7 @@ from typing import Dict, Any
 
 from app.constants.node_categories import CATEGORY_CORE
 from app.constants.node_types import (
+    ExecutionContext,
     ExecutionData,
     Node,
     NodeDescription,
@@ -33,9 +34,9 @@ class TestActionDescription(NodeDescription):
     credentials: list = field(default_factory=list)
     properties: list = field(default_factory=list)
 
-    def execute(self, input: ExecutionData) -> ExecutionData:
+    def execute(self, context: ExecutionContext) -> ExecutionData:
         """Execute the test action node - simply passes through the input data."""
-        return input
+        return context.get_previous_output()
 
 
 NODE = Node(

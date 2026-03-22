@@ -86,7 +86,7 @@ def test_update_workflow_with_nodes_auto_edges_router(client, db, test_workflow)
             {
                 "name": "RNode 1",
                 "description": "Router node 1",
-                "kind": "orcha-nodes.base.http_request",
+                "kind": "orcha-nodes.base.event_received",
                 "properties": [{"a": 1}],
                 "ui_settings": {"x": 10},
             },
@@ -185,7 +185,7 @@ def test_get_workflow_returns_nodes_in_order(client, db, test_workflow):
             {
                 "name": "OrderNode 1",
                 "description": "First",
-                "kind": "orcha-nodes.base.http_request",
+                "kind": "orcha-nodes.base.event_received",
                 "properties": [{"a": 1}],
                 "ui_settings": {"x": 1},
             },

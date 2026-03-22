@@ -128,45 +128,19 @@ class NodeExecutionResult(BaseModel):
     """Schema for a single node execution result."""
 
     node_id: str
-    """ID of the executed node."""
-
     node_name: str
-    """Name of the executed node."""
-
     node_kind: str
-    """Kind of the executed node."""
-
     status: str
-    """Execution status (success or error)."""
-
-    data: Optional[Dict[str, Any]] = None
-    """Output data from the node execution."""
-
-    error: Optional[str] = None
-    """Error message if execution failed."""
-
-
-class TriggerExecutionResult(BaseModel):
-    """Schema for execution results starting from a trigger node."""
-
-    trigger_node_id: str
-    """ID of the trigger node."""
-
-    trigger_node_name: str
-    """Name of the trigger node."""
-
-    execution_results: List[NodeExecutionResult]
-    """List of node execution results."""
+    input: Dict[str, Any]
+    output: Dict[str, Any]
+    timestamp: str
 
 
 class WorkflowExecuteResponse(BaseModel):
     """Schema for workflow execution response."""
 
     workflow_id: str
-    """ID of the executed workflow."""
-
     status: str
-    """Overall execution status (completed or error)."""
-
-    results: List[TriggerExecutionResult]
-    """List of execution results for each trigger node."""
+    trigger_event: Dict[str, Any]
+    node_results: List[NodeExecutionResult]
+    error_message: Optional[str] = None
