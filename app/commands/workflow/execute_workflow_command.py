@@ -97,7 +97,7 @@ class ExecuteWorkflowCommand:
 
         # For event-triggered runs, trigger_event is the raw CloudEvents payload.
         # For manual runs, it is the caller-supplied initial_data (or empty dict).
-        trigger_event = event.model_dump() if event else (initial_data or {})
+        trigger_event = event.model_dump(mode="json") if event else (initial_data or {})
 
         execution_id = uuid.uuid4()
         context = ExecutionContext(

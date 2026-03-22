@@ -43,6 +43,7 @@ def _context(json: Dict[str, Any] | None = None) -> ExecutionContext:
     ctx = ExecutionContext(trigger_event={}, execution_id="test", triggered_by="manual")
     if json:
         from app.constants.node_types import NodeResult
+
         ctx.append_result(
             NodeResult(
                 node_id="prev",
@@ -302,6 +303,10 @@ def test_get_parsed_parameter_resolves_nodes_context():
 
 
 def test_get_parsed_parameter_returns_primitive_unchanged():
-    n = _node({"count": 5})
+    n = _node({"count": 5, "project_id": "55e4f7b0-a447-430d-98f8-e650b0b708eb"})
     ctx = _context()
     assert n.get_parsed_parameter("count", ctx) == 5
+    assert (
+        n.get_parsed_parameter("project_id", ctx)
+        == "55e4f7b0-a447-430d-98f8-e650b0b708eb"
+    )

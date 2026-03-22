@@ -57,7 +57,9 @@ class EventReceivedDescription(NodeDescription):
         # No trigger event — manual run. Fall back to the configured test payload.
         test_payload = self.parameters.get("event_test_payload")
         if not test_payload:
-            return ExecutionData(json={}, error="No event or event test payload provided")
+            return ExecutionData(
+                json={}, error="No event or event test payload provided"
+            )
 
         return ExecutionData(json=test_payload)
 

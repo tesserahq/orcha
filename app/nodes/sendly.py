@@ -4,13 +4,22 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from app.constants.node_categories import CATEGORY_ACTION_APP
-from app.constants.node_types import ExecutionContext, ExecutionData, Node, NodeDescription
+from app.constants.node_types import (
+    ExecutionContext,
+    ExecutionData,
+    Node,
+    NodeDescription,
+)
 from app.nodes.schemas.node_property import (
     DisplayOptions,
     NodeProperty,
     NodePropertyOption,
     StringTypeOptions,
 )
+
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -152,15 +161,16 @@ class SendlyDescription(NodeDescription):
         try:
             client = SendlyClient(api_token=m2m_token)
             request = CreateEmailRequest(
-                project_id=str(project_id) or None,
+                project_id=str(project_id),
                 from_email=from_email or None,
                 subject=subject,
                 html=html or None,
                 to=to,
             )
             response = client.create_email(request)
-            output.json[self.kind] = response.model_dump()
+            output.json[self.kind] = response.model_dump(mode="json")
         except Exception as e:
+            logger.exception(e)
             output.error = f"Sendly error (send): {str(e)}"
 
         return output

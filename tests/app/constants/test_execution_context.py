@@ -8,10 +8,10 @@ import pytest
 
 from app.constants.node_types import ExecutionContext, ExecutionData, NodeResult
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _result(name: str, output: dict) -> NodeResult:
     return NodeResult(

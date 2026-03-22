@@ -31,7 +31,8 @@ class WorkflowCommandBase:
         trigger_count = sum(
             1
             for n in nodes
-            if NODE_BY_ID.get(n.kind) and NODE_BY_ID[n.kind].category == CATEGORY_TRIGGER
+            if NODE_BY_ID.get(n.kind)
+            and NODE_BY_ID[n.kind].category == CATEGORY_TRIGGER
         )
         if trigger_count == 0:
             raise ValueError("Workflow must have exactly one trigger node, found none")
