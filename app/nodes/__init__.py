@@ -11,6 +11,7 @@ from .date_time import NODE as DATE_TIME_NODE
 from .edit_fields import NODE as EDIT_FIELDS_NODE
 from .test_action import NODE as TEST_ACTION_NODE
 from .sendly import NODE as SENDLY_NODE
+from .looply import NODE as LOOPLY_NODE
 
 __all__ = [
     "EVENT_RECEIVED_NODE",
@@ -21,4 +22,5 @@ __all__ = [
     "EDIT_FIELDS_NODE",
     "TEST_ACTION_NODE",
     "SENDLY_NODE",
+    "LOOPLY_NODE",
 ]

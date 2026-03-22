@@ -353,6 +353,7 @@ from app.nodes import (
     EDIT_FIELDS_NODE,
     TEST_ACTION_NODE,
     SENDLY_NODE,
+    LOOPLY_NODE,
 )
 
 # All node instances
@@ -365,6 +366,7 @@ _ALL_NODES = [
     EDIT_FIELDS_NODE,
     TEST_ACTION_NODE,
     SENDLY_NODE,
+    LOOPLY_NODE,
 ]
 
 # Kind registry - converted to dict format for API compatibility
