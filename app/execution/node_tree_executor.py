@@ -38,7 +38,7 @@ class NodeTreeExecutor:
 
         Returns None on full success, or an error string describing the first
         failure. Mutates context in place by appending NodeResult entries.
-        Failed nodes are not recorded in the context.
+        Failed nodes are recorded with status "error" and an error_message.
         """
         node_map: Dict[UUID, Node] = {node.id: node for node in nodes}
 
@@ -62,6 +62,18 @@ class NodeTreeExecutor:
                 output_data = self._execute_node(current_node, context)
 
                 if output_data.error:
+                    context.append_result(
+                        NodeResult(
+                            node_id=str(current_node.id),
+                            node_name=current_node.name,
+                            node_kind=current_node.kind,
+                            status="error",
+                            input=input_snapshot,
+                            output={},
+                            timestamp=datetime.now(timezone.utc).isoformat(),
+                            error_message=output_data.error,
+                        )
+                    )
                     return f"{current_node.name}: {output_data.error}"
 
                 context.append_result(
@@ -82,6 +94,18 @@ class NodeTreeExecutor:
                         queue.append(target_node)
 
             except Exception as e:
+                context.append_result(
+                    NodeResult(
+                        node_id=str(current_node.id),
+                        node_name=current_node.name,
+                        node_kind=current_node.kind,
+                        status="error",
+                        input=input_snapshot,
+                        output={},
+                        timestamp=datetime.now(timezone.utc).isoformat(),
+                        error_message=str(e),
+                    )
+                )
                 return f"{current_node.name}: {str(e)}"
 
         return None
