@@ -41,6 +41,7 @@ class NodeResult:
     input: Dict[str, Any]
     output: Dict[str, Any]
     timestamp: str
+    error_message: Optional[str] = None
 
 
 class ExecutionContext:
@@ -117,6 +118,7 @@ class ExecutionContext:
                     "input": r.input,
                     "output": r.output,
                     "timestamp": r.timestamp,
+                    "error_message": r.error_message,
                 }
                 for r in self._node_results
             ],
