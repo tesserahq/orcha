@@ -1,6 +1,6 @@
 """Utility for caching unique event types using tessera cache."""
 
-from typing import List, Optional
+from typing import List
 from tessera_sdk.infra.cache import Cache
 
 # Cache key for storing event types list

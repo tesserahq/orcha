@@ -1,6 +1,5 @@
 """Command for triggering workflows based on received events."""
 
-from uuid import UUID
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 
@@ -10,7 +9,6 @@ from app.models.event import Event
 from app.repositories.workflow_repository import WorkflowRepository
 from app.repositories.node_repository import NodeRepository
 from app.commands.workflow.execute_workflow_command import ExecuteWorkflowCommand
-from app.constants.node_kinds import NODE_BY_ID, CATEGORY_TRIGGER
 from app.schemas.event import EventBase
 from app.core.logging_config import get_logger
 from app.nodes.event_received import EVENT_RECEIVED_NODE_ID

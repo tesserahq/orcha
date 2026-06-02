@@ -6,7 +6,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
 from app.db import get_db
-from app.schemas.event import Event as EventSchema, EventCreate, EventUpdate
+from app.schemas.event import Event as EventSchema
 from app.models.event import Event as EventModel
 from app.repositories.event_repository import EventRepository
 from app.auth.rbac import build_rbac_dependencies

@@ -1,10 +1,7 @@
 import datetime
 from app.models.event import Event
-from typing import Dict, Optional
-from uuid import UUID
 
 from app.core.celery_app import celery_app
-from app.db import SessionLocal
 from app.utils.db.db_session_helper import db_session
 
 
