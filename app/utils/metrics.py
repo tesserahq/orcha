@@ -104,7 +104,9 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 
     @staticmethod
     def get_path(request: Request) -> Tuple[str, bool]:
-        return PrometheusMiddleware._match_path(request.app.routes, request.scope, request.url.path)
+        return PrometheusMiddleware._match_path(
+            request.app.routes, request.scope, request.url.path
+        )
 
     @staticmethod
     def _match_path(routes, scope, fallback: str) -> Tuple[str, bool]:
@@ -116,9 +118,15 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
                 # _IncludedRouter wraps an APIRouter; its actual Route objects live on
                 # original_router.routes and match against the unstripped scope.
                 original_router = getattr(route, "original_router", None)
-                sub_routes = getattr(original_router, "routes", None) if original_router else None
+                sub_routes = (
+                    getattr(original_router, "routes", None)
+                    if original_router
+                    else None
+                )
                 if sub_routes:
-                    result = PrometheusMiddleware._match_path(sub_routes, scope, fallback)
+                    result = PrometheusMiddleware._match_path(
+                        sub_routes, scope, fallback
+                    )
                     if result[1]:
                         return result
         return fallback, False
