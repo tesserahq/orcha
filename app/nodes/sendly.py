@@ -132,6 +132,21 @@ class SendlyDescription(NodeDescription):
                     show={"resource": ["email"], "operation": ["send"]}
                 ),
             ),
+            NodeProperty(
+                display_name="Template Variables",
+                name="template_variables",
+                type=NodePropertyType.Json,
+                default="",
+                description="Template variables to use for the template.",
+                placeholder="{}",
+                display_options=DisplayOptions(
+                    show={
+                        "resource": ["email"],
+                        "operation": ["send"],
+                        "template_alias": ["template"],
+                    }
+                ),
+            ),
         ]
     )
 
@@ -157,6 +172,7 @@ class SendlyDescription(NodeDescription):
         project_id = p.get("project_id")
         from_email = p.get("from_email") or ""
         template_alias = p.get("template_alias") or ""
+        template_variables = p.get("template_variables") or {}
 
         output = context.get_previous_output()
         to = [addr.strip() for addr in to_raw.split(",") if addr.strip()]
@@ -184,6 +200,7 @@ class SendlyDescription(NodeDescription):
                 html=html or None,
                 to=to,
                 template_alias=template_alias or None,
+                template_variables=template_variables or None,
             )
             response = client.create_email(request)
             output.json[self.kind] = response.model_dump(mode="json")
