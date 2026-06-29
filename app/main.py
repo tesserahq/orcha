@@ -122,6 +122,44 @@ def create_app(testing: bool = False, auth_middleware=None) -> FastAPI:
     return app
 
 
+def _patched_otel_get_route_details(scope):
+    """
+    Replacement for opentelemetry.instrumentation.fastapi._get_route_details.
+
+    The upstream implementation assumes every entry in app.routes has a .path
+    attribute. FastAPI >=0.138 adds _IncludedRouter objects that wrap sub-routers
+    and have no .path; they expose original_router.routes instead.
+    """
+    from starlette.routing import Match
+
+    def _find(routes, scope):
+        for route in routes:
+            match, child_scope = route.matches(scope)
+            if match == Match.FULL:
+                if hasattr(route, "path"):
+                    return route.path
+                original_router = getattr(route, "original_router", None)
+                sub_routes = (
+                    getattr(original_router, "routes", None)
+                    if original_router
+                    else None
+                )
+                if sub_routes:
+                    result = _find(sub_routes, scope)
+                    if result:
+                        return result
+                return None
+            if match == Match.PARTIAL and hasattr(route, "path"):
+                return route.path
+        return None
+
+    return _find(scope["app"].routes, scope)
+
+
+import opentelemetry.instrumentation.fastapi as _otel_fastapi_module
+
+_otel_fastapi_module._get_route_details = _patched_otel_get_route_details
+
 # Production app instance
 app = create_app()
 
