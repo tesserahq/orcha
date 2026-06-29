@@ -154,7 +154,7 @@ class SendlyDescription(NodeDescription):
         to_raw = p.get("to") or ""
         subject = p.get("subject") or ""
         html = p.get("html") or ""
-        project_id = p.get("project_id") or ""
+        project_id = p.get("project_id")
         from_email = p.get("from_email") or ""
         template_alias = p.get("template_alias") or ""
 
@@ -178,7 +178,7 @@ class SendlyDescription(NodeDescription):
         try:
             client = SendlyClient(api_token=m2m_token)
             request = CreateEmailRequest(
-                project_id=str(project_id),
+                project_id=project_id or None,
                 from_email=from_email or None,
                 subject=subject,
                 html=html or None,
