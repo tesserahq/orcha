@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from app.constants.node_categories import CATEGORY_ACTION_APP
+from app.constants.node_property_types import NodePropertyType
 from app.constants.node_types import (
     ExecutionContext,
     ExecutionData,
@@ -42,7 +43,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="Resource",
                 name="resource",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Email", value="email"),
                 ],
@@ -52,7 +53,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="Operation",
                 name="operation",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Send", value="send"),
                 ],
@@ -63,7 +64,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="To",
                 name="to",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="Comma-separated list of recipient email addresses.",
@@ -75,7 +76,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="Subject",
                 name="subject",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="Email subject line.",
@@ -86,7 +87,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="HTML",
                 name="html",
-                type="string",
+                type=NodePropertyType.String,
                 type_options=StringTypeOptions(editor="htmlEditor"),
                 default="",
                 description="HTML content of the email.",
@@ -97,7 +98,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="Template Alias",
                 name="template_alias",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="The alias of the template to use.",
                 display_options=DisplayOptions(
@@ -111,7 +112,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="Project ID",
                 name="project_id",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="The project identifier. Supports expressions, e.g. {{ event.event_data.account.id }}.",
@@ -123,7 +124,7 @@ class SendlyDescription(NodeDescription):
             NodeProperty(
                 display_name="From Email",
                 name="from_email",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="Sender address. Overrides the default configured in Sendly.",
                 placeholder="noreply@example.com",
@@ -181,7 +182,7 @@ class SendlyDescription(NodeDescription):
                 from_email=from_email or None,
                 subject=subject,
                 html=html or None,
-                to=to,
+                to=[to],
                 template_alias=template_alias or None,
             )
             response = client.create_email(request)

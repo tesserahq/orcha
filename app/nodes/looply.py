@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from app.constants.node_categories import CATEGORY_ACTION_APP
+from app.constants.node_property_types import NodePropertyType
 from app.constants.node_types import (
     ExecutionContext,
     ExecutionData,
@@ -43,7 +44,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Resource",
                 name="resource",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Contact", value="contact"),
                     NodePropertyOption(name="Contact List", value="contact_list"),
@@ -59,7 +60,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Operation",
                 name="operation",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Create", value="create"),
                     NodePropertyOption(name="Get", value="get"),
@@ -73,7 +74,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="First Name",
                 name="first_name",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="Contact's first name.",
@@ -84,7 +85,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Last Name",
                 name="last_name",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="Contact's last name.",
                 display_options=DisplayOptions(
@@ -94,7 +95,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Email",
                 name="email",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="Contact's email address.",
                 placeholder="contact@example.com",
@@ -105,7 +106,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Phone",
                 name="phone",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="Contact's phone number.",
                 placeholder="+1-555-0123",
@@ -116,7 +117,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Company",
                 name="company",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="Contact's company.",
                 display_options=DisplayOptions(
@@ -126,7 +127,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Contact ID",
                 name="contact_id",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="The UUID of the contact. Supports expressions, e.g. {{ event.event_data.contact_id }}.",
@@ -142,7 +143,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Operation",
                 name="operation",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Create", value="create"),
                     NodePropertyOption(name="Add Members", value="add_members"),
@@ -155,7 +156,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="List Name",
                 name="list_name",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="Name of the contact list.",
@@ -166,7 +167,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Contact List ID",
                 name="contact_list_id",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="The UUID of the contact list. Supports expressions, e.g. {{ event.event_data.list_id }}.",
@@ -181,7 +182,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Contact IDs",
                 name="contact_ids",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="Comma-separated list of contact UUIDs to add.",
@@ -193,7 +194,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Contact ID",
                 name="contact_id",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="UUID of the contact to remove from the list.",
@@ -206,7 +207,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Operation",
                 name="operation",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Create", value="create"),
                 ],
@@ -219,7 +220,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Contact ID",
                 name="contact_id",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="UUID of the contact for this interaction. Supports expressions.",
@@ -231,7 +232,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Note",
                 name="note",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="Notes about the interaction.",
                 display_options=DisplayOptions(
@@ -241,7 +242,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Action",
                 name="action",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="Follow-up action (e.g. 'Follow up in 2 weeks').",
                 display_options=DisplayOptions(
@@ -252,7 +253,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Operation",
                 name="operation",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Add Members", value="add_members"),
                     NodePropertyOption(
@@ -266,7 +267,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Waiting List ID",
                 name="waiting_list_id",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="The UUID of the waiting list. Supports expressions.",
@@ -281,7 +282,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Contact IDs",
                 name="contact_ids",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="Comma-separated list of contact UUIDs to add.",
@@ -293,7 +294,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Contact ID",
                 name="contact_id",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 required=True,
                 description="UUID of the contact whose status to update.",
@@ -308,7 +309,7 @@ class LooplyDescription(NodeDescription):
             NodeProperty(
                 display_name="Status",
                 name="status",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="Pending", value="pending"),
                     NodePropertyOption(name="Approved", value="approved"),

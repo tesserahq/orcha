@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 import requests
 
 from app.constants.node_categories import CATEGORY_CORE
+from app.constants.node_property_types import NodePropertyType
 from app.constants.node_types import (
     ExecutionContext,
     ExecutionData,
@@ -34,14 +35,14 @@ class HttpRequestDescription(NodeDescription):
             NodeProperty(
                 display_name="URL",
                 name="url",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="The URL to make the request to.",
             ),
             NodeProperty(
                 display_name="Method",
                 name="method",
-                type="options",
+                type=NodePropertyType.Option,
                 options=[
                     NodePropertyOption(name="GET", value="GET"),
                     NodePropertyOption(name="POST", value="POST"),
@@ -57,14 +58,14 @@ class HttpRequestDescription(NodeDescription):
             NodeProperty(
                 display_name="Headers",
                 name="headers",
-                type="json",
+                type=NodePropertyType.Json,
                 default={},
                 description="The headers to send with the request.",
             ),
             NodeProperty(
                 display_name="Body",
                 name="body",
-                type="json",
+                type=NodePropertyType.Json,
                 default={},
                 description="The body to send with the request.",
             ),

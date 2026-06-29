@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List
 
 from app.constants.node_categories import CATEGORY_TRIGGER
+from app.constants.node_property_types import NodePropertyType
 from app.constants.node_types import (
     ExecutionContext,
     ExecutionData,
@@ -35,14 +36,14 @@ class EventReceivedDescription(NodeDescription):
             NodeProperty(
                 display_name="Event Type",
                 name="event_type",
-                type="string",
+                type=NodePropertyType.String,
                 default="",
                 description="The name of the event to receive.",
             ),
             NodeProperty(
                 display_name="Event Example Payload",
                 name="event_test_payload",
-                type="json",
+                type=NodePropertyType.Json,
                 default="",
                 description="The example payload of the event to receive. This is used to test the event receiver.",
             ),
