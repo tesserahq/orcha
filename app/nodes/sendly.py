@@ -95,6 +95,20 @@ class SendlyDescription(NodeDescription):
                 ),
             ),
             NodeProperty(
+                display_name="Template Alias",
+                name="template_alias",
+                type="string",
+                default="",
+                description="The alias of the template to use.",
+                display_options=DisplayOptions(
+                    show={
+                        "resource": ["email"],
+                        "operation": ["send"],
+                        "template_alias": ["template"],
+                    }
+                ),
+            ),
+            NodeProperty(
                 display_name="Project ID",
                 name="project_id",
                 type="string",
@@ -141,6 +155,7 @@ class SendlyDescription(NodeDescription):
         html = p.get("html") or ""
         project_id = p.get("project_id") or ""
         from_email = p.get("from_email") or ""
+        template_alias = p.get("template_alias") or ""
 
         output = context.get_previous_output()
         to = [addr.strip() for addr in to_raw.split(",") if addr.strip()]
@@ -167,6 +182,7 @@ class SendlyDescription(NodeDescription):
                 subject=subject,
                 html=html or None,
                 to=to,
+                template_alias=template_alias or None,
             )
             response = client.create_email(request)
             output.json[self.kind] = response.model_dump(mode="json")
