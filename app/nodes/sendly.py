@@ -182,7 +182,7 @@ class SendlyDescription(NodeDescription):
                 from_email=from_email or None,
                 subject=subject,
                 html=html or None,
-                to=[to],
+                to=to,
                 template_alias=template_alias or None,
             )
             response = client.create_email(request)
