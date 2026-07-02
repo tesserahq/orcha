@@ -6,8 +6,8 @@ import rollbar
 from rollbar.logger import RollbarHandler
 from rollbar.contrib.fastapi import ReporterMiddleware as RollbarMiddleware
 from fastapi_pagination import add_pagination
-from app.utils.metrics import PrometheusMiddleware, metrics
 from tessera_sdk.server.health import get_livez_readyz_router
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .routers import (
     user,
@@ -87,10 +87,6 @@ def create_app(testing: bool = False, auth_middleware=None) -> FastAPI:
             user_service_factory=user_service_factory,
         )
 
-        # Setting metrics middleware
-        app.add_middleware(PrometheusMiddleware, app_name=settings.app_name)
-        app.add_route("/metrics", metrics)
-
     else:
         logger.info("Main: No authentication middleware")
         if auth_middleware:
@@ -167,6 +163,9 @@ settings = get_settings()
 if settings.otel_enabled:
     tracer_provider = setup_tracing()  # Or use env/config
     FastAPIInstrumentor.instrument_app(app, tracer_provider=tracer_provider)
+    Instrumentator(
+        excluded_handlers=["^/$", "/livez", "/readyz", "/metrics", "none"],
+    ).instrument(app).expose(app)
 
 
 @app.get("/")
