@@ -163,6 +163,54 @@ def test_execute_workflow_manual_execution(db, faker, setup_user):
     # Verify execution succeeded
     assert result is not None
     assert result["status"] == "completed"
+    assert result["trigger_event"]["event_type"] == "test_event"
+
+
+def test_execute_workflow_uses_event_test_payload_when_no_initial_data(
+    db, faker, setup_user
+):
+    """Test that manual execution without initial_data uses event_test_payload."""
+    workflow = Workflow(
+        name=faker.sentence(nb_words=3),
+        description=faker.text(max_nb_chars=200),
+        is_active=True,
+        created_by_id=setup_user.id,
+    )
+    db.add(workflow)
+    db.commit()
+    db.refresh(workflow)
+
+    workflow_version = WorkflowVersion(
+        workflow_id=workflow.id,
+        version=1,
+        is_active=True,
+    )
+    db.add(workflow_version)
+    db.commit()
+    db.refresh(workflow_version)
+
+    workflow.active_version_id = workflow_version.id
+    db.commit()
+    db.refresh(workflow)
+
+    test_payload = get_test_event_payload("test_event")
+    trigger_node = Node(
+        name="Trigger Node",
+        description="Test trigger",
+        kind="orcha-nodes.base.event_received",
+        properties=[{"event_type": "test_event"}],
+        parameters={"event_test_payload": test_payload},
+        ui_settings={"x": 100, "y": 100},
+        workflow_version_id=workflow_version.id,
+    )
+    db.add(trigger_node)
+    db.commit()
+
+    command = ExecuteWorkflowCommand(db)
+    result = command.execute(workflow_id=workflow.id, manual=True)
+
+    assert result["trigger_event"] == test_payload
+    assert result["node_results"][0]["output"] == test_payload
 
 
 def test_execute_workflow_inactive_raises_error(db, faker, setup_user):
