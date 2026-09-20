@@ -49,13 +49,6 @@ class Settings(BaseSettings):
         default="default-salt", json_schema_extra={"env": "FERNET_SALT"}
     )
 
-    redis_host: str = Field(
-        default="localhost", json_schema_extra={"env": "REDIS_HOST"}
-    )
-    redis_port: int = Field(default=6379, json_schema_extra={"env": "REDIS_PORT"})
-    redis_namespace: str = Field(
-        default="llama_index", json_schema_extra={"env": "REDIS_NAMESPACE"}
-    )
     nats_enabled: bool = Field(default=False, json_schema_extra={"env": "NATS_ENABLED"})
     nats_url: str = Field(
         default="nats://localhost:4222", json_schema_extra={"env": "NATS_URL"}
