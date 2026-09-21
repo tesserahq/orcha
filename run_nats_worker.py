@@ -16,7 +16,9 @@ async def _run_async() -> None:
     """Async function that runs the FastStream application."""
     settings = get_settings()
     logger.info("Starting NATS worker...")
-    logger.info(f"NATS URL: {settings.nats_url}")
+    # The URL contains the application account password in production. Never
+    # include it in logs, even during connection troubleshooting.
+    logger.info("NATS connection endpoint configured")
     logger.info(f"NATS Enabled: {settings.nats_enabled}")
     subjects = settings.nats_subjects.split(",")
 
