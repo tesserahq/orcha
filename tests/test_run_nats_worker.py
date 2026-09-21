@@ -2,8 +2,13 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+from nats.js.api import DeliverPolicy
 
 import run_nats_worker
+
+
+def test_new_durable_starts_after_existing_stream_tail():
+    assert run_nats_worker.NATS_DELIVER_POLICY is DeliverPolicy.NEW
 
 
 @pytest.mark.asyncio

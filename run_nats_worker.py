@@ -10,6 +10,7 @@ from nats.js.api import DeliverPolicy
 # Initialize logging configuration
 LoggingConfig()
 logger = get_logger("nats_worker")
+NATS_DELIVER_POLICY = DeliverPolicy.NEW
 
 
 async def _run_async() -> None:
@@ -55,7 +56,10 @@ async def _run_async() -> None:
         "com.>",
         stream=js_stream,  # THIS makes it JetStream
         durable=settings.nats_queue,  # durable consumer name
-        deliver_policy=DeliverPolicy.LAST,  # or DeliverPolicy.LAST, etc.
+        # A newly created migration/cutover durable must begin after the
+        # restored stream tail. Replaying LAST duplicates an event that the
+        # source durable already acknowledged before the snapshot.
+        deliver_policy=NATS_DELIVER_POLICY,
         **subscriber_kwargs,
     )
     async def handler(msg: dict) -> None:
