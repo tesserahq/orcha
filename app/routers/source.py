@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
-from app.db import get_db
+from app.db import DbSession
 from app.schemas.source import Source as SourceSchema, SourceCreate, SourceUpdate
 from app.repositories.source_repository import SourceRepository
 from app.models.source import Source as SourceModel
@@ -33,7 +33,7 @@ router = APIRouter(
 @router.post("", response_model=SourceSchema, status_code=status.HTTP_201_CREATED)
 def create_source(
     source: SourceCreate,
-    db: Session = Depends(get_db),
+    db: DbSession,
     _authorized: bool = Depends(rbac["create"]),
 ):
     """Create a new source."""
@@ -51,7 +51,7 @@ def create_source(
 
 @router.get("", response_model=Page[SourceSchema])
 def list_sources(
-    db: Session = Depends(get_db), _authorized: bool = Depends(rbac["read"])
+    db: DbSession, _authorized: bool = Depends(rbac["read"])
 ):
     """List all sources."""
     return paginate(db, SourceRepository(db).get_sources_query())
@@ -67,12 +67,7 @@ def get_source(
 
 
 @router.put("/{source_id}", response_model=SourceSchema)
-def update_source(
-    source: SourceModel = Depends(get_source_by_id),
-    update: SourceUpdate = ...,
-    db: Session = Depends(get_db),
-    _authorized: bool = Depends(rbac["update"]),
-):
+def update_source(db: DbSession, source: SourceModel = Depends(get_source_by_id), update: SourceUpdate = ..., _authorized: bool = Depends(rbac["update"])):
     """Update a source."""
     source_service = SourceRepository(db)
 
@@ -94,11 +89,7 @@ def update_source(
 
 
 @router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_source(
-    source: SourceModel = Depends(get_source_by_id),
-    db: Session = Depends(get_db),
-    _authorized: bool = Depends(rbac["delete"]),
-):
+def delete_source(db: DbSession, source: SourceModel = Depends(get_source_by_id), _authorized: bool = Depends(rbac["delete"])):
     """Delete a source (soft delete)."""
     if not SourceRepository(db).delete_source(source.id):
         raise HTTPException(

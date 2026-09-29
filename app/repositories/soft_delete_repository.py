@@ -2,13 +2,14 @@ from typing import List, Optional, TypeVar, Generic, Type
 from uuid import UUID
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
+from tessera_sdk.infra.repository import Repository
 from app.db import Base
 
 # Generic type for SQLAlchemy models that have id and deleted_at fields
 T = TypeVar("T", bound=Base)
 
 
-class SoftDeleteRepository(Generic[T]):
+class SoftDeleteRepository(Repository, Generic[T]):
     """
     Generic service class that provides soft delete functionality for any model.
 
@@ -24,7 +25,7 @@ class SoftDeleteRepository(Generic[T]):
             db: Database session
             model_class: The SQLAlchemy model class that supports soft deletes
         """
-        self.db = db
+        super().__init__(db)
         self.model_class = model_class
 
     def delete_record(self, record_id: UUID) -> bool:
@@ -45,7 +46,7 @@ class SoftDeleteRepository(Generic[T]):
 
         if record:
             record.deleted_at = datetime.now(timezone.utc)
-            self.db.commit()
+            self.db.flush()
             return True
         return False
 
@@ -60,7 +61,7 @@ class SoftDeleteRepository(Generic[T]):
         )
         for record in records:
             record.deleted_at = datetime.now(timezone.utc)
-            self.db.commit()
+            self.db.flush()
         return True
 
     def restore_record(self, record_id: UUID) -> bool:
@@ -82,7 +83,7 @@ class SoftDeleteRepository(Generic[T]):
 
         if record:
             record.deleted_at = None
-            self.db.commit()
+            self.db.flush()
             return True
         return False
 
@@ -104,7 +105,7 @@ class SoftDeleteRepository(Generic[T]):
 
         if record:
             self.db.delete(record)
-            self.db.commit()
+            self.db.flush()
             return True
         return False
 

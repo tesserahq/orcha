@@ -85,7 +85,7 @@ class SourceRepository(SoftDeleteRepository[Source]):
         """
         db_source = Source(**source.model_dump())
         self.db.add(db_source)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(db_source)
         return db_source
 
@@ -105,7 +105,7 @@ class SourceRepository(SoftDeleteRepository[Source]):
             update_data = source.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_source, key, value)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(db_source)
         return db_source
 

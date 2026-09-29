@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, update
 from app.models.workflow_version import WorkflowVersion
 from app.schemas.workflow_version import (
     WorkflowVersionCreate,
@@ -138,19 +138,19 @@ class WorkflowVersionRepository(SoftDeleteRepository[WorkflowVersion]):
             )
 
         if workflow_version.is_active:
-            (
-                self.db.query(WorkflowVersion)
-                .filter(
+            self._execute_mutation(
+                update(WorkflowVersion)
+                .where(
                     WorkflowVersion.workflow_id == workflow_version.workflow_id,
                     WorkflowVersion.is_active.is_(True),
                     WorkflowVersion.deleted_at.is_(None),
                 )
-                .update({"is_active": False}, synchronize_session=False)
+                .values(is_active=False)
             )
 
         db_workflow_version = WorkflowVersion(**workflow_version.model_dump())
         self.db.add(db_workflow_version)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(db_workflow_version)
         return db_workflow_version
 
@@ -176,7 +176,7 @@ class WorkflowVersionRepository(SoftDeleteRepository[WorkflowVersion]):
             update_data = workflow_version.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_workflow_version, key, value)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(db_workflow_version)
         return db_workflow_version
 
@@ -251,7 +251,7 @@ class WorkflowVersionRepository(SoftDeleteRepository[WorkflowVersion]):
         )
         if db_workflow_version:
             db_workflow_version.is_active = not db_workflow_version.is_active
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(db_workflow_version)
         return db_workflow_version
 

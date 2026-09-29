@@ -1,7 +1,9 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from datetime import datetime
+
+from sqlalchemy import delete, select
 from app.models.event import Event
 from app.schemas.event import EventCreate, EventUpdate
 from app.repositories.soft_delete_repository import SoftDeleteRepository
@@ -19,6 +21,10 @@ class EventRepository(SoftDeleteRepository[Event]):
             db: Database session
         """
         super().__init__(db, Event)
+
+    def delete_events_created_before(self, cutoff: datetime) -> None:
+        """Permanently delete events created before ``cutoff``."""
+        self._execute_mutation(delete(Event).where(Event.created_at < cutoff))
 
     def get_event(self, event_id: UUID) -> Optional[Event]:
         """
@@ -96,7 +102,7 @@ class EventRepository(SoftDeleteRepository[Event]):
         """
         db_event = Event(**event.model_dump())
         self.db.add(db_event)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(db_event)
         return db_event
 
@@ -116,7 +122,7 @@ class EventRepository(SoftDeleteRepository[Event]):
             update_data = event.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_event, key, value)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(db_event)
         return db_event
 
