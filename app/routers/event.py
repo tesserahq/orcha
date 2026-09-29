@@ -31,9 +31,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=Page[EventSchema])
-def list_events(
-    db: DbSession, _authorized: bool = Depends(rbac["read"])
-):
+def list_events(db: DbSession, _authorized: bool = Depends(rbac["read"])):
     """List all events."""
     return paginate(db, EventRepository(db).get_events_query())
 
@@ -48,7 +46,11 @@ def get_event(
 
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_event(db: DbSession, event: EventModel = Depends(get_event_by_id), _authorized: bool = Depends(rbac["delete"])):
+def delete_event(
+    db: DbSession,
+    event: EventModel = Depends(get_event_by_id),
+    _authorized: bool = Depends(rbac["delete"]),
+):
     """Delete an event (soft delete)."""
     if not EventRepository(db).delete_event(event.id):
         raise HTTPException(

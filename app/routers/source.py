@@ -50,9 +50,7 @@ def create_source(
 
 
 @router.get("", response_model=Page[SourceSchema])
-def list_sources(
-    db: DbSession, _authorized: bool = Depends(rbac["read"])
-):
+def list_sources(db: DbSession, _authorized: bool = Depends(rbac["read"])):
     """List all sources."""
     return paginate(db, SourceRepository(db).get_sources_query())
 
@@ -67,7 +65,12 @@ def get_source(
 
 
 @router.put("/{source_id}", response_model=SourceSchema)
-def update_source(db: DbSession, source: SourceModel = Depends(get_source_by_id), update: SourceUpdate = ..., _authorized: bool = Depends(rbac["update"])):
+def update_source(
+    db: DbSession,
+    source: SourceModel = Depends(get_source_by_id),
+    update: SourceUpdate = ...,
+    _authorized: bool = Depends(rbac["update"]),
+):
     """Update a source."""
     source_service = SourceRepository(db)
 
@@ -89,7 +92,11 @@ def update_source(db: DbSession, source: SourceModel = Depends(get_source_by_id)
 
 
 @router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_source(db: DbSession, source: SourceModel = Depends(get_source_by_id), _authorized: bool = Depends(rbac["delete"])):
+def delete_source(
+    db: DbSession,
+    source: SourceModel = Depends(get_source_by_id),
+    _authorized: bool = Depends(rbac["delete"]),
+):
     """Delete a source (soft delete)."""
     if not SourceRepository(db).delete_source(source.id):
         raise HTTPException(
