@@ -26,6 +26,6 @@ class WorkflowExecutionRepository:
 
     def create_execution(self, execution: WorkflowExecution) -> WorkflowExecution:
         self.db.add(execution)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(execution)
         return execution

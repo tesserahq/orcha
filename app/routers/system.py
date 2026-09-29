@@ -6,7 +6,7 @@ from httpx import Request
 from sqlalchemy.orm import Session
 from tessera_sdk.config import get_settings as get_sdk_settings
 
-from app.db import get_db
+from app.db import DbSession
 from app.schemas.system import (
     GeneralGroup,
     SystemSettingsGrouped,
@@ -51,7 +51,7 @@ def _get_redis_group() -> RedisGroup:
 
 @router.get("/settings", response_model=DataResponse[SystemSettingsGrouped])
 def get_system_settings(
-    db: Session = Depends(get_db),
+    db: DbSession,
     _authorized: bool = Depends(rbac["read"]),
 ):
     """Return grouped, non-sensitive system configuration settings for troubleshooting."""

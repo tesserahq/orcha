@@ -202,5 +202,5 @@ class ExecuteWorkflowCommand:
         workflow.last_execution_time = datetime.now(timezone.utc)
         workflow.execution_status = status
         workflow.execution_status_message = message
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(workflow)

@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 from app.core.celery_app import celery_app
 from app.core.logging_config import get_logger
-from app.db import SessionLocal
+from app.db import session_scope
 from app.schemas.event import EventCreate
 from app.repositories.event_repository import EventRepository
 from app.utils.event_type_cache import add_event_type
@@ -32,71 +32,67 @@ def process_nats_event_task(msg: Dict) -> Optional[str]:
     """
     logger.info(f"Processing NATS event: {msg}")
 
-    db = SessionLocal()
+    # Parse time if it's a string
+    time_value = msg.get("time")
+    if isinstance(time_value, str):
+        time_value = datetime.fromisoformat(time_value.replace("Z", "+00:00"))
+    elif time_value is None:
+        time_value = datetime.now(timezone.utc)
+
+    # Extract specific fields from the event for model columns
+    event_data = msg.get("event_data")
+    if event_data is None:
+        event_data = {}
+    elif not isinstance(event_data, dict):
+        # If event_data is not a dict, wrap it
+        event_data = {"data": event_data}
+
+    event_create = EventCreate(
+        source=msg.get("source", ""),
+        spec_version=msg.get("spec_version", "1.0"),
+        event_type=msg.get("event_type", ""),
+        event_data=event_data,  # Store entire event here
+        data_content_type=msg.get("data_content_type", "application/json"),
+        subject=msg.get("subject", ""),
+        time=time_value,
+        tags=msg.get("tags"),
+        labels=msg.get("labels"),
+        privy=msg.get("privy", False),  # Default to False if not provided
+        user_id=msg.get("user_id"),
+    )
+
+    # Phase 1: store the event. It commits on its own, so no workflow failure
+    # below can lose it.
     try:
-        # Parse time if it's a string
-        time_value = msg.get("time")
-        if isinstance(time_value, str):
-            time_value = datetime.fromisoformat(time_value.replace("Z", "+00:00"))
-        elif time_value is None:
-            time_value = datetime.now(timezone.utc)
-
-        # Extract specific fields from the event for model columns
-        event_data = msg.get("event_data")
-        if event_data is None:
-            event_data = {}
-        elif not isinstance(event_data, dict):
-            # If event_data is not a dict, wrap it
-            event_data = {"data": event_data}
-
-        event_create = EventCreate(
-            source=msg.get("source", ""),
-            spec_version=msg.get("spec_version", "1.0"),
-            event_type=msg.get("event_type", ""),
-            event_data=event_data,  # Store entire event here
-            data_content_type=msg.get("data_content_type", "application/json"),
-            subject=msg.get("subject", ""),
-            time=time_value,
-            tags=msg.get("tags"),
-            labels=msg.get("labels"),
-            privy=msg.get("privy", False),  # Default to False if not provided
-            user_id=msg.get("user_id"),
-        )
-
-        # Create event using EventRepository
-        event_service = EventRepository(db)
-        created_event = event_service.create_event(event_create)
-
-        # Add event type to cache (maintains unique list)
-        event_type = msg.get("event_type")
-        if event_type:
-            add_event_type(event_type)
-
-        logger.info(f"Event created successfully: {created_event.id}")
-
-        # Trigger workflows that match this event
-        try:
-            trigger_command = TriggerWorkflowsByEventCommand(db)
-            execution_results = trigger_command.execute(created_event)
-            if execution_results:
-                logger.info(
-                    f"Triggered {len(execution_results)} workflow(s) for event {created_event.id}"
-                )
-            else:
-                logger.debug(
-                    f"No workflows matched event type: {created_event.event_type}"
-                )
-        except Exception as e:
-            # Log error but don't fail the event creation
-            logger.error(
-                f"Error triggering workflows for event {created_event.id}: {e}",
-                exc_info=True,
-            )
-
-        return str(created_event.id)
+        with session_scope() as db:
+            event_id = EventRepository(db).create_event(event_create).id
     except Exception as e:
         logger.error(f"Error creating event: {e}", exc_info=True)
-        db.rollback()
         raise
-    finally:
-        db.close()
+
+    # Add event type to cache (maintains unique list)
+    event_type = msg.get("event_type")
+    if event_type:
+        add_event_type(event_type)
+
+    logger.info(f"Event created successfully: {event_id}")
+
+    # Phase 2: trigger the workflows that match this event.
+    try:
+        with session_scope() as db:
+            event = EventRepository(db).get_event(event_id)
+            execution_results = TriggerWorkflowsByEventCommand(db).execute(event)
+        if execution_results:
+            logger.info(
+                f"Triggered {len(execution_results)} workflow(s) for event {event_id}"
+            )
+        else:
+            logger.debug(f"No workflows matched event type: {event_type}")
+    except Exception as e:
+        # Log error but don't fail the event creation
+        logger.error(
+            f"Error triggering workflows for event {event_id}: {e}",
+            exc_info=True,
+        )
+
+    return str(event_id)

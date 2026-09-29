@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from app.db import get_db
+from app.db import DbSession
 from app.schemas.user import User
 from app.repositories.user_repository import UserRepository
 from app.auth.rbac import build_rbac_dependencies
@@ -29,7 +29,7 @@ router = APIRouter(
 @router.get("/{user_id}", response_model=User)
 def get_user(
     user_id: UUID,
-    db: Session = Depends(get_db),
+    db: DbSession,
     _authorized: bool = Depends(rbac["read"]),
 ):
     """Get a user by ID."""

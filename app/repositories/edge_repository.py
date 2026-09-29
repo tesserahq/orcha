@@ -165,7 +165,7 @@ class EdgeRepository(SoftDeleteRepository[Edge]):
         """
         db_edge = Edge(**edge.model_dump())
         self.db.add(db_edge)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(db_edge)
         return db_edge
 
@@ -185,7 +185,7 @@ class EdgeRepository(SoftDeleteRepository[Edge]):
             update_data = edge.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_edge, key, value)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(db_edge)
         return db_edge
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
-from app.db import get_db
+from app.db import DbSession
 from app.schemas.event import Event as EventSchema
 from app.models.event import Event as EventModel
 from app.repositories.event_repository import EventRepository
@@ -31,9 +31,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=Page[EventSchema])
-def list_events(
-    db: Session = Depends(get_db), _authorized: bool = Depends(rbac["read"])
-):
+def list_events(db: DbSession, _authorized: bool = Depends(rbac["read"])):
     """List all events."""
     return paginate(db, EventRepository(db).get_events_query())
 
@@ -49,8 +47,8 @@ def get_event(
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_event(
+    db: DbSession,
     event: EventModel = Depends(get_event_by_id),
-    db: Session = Depends(get_db),
     _authorized: bool = Depends(rbac["delete"]),
 ):
     """Delete an event (soft delete)."""

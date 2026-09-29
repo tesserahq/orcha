@@ -1,6 +1,7 @@
 """Command for updating an existing workflow."""
 
 from uuid import UUID
+from app.exceptions.resource_not_found_error import ResourceNotFoundError
 from app.schemas.workflow import Workflow, WorkflowUpdateRequest
 from app.schemas.workflow_version import WorkflowVersionCreate
 from app.repositories.workflow_version_repository import WorkflowVersionRepository
@@ -14,7 +15,7 @@ class UpdateWorkflowCommand(WorkflowCommandBase):
         """Update an existing workflow and return the updated entity."""
         workflow = self.workflow_repository.get_workflow(workflow_id)
         if not workflow:
-            raise Exception(f"Workflow with id {workflow_id} not found")
+            raise ResourceNotFoundError(f"Workflow with id {workflow_id} not found")
 
         updated_workflow = self.workflow_repository.update_workflow(
             workflow_id, workflow_data

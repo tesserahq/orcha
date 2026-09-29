@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from uuid import UUID
-from app.db import get_db
+from app.db import DbSession
 from app.models.workflow import Workflow
 from app.models.event import Event
 from app.models.source import Source
@@ -21,7 +21,7 @@ def get_current_user(request: Request) -> User:
 
 def get_workflow_by_id(
     workflow_id: UUID,
-    db: Session = Depends(get_db),
+    db: DbSession,
 ) -> Workflow:
     """FastAPI dependency to get a workflow by ID.
 
@@ -43,7 +43,7 @@ def get_workflow_by_id(
 
 def get_event_by_id(
     event_id: UUID,
-    db: Session = Depends(get_db),
+    db: DbSession,
 ) -> Event:
     """FastAPI dependency to get an event by ID.
 
@@ -65,7 +65,7 @@ def get_event_by_id(
 
 def get_source_by_id(
     source_id: UUID,
-    db: Session = Depends(get_db),
+    db: DbSession,
 ) -> Source:
     """FastAPI dependency to get a source by ID.
 

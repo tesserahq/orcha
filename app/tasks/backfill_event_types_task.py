@@ -3,7 +3,7 @@
 from app.core.celery_app import celery_app
 from app.core.logging_config import get_logger
 from app.models.event import Event
-from app.utils.db.db_session_helper import db_session
+from app.db import session_scope
 from app.utils.event_type_cache import set_event_types
 
 logger = get_logger("backfill_event_types_task")
@@ -19,7 +19,7 @@ def backfill_event_types_task() -> None:
     """
     logger.info("Starting event types cache backfill")
 
-    with db_session() as db:
+    with session_scope() as db:
         # Query distinct event_type values from the events table
         # Results will be tuples like (event_type,), so we unpack them
         distinct_results = db.query(Event.event_type).distinct().all()

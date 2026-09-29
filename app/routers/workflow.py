@@ -6,7 +6,7 @@ from app.routers.utils.dependencies import get_workflow_by_id, get_current_user
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
-from app.db import get_db
+from app.db import DbSession
 from app.schemas.workflow import (
     Workflow,
     WorkflowCreate,
@@ -48,7 +48,7 @@ router = APIRouter(
 @router.post("", response_model=WorkflowWithNodes, status_code=status.HTTP_201_CREATED)
 def create_workflow(
     workflow_data: WorkflowCreate,
-    db: Session = Depends(get_db),
+    db: DbSession,
     current_user: object = Depends(get_current_user),
     _authorized: bool = Depends(rbac["create"]),
 ):
@@ -71,17 +71,15 @@ def create_workflow(
 
 
 @router.get("", response_model=Page[Workflow])
-def list_workflows(
-    db: Session = Depends(get_db), _authorized: bool = Depends(rbac["read"])
-):
+def list_workflows(db: DbSession, _authorized: bool = Depends(rbac["read"])):
     """List all workflows."""
     return paginate(db, WorkflowRepository(db).get_workflows_query())
 
 
 @router.get("/{workflow_id}", response_model=WorkflowWithNodes)
 def get_workflow(
+    db: DbSession,
     workflow: Workflow = Depends(get_workflow_by_id),
-    db: Session = Depends(get_db),
     _authorized: bool = Depends(rbac["read"]),
 ):
     """Get a workflow by ID, including ordered nodes for its active version."""
@@ -102,7 +100,7 @@ def get_workflow(
 @router.put("/{workflow_id}", response_model=WorkflowWithNodes)
 def update_workflow(
     workflow_data: WorkflowUpdateRequest,
-    db: Session = Depends(get_db),
+    db: DbSession,
     workflow: Workflow = Depends(get_workflow_by_id),
     _authorized: bool = Depends(rbac["update"]),
 ):
@@ -126,8 +124,8 @@ def update_workflow(
 
 @router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_workflow(
+    db: DbSession,
     workflow: Workflow = Depends(get_workflow_by_id),
-    db: Session = Depends(get_db),
     _authorized: bool = Depends(rbac["delete"]),
 ):
     """Delete a workflow (soft delete)."""
@@ -139,7 +137,7 @@ def delete_workflow(
 def execute_workflow(
     workflow_id: UUID,
     execute_data: WorkflowExecuteRequest,
-    db: Session = Depends(get_db),
+    db: DbSession,
     _authorized: bool = Depends(rbac["read"]),
 ):
     """Execute a workflow."""
@@ -160,8 +158,8 @@ def execute_workflow(
 
 @router.get("/{workflow_id}/executions", response_model=Page[WorkflowExecutionSchema])
 def list_workflow_executions(
+    db: DbSession,
     workflow: Workflow = Depends(get_workflow_by_id),
-    db: Session = Depends(get_db),
     _authorized: bool = Depends(rbac["read"]),
 ):
     """List execution history for a workflow, newest first."""

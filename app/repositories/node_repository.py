@@ -150,7 +150,7 @@ class NodeRepository(SoftDeleteRepository[Node]):
         """
         db_node = Node(**node.model_dump())
         self.db.add(db_node)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(db_node)
         return db_node
 
@@ -170,7 +170,7 @@ class NodeRepository(SoftDeleteRepository[Node]):
             update_data = node.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_node, key, value)
-            self.db.commit()
+            self.db.flush()
             self.db.refresh(db_node)
         return db_node
 

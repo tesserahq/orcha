@@ -11,6 +11,7 @@ from app.repositories.node_repository import NodeRepository
 from app.commands.workflow.execute_workflow_command import ExecuteWorkflowCommand
 from app.schemas.event import EventBase
 from app.core.logging_config import get_logger
+from app.db import savepoint
 from app.nodes.event_received import EVENT_RECEIVED_NODE_ID
 
 logger = get_logger("trigger_workflows_by_event")
@@ -33,6 +34,12 @@ class TriggerWorkflowsByEventCommand:
     def execute(self, event: Event) -> List[Dict[str, Any]]:
         """
         Find all active workflows with event triggers matching the event type and execute them.
+
+        Each workflow runs in a savepoint and is committed as soon as it
+        finishes: its nodes may already have had external effects (HTTP
+        requests, emails), so its execution record must not depend on the
+        workflows that follow. A failing workflow is rolled back to its
+        savepoint and logged; the others still run.
 
         Args:
             event: The event that was received
@@ -87,36 +94,42 @@ class TriggerWorkflowsByEventCommand:
         )
 
         for workflow in matching_workflows:
+            workflow_id = str(workflow.id)
+            workflow_name = workflow.name
             try:
                 logger.info(
-                    f"Executing workflow {workflow.id} for event type: {event.event_type}"
+                    f"Executing workflow {workflow_id} for event type: {event.event_type}"
                 )
-                result = execute_command.execute(
-                    workflow_id=workflow.id,  # type: ignore[arg-type]
-                    manual=False,
-                    event=event_schema,
-                    triggered_by="event",
-                )
+                with savepoint(self.db):
+                    result = execute_command.execute(
+                        workflow_id=workflow.id,  # type: ignore[arg-type]
+                        manual=False,
+                        event=event_schema,
+                        triggered_by="event",
+                    )
                 execution_results.append(
                     {
-                        "workflow_id": str(workflow.id),
-                        "workflow_name": workflow.name,
+                        "workflow_id": workflow_id,
+                        "workflow_name": workflow_name,
                         "result": result,
                     }
                 )
-                logger.info(f"Successfully executed workflow {workflow.id}")
+                logger.info(f"Successfully executed workflow {workflow_id}")
             except Exception as e:
                 logger.error(
-                    f"Error executing workflow {workflow.id} for event type {event.event_type}: {e}",
+                    f"Error executing workflow {workflow_id} for event type {event.event_type}: {e}",
                     exc_info=True,
                 )
                 execution_results.append(
                     {
-                        "workflow_id": str(workflow.id),
-                        "workflow_name": workflow.name,
+                        "workflow_id": workflow_id,
+                        "workflow_name": workflow_name,
                         "error": str(e),
                     }
                 )
+            # commit: workflow_executed. Per-workflow checkpoint, so a later
+            # failure cannot undo the record of work that already ran.
+            self.db.commit()
 
         return execution_results
 
