@@ -37,11 +37,11 @@ ruff = "0.15.20"
 pydantic-settings = "^2.9.1"
 python-jose = "^3.3.0"
 
-opentelemetry-instrumentation-fastapi = "^0.63b1"
+opentelemetry-instrumentation-fastapi = "^0.66b1"
 opentelemetry-exporter-otlp-proto-grpc = "^1.39.1"
 opentelemetry-sdk = "^1.39.1"
-opentelemetry-instrumentation-sqlalchemy = "^0.63b1"
-opentelemetry-instrumentation-logging = "^0.63b1"
+opentelemetry-instrumentation-sqlalchemy = "^0.66b1"
+opentelemetry-instrumentation-logging = "^0.66b1"
 prometheus-client = ">=0.24.1"
 
 requests = "^2.32.3"
@@ -63,8 +63,8 @@ mako = "^1.3.10"
 faststream = {extras = ["nats"], version = "^0.7.0"}
 jinja2 = "^3.1.6"
 uvicorn = "0.54.0"
-opentelemetry-instrumentation-requests = "^0.63b1"
-opentelemetry-instrumentation-celery = "0.63b1"
+opentelemetry-instrumentation-requests = "^0.66b1"
+opentelemetry-instrumentation-celery = "0.66b1"
 prometheus-fastapi-instrumentator = "^8.0.2"
 
 [tool.poetry.group.dev.dependencies]
