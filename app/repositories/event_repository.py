@@ -2,12 +2,35 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import delete, select
+from sqlalchemy.sql import ColumnElement
 from app.models.event import Event
 from app.schemas.event import EventCreate, EventUpdate
 from app.repositories.soft_delete_repository import SoftDeleteRepository
 from app.utils.db.filtering import apply_filters
+
+
+def event_type_condition(pattern: str) -> ColumnElement[bool]:
+    """
+    Build a SQL condition matching ``Event.event_type`` against ``pattern``.
+
+    A pattern without ``*`` is an exact match. ``*`` is a wildcard matching any
+    run of characters, so ``user.*`` matches ``user.created`` and ``user.updated``.
+    Literal ``%``, ``_`` and ``\\`` in the pattern are escaped so they match only
+    themselves.
+    """
+    if "*" not in pattern:
+        return Event.event_type == pattern
+
+    escaped = (
+        pattern.replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+        .replace("*", "%")
+    )
+    return Event.event_type.like(escaped)
 
 
 class EventRepository(SoftDeleteRepository[Event]):
@@ -57,15 +80,32 @@ class EventRepository(SoftDeleteRepository[Event]):
             .all()
         )
 
-    def get_events_query(self):
+    def get_events_query(
+        self,
+        event_type: Optional[str] = None,
+        created_from: Optional[datetime] = None,
+        created_to: Optional[datetime] = None,
+    ):
         """
-        Get a query for all events.
+        Get a query for events, optionally filtered.
         This is useful for pagination with fastapi-pagination.
+
+        Args:
+            event_type: Exact type, or a pattern with ``*`` wildcards (e.g. ``user.*``)
+            created_from: Only events created at or after this time (inclusive)
+            created_to: Only events created at or before this time (inclusive)
 
         Returns:
             Select: SQLAlchemy select statement for events
         """
-        return select(Event).order_by(Event.time.desc())
+        query = select(Event)
+        if event_type:
+            query = query.where(event_type_condition(event_type))
+        if created_from is not None:
+            query = query.where(Event.created_at >= created_from)
+        if created_to is not None:
+            query = query.where(Event.created_at <= created_to)
+        return query.order_by(Event.time.desc())
 
     def get_events_by_type(
         self, event_type: str, skip: int = 0, limit: int = 100
