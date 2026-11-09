@@ -2,7 +2,7 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models.mixins import TimestampMixin, SoftDeleteMixin
 from sqlalchemy import Column, DateTime, String
-from sqlalchemy import Boolean, ARRAY
+from sqlalchemy import Boolean, ARRAY, Index
 import uuid
 
 from app.db import Base
@@ -14,6 +14,16 @@ class Event(Base, TimestampMixin, SoftDeleteMixin):
     """
 
     __tablename__ = "events"
+
+    __table_args__ = (
+        Index("ix_events_created_at", "created_at"),
+        # text_pattern_ops lets btree serve LIKE 'prefix%' (used by wildcard filters)
+        Index(
+            "ix_events_event_type",
+            "event_type",
+            postgresql_ops={"event_type": "text_pattern_ops"},
+        ),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     event_data: Mapped[dict] = mapped_column(JSONB, nullable=False)

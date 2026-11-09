@@ -1,5 +1,6 @@
+from datetime import datetime, timezone
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from httpx import Request
 from sqlalchemy.orm import Session
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -30,10 +31,47 @@ router = APIRouter(
 )
 
 
+def _to_naive_utc(value: Optional[datetime]) -> Optional[datetime]:
+    """created_at is stored as naive UTC; normalize incoming datetimes to match."""
+    if value is None or value.tzinfo is None:
+        return value
+    return value.astimezone(timezone.utc).replace(tzinfo=None)
+
+
 @router.get("", response_model=Page[EventSchema])
-def list_events(db: DbSession, _authorized: bool = Depends(rbac["read"])):
-    """List all events."""
-    return paginate(db, EventRepository(db).get_events_query())
+def list_events(
+    db: DbSession,
+    event_type: Optional[str] = Query(
+        None,
+        description="Exact event type, or a pattern with '*' wildcards, e.g. 'user.*'",
+    ),
+    created_from: Optional[datetime] = Query(
+        None, description="Only events created at or after this time (inclusive)"
+    ),
+    created_to: Optional[datetime] = Query(
+        None, description="Only events created at or before this time (inclusive)"
+    ),
+    _authorized: bool = Depends(rbac["read"]),
+):
+    """List events, optionally filtered by type and created_at range."""
+    created_from = _to_naive_utc(created_from)
+    created_to = _to_naive_utc(created_to)
+    if (
+        created_from is not None
+        and created_to is not None
+        and created_from > created_to
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="created_from must be before or equal to created_to",
+        )
+
+    query = EventRepository(db).get_events_query(
+        event_type=event_type,
+        created_from=created_from,
+        created_to=created_to,
+    )
+    return paginate(db, query)
 
 
 @router.get("/{event_id}", response_model=EventSchema)

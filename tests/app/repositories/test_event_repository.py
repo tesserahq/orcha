@@ -1,8 +1,9 @@
 import pytest
 from uuid import uuid4
 from app.schemas.event import EventCreate, EventUpdate
+from app.models.event import Event
 from app.repositories.event_repository import EventRepository
-from datetime import datetime, UTC
+from datetime import datetime, timedelta, UTC
 
 
 @pytest.fixture
@@ -242,3 +243,94 @@ def test_get_events_query(db, setup_event):
     # Assertions
     assert len(events) >= 1
     assert any(e.id == setup_event.id for e in events)
+
+
+def _make_event(db, event_type, created_at):
+    row = Event(
+        source="test.source",
+        spec_version="1.0",
+        event_type=event_type,
+        event_data={},
+        data_content_type="application/json",
+        subject="filter test",
+        time=created_at,
+        created_at=created_at,
+        updated_at=created_at,
+    )
+    db.add(row)
+    db.commit()
+    return row
+
+
+def _run(db, **kwargs):
+    query = EventRepository(db).get_events_query(**kwargs)
+    return {e.id for e in db.execute(query).scalars().all()}
+
+
+def test_get_events_query_filters_exact_event_type(db):
+    """An event type without '*' matches exactly."""
+    now = datetime.now(UTC).replace(tzinfo=None)
+    a = _make_event(db, "filt.user.created", now)
+    b = _make_event(db, "filt.user.updated", now)
+
+    ids = _run(db, event_type="filt.user.created")
+    assert a.id in ids
+    assert b.id not in ids
+
+
+def test_get_events_query_wildcard_event_type(db):
+    """'*' matches any run of characters, e.g. 'filt.user.*'."""
+    now = datetime.now(UTC).replace(tzinfo=None)
+    a = _make_event(db, "filt.user.created", now)
+    b = _make_event(db, "filt.user.updated", now)
+    c = _make_event(db, "filt.system.alert", now)
+
+    ids = _run(db, event_type="filt.user.*")
+    assert {a.id, b.id} <= ids
+    assert c.id not in ids
+
+
+def test_get_events_query_wildcard_escapes_like_metacharacters(db):
+    """'_' and '%' in a pattern are literal, not SQL wildcards."""
+    now = datetime.now(UTC).replace(tzinfo=None)
+    underscore = _make_event(db, "filt_esc_a", now)
+    other = _make_event(db, "filtXescYb", now)
+
+    ids = _run(db, event_type="filt_esc*")
+    assert underscore.id in ids
+    assert other.id not in ids
+
+
+def test_get_events_query_created_range_is_inclusive(db):
+    """created_from and created_to bound created_at inclusively."""
+    base = datetime(2026, 1, 10, 12, 0, 0)
+    before = _make_event(db, "filt.range", base - timedelta(days=1))
+    at_start = _make_event(db, "filt.range", base)
+    inside = _make_event(db, "filt.range", base + timedelta(days=1))
+    at_end = _make_event(db, "filt.range", base + timedelta(days=2))
+    after = _make_event(db, "filt.range", base + timedelta(days=3))
+
+    ids = _run(
+        db,
+        event_type="filt.range",
+        created_from=base,
+        created_to=base + timedelta(days=2),
+    )
+    assert ids == {at_start.id, inside.id, at_end.id}
+    assert before.id not in ids
+    assert after.id not in ids
+
+
+def test_get_events_query_created_from_only(db):
+    base = datetime(2026, 1, 10, 12, 0, 0)
+    old = _make_event(db, "filt.only_from", base - timedelta(days=1))
+    new = _make_event(db, "filt.only_from", base + timedelta(days=1))
+
+    ids = _run(db, event_type="filt.only_from", created_from=base)
+    assert new.id in ids
+    assert old.id not in ids
+
+
+def test_get_events_query_no_filters_returns_all(db, setup_event):
+    """With no filters the query is unchanged."""
+    assert setup_event.id in _run(db)
