@@ -43,7 +43,7 @@ def list_events(
     db: DbSession,
     event_type: Optional[str] = Query(
         None,
-        description="Exact event type, or a pattern with '*' wildcards, e.g. 'user.*'",
+        description="Event type prefix, e.g. 'com.mylinden.', or a pattern with '*' wildcards",
     ),
     created_from: Optional[datetime] = Query(
         None, description="Only events created at or after this time (inclusive)"
