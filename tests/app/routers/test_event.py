@@ -101,16 +101,20 @@ def test_list_events_filter_by_wildcard_event_type(client, db):
     assert str(other.id) not in ids
 
 
-def test_list_events_filter_by_exact_event_type(client, db):
+def test_list_events_filter_by_type_prefix(client, db):
+    """GET /events?event_type=com.mylinden. returns every type starting with it."""
     from datetime import datetime
 
     now = datetime(2026, 1, 10, 12, 0, 0)
-    exact = _add_event(db, "rtest.exact", now)
-    _add_event(db, "rtest.exact.more", now)
+    a = _add_event(db, "rtest.prefix.created", now)
+    b = _add_event(db, "rtest.prefix.updated", now)
+    other = _add_event(db, "rtest.other", now)
 
-    response = client.get("/events", params={"event_type": "rtest.exact"})
+    response = client.get("/events", params={"event_type": "rtest.prefix."})
     assert response.status_code == 200
-    assert _ids(response) == {str(exact.id)}
+    ids = _ids(response)
+    assert {str(a.id), str(b.id)} <= ids
+    assert str(other.id) not in ids
 
 
 def test_list_events_filter_by_created_range(client, db):

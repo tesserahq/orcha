@@ -267,15 +267,26 @@ def _run(db, **kwargs):
     return {e.id for e in db.execute(query).scalars().all()}
 
 
-def test_get_events_query_filters_exact_event_type(db):
-    """An event type without '*' matches exactly."""
+def test_get_events_query_filters_by_prefix(db):
+    """An event type without '*' matches by prefix, so 'filt.user.' matches all user types."""
     now = datetime.now(UTC).replace(tzinfo=None)
     a = _make_event(db, "filt.user.created", now)
     b = _make_event(db, "filt.user.updated", now)
+    c = _make_event(db, "filt.system.alert", now)
 
-    ids = _run(db, event_type="filt.user.created")
-    assert a.id in ids
-    assert b.id not in ids
+    ids = _run(db, event_type="filt.user.")
+    assert {a.id, b.id} <= ids
+    assert c.id not in ids
+
+
+def test_get_events_query_full_type_matches_its_prefix(db):
+    """A full type also matches longer types that start with it."""
+    now = datetime.now(UTC).replace(tzinfo=None)
+    a = _make_event(db, "filt.exact", now)
+    b = _make_event(db, "filt.exact.more", now)
+
+    ids = _run(db, event_type="filt.exact")
+    assert {a.id, b.id} <= ids
 
 
 def test_get_events_query_wildcard_event_type(db):

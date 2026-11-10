@@ -16,21 +16,17 @@ def event_type_condition(pattern: str) -> ColumnElement[bool]:
     """
     Build a SQL condition matching ``Event.event_type`` against ``pattern``.
 
-    A pattern without ``*`` is an exact match. ``*`` is a wildcard matching any
-    run of characters, so ``user.*`` matches ``user.created`` and ``user.updated``.
-    Literal ``%``, ``_`` and ``\\`` in the pattern are escaped so they match only
-    themselves.
+    A pattern without ``*`` matches by prefix, so ``com.mylinden.`` matches every
+    type starting with it. ``*`` is a wildcard matching any run of characters, so
+    ``user.*.created`` matches ``user.person.created``. Literal ``%``, ``_`` and
+    ``\\`` in the pattern are escaped so they match only themselves.
     """
-    if "*" not in pattern:
-        return Event.event_type == pattern
+    escaped = pattern.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
-    escaped = (
-        pattern.replace("\\", "\\\\")
-        .replace("%", "\\%")
-        .replace("_", "\\_")
-        .replace("*", "%")
-    )
-    return Event.event_type.like(escaped)
+    if "*" not in pattern:
+        return Event.event_type.like(f"{escaped}%")
+
+    return Event.event_type.like(escaped.replace("*", "%"))
 
 
 class EventRepository(SoftDeleteRepository[Event]):
@@ -91,7 +87,7 @@ class EventRepository(SoftDeleteRepository[Event]):
         This is useful for pagination with fastapi-pagination.
 
         Args:
-            event_type: Exact type, or a pattern with ``*`` wildcards (e.g. ``user.*``)
+            event_type: Prefix (e.g. ``com.mylinden.``), or a pattern with ``*`` wildcards
             created_from: Only events created at or after this time (inclusive)
             created_to: Only events created at or before this time (inclusive)
 
